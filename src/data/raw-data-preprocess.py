@@ -97,7 +97,7 @@ class JobDataProcessor:
 
     def process(self):
         """segmenting, and checking quality."""
-        df = pd.read_csv(self.raw_data_path / "merged.csv")
+        df = pd.read_csv(self.raw_data_path / "merged.csv").iloc[0:1000]
 
         # Drop duplicate qualifications
         df.drop_duplicates(subset=["Qualification"], inplace=True)
@@ -121,7 +121,7 @@ class JobDataProcessor:
         df = df[["Topic", "Sentence_Index", "Segmented_Qualification"]]
 
         # Save processed data
-        df.to_csv(self.interim_data_path / "segmented_data.csv", index=False)
+        df.to_csv(self.interim_data_path / "test.csv", index=False)
 
         # Run data quality checks
         data_quality = DataQualityCheck(df)
