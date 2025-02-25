@@ -1,2 +1,4 @@
 # Ignore a data directory
-/data/
+/data/raw
+/data/processed
+/data/interim

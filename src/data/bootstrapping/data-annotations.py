@@ -2,7 +2,7 @@ import sys
 import pandas as pd
 import yaml
 from pathlib import Path
-from transformers import pipeline
+from transformers import pipeline, AutoTokenizer
 from collections import Counter
 import json
 import re
@@ -16,8 +16,9 @@ from data.keywords import KEYWORDS_DATA_PATH
 # Load the model
 model_name = "FacebookAI/xlm-roberta-large-finetuned-conll03-english"
 ner = pipeline("ner", model=model_name, tokenizer=model_name, device=0)
+tokenizer = AutoTokenizer.from_pretrained(model_name)
 
-df = pd.read_csv(INTERIM_DATA_PATH / "segmented_data.csv").iloc[:500]
+df = pd.read_csv(INTERIM_DATA_PATH / "segmented_data.csv").iloc[:1000]
 
 # Load keywords from YAML file
 with open(KEYWORDS_DATA_PATH / "classification-keyword.yaml", "r") as file:
@@ -52,13 +53,10 @@ embedded_technologies = flatten_and_lower(
     classification_keywords["keywords"]["Embedded_Technologies"]
 )
 
-# Debug: Print keyword lists
-print("Programming Languages:", sorted(programming_languages))
-
 
 def refine_labels(ner_results, text):
     """
-    Refine labels using NER results and keyword matching, case-insensitive.
+    Refine labels using NER results and keyword matching, but only for MISC entities.
     """
     refined_labels = []
     all_keywords = (
@@ -70,18 +68,23 @@ def refine_labels(ner_results, text):
         | embedded_technologies
     )
 
-    # Step 1: Process NER results
+    tokenized = tokenizer.encode_plus(
+        text, add_special_tokens=False, return_offsets_mapping=True
+    )
+    tokens = tokenized.tokens()
+    offset_mapping = tokenized["offset_mapping"]
+
+    # Step 1: Process NER results (only MISC entities)
     for entity in ner_results:
         word = entity.get("word", "").strip()
         word_lower = word.lower()
         start = entity.get("start")
         end = entity.get("end")
-        entity_type = entity.get("entity", "")
+        entity_label = entity.get("entity")
 
-        # Debug: Print every entity
-        print(f"NER Entity: {word}, Type: {entity_type}, Start: {start}, End: {end}")
+        if not entity_label or "MISC" not in entity_label:
+            continue
 
-        # Only process if we have valid start and end
         if start is None or end is None:
             continue
 
@@ -100,50 +103,41 @@ def refine_labels(ner_results, text):
             label = "B-EMBEDDEDTECH"
 
         if label:
-            words = word.split()
-            if len(words) > 1:
-                current_pos = start
-                for i, w in enumerate(words):
-                    w_start = text.find(w, current_pos, end)
-                    w_end = w_start + len(w)
-                    w_label = (
-                        f"B-{label.split('-')[1]}"
-                        if i == 0
-                        else f"I-{label.split('-')[1]}"
-                    )
-                    refined_labels.append(
-                        {
-                            "entity": w_label,
-                            "start": w_start,
-                            "end": w_end,
-                            "text": text[w_start:w_end],
-                        }
-                    )
-                    current_pos = w_end
-            else:
-                refined_labels.append(
-                    {
-                        "entity": label,
-                        "start": start,
-                        "end": end,
-                        "text": word,
-                    }
-                )
+            refined_labels.append(
+                {
+                    "entity": label,
+                    "start": start,
+                    "end": end,
+                    "text": word,
+                }
+            )
 
-    # Step 2: Direct keyword matching for missed entities
+    # Step 2: use offset_mapping to find start-end positions
     for keyword in all_keywords:
-        for match in re.finditer(
-            r"\b" + re.escape(keyword) + r"\b", text, re.IGNORECASE
-        ):
+        pattern = r"(?<!\w)" + re.escape(keyword) + r"(?!\w)"
+        for match in re.finditer(pattern, text, re.IGNORECASE):
             start, end = match.span()
-            # Avoid duplicates
+
+            token_start, token_end = None, None
+            for i, (token_text, (s, e)) in enumerate(zip(tokens, offset_mapping)):
+                if s == start and e == end:
+                    token_start, token_end = s, e
+                    break
+
+            if token_start is None:
+                for i, (s, e) in enumerate(offset_mapping):
+                    if s <= start < e or s < end <= e:
+                        token_start = s if token_start is None else min(token_start, s)
+                        token_end = e if token_end is None else max(token_end, e)
+
             if not any(
-                label["start"] == start and label["end"] == end
+                label["start"] == token_start and label["end"] == token_end
                 for label in refined_labels
             ):
-                word = text[start:end]
+                word = text[token_start:token_end]
                 word_lower = word.lower()
                 label = None
+
                 if word_lower in programming_languages:
                     label = "B-PROGRAMMINGLANG"
                 elif word_lower in cloud_platforms:
@@ -161,14 +155,13 @@ def refine_labels(ner_results, text):
                     refined_labels.append(
                         {
                             "entity": label,
-                            "start": start,
-                            "end": end,
+                            "start": token_start,
+                            "end": token_end,
                             "text": word,
                         }
                     )
 
-    refined_labels = sorted(refined_labels, key=lambda x: x["start"])
-    return refined_labels
+    return sorted(refined_labels, key=lambda x: x["start"])
 
 
 # Create a list to store the results in Label Studio format
@@ -182,11 +175,7 @@ for index, row in tqdm(
 ):
     text = row["Segmented_Qualification"]
     if pd.notna(text) and text.strip():  # Check if text is not NaN or empty
-        print(
-            f"Row {index} Text: {text[:100]}..."
-        )  # Print first 100 chars for debugging
         ner_results = ner(text)
-        print(f"Row {index} NER Results: {ner_results}")
         refined_labels = refine_labels(ner_results, text)
 
         if refined_labels:
