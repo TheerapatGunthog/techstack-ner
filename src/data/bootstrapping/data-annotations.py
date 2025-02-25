@@ -57,6 +57,7 @@ embedded_technologies = flatten_and_lower(
 def refine_labels(ner_results, text):
     """
     Refine labels using NER results and keyword matching, but only for MISC entities.
+    Ensure that overlapping entities keep only the longest span.
     """
     refined_labels = []
     all_keywords = (
@@ -73,6 +74,8 @@ def refine_labels(ner_results, text):
     )
     tokens = tokenized.tokens()
     offset_mapping = tokenized["offset_mapping"]
+
+    temp_labels = []
 
     # Step 1: Process NER results (only MISC entities)
     for entity in ner_results:
@@ -103,16 +106,11 @@ def refine_labels(ner_results, text):
             label = "B-EMBEDDEDTECH"
 
         if label:
-            refined_labels.append(
-                {
-                    "entity": label,
-                    "start": start,
-                    "end": end,
-                    "text": word,
-                }
+            temp_labels.append(
+                {"entity": label, "start": start, "end": end, "text": word}
             )
 
-    # Step 2: use offset_mapping to find start-end positions
+    # Step 2: Use offset_mapping to find start-end positions
     for keyword in all_keywords:
         pattern = r"(?<!\w)" + re.escape(keyword) + r"(?!\w)"
         for match in re.finditer(pattern, text, re.IGNORECASE):
@@ -132,7 +130,7 @@ def refine_labels(ner_results, text):
 
             if not any(
                 label["start"] == token_start and label["end"] == token_end
-                for label in refined_labels
+                for label in temp_labels
             ):
                 word = text[token_start:token_end]
                 word_lower = word.lower()
@@ -152,7 +150,7 @@ def refine_labels(ner_results, text):
                     label = "B-EMBEDDEDTECH"
 
                 if label:
-                    refined_labels.append(
+                    temp_labels.append(
                         {
                             "entity": label,
                             "start": token_start,
@@ -161,7 +159,18 @@ def refine_labels(ner_results, text):
                         }
                     )
 
-    return sorted(refined_labels, key=lambda x: x["start"])
+    # Step 3: Remove overlapping entities, keeping the longest
+    temp_labels.sort(key=lambda x: (x["start"], -x["end"]))
+    prev_start, prev_end = -1, -1
+    for label in temp_labels:
+        if label["start"] >= prev_end:
+            refined_labels.append(label)
+            prev_start, prev_end = label["start"], label["end"]
+        elif label["end"] - label["start"] > prev_end - prev_start:
+            refined_labels[-1] = label
+            prev_start, prev_end = label["start"], label["end"]
+
+    return refined_labels
 
 
 # Create a list to store the results in Label Studio format
