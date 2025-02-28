@@ -8,7 +8,7 @@ import json
 import re
 from tqdm import tqdm
 
-sys.path.append(str(Path(__file__).resolve().parent.parent.parent.parent))
+sys.path.append(str(Path(__file__).resolve().parent.parent.parent.parent.parent))
 
 from data.interim import INTERIM_DATA_PATH
 from data.keywords import KEYWORDS_DATA_PATH
@@ -18,7 +18,7 @@ model_name = "FacebookAI/xlm-roberta-large-finetuned-conll03-english"
 ner = pipeline("ner", model=model_name, tokenizer=model_name, device=0)
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 
-df = pd.read_csv(INTERIM_DATA_PATH / "segmented_data.csv").iloc[:1000]
+df = pd.read_csv(INTERIM_DATA_PATH / "segmented_data.csv")
 
 # Load keywords from YAML file
 with open(KEYWORDS_DATA_PATH / "classification-keyword.yaml", "r") as file:
@@ -93,17 +93,17 @@ def refine_labels(ner_results, text):
 
         label = None
         if word_lower in programming_languages:
-            label = "B-PROGRAMMINGLANG"
+            label = "PROGRAMMINGLANG"
         elif word_lower in cloud_platforms:
-            label = "B-CLOUDPLATFORM"
+            label = "CLOUDPLATFORM"
         elif word_lower in databases:
-            label = "B-DATABASE"
+            label = "DATABASE"
         elif word_lower in web_frameworks_and_technologies:
-            label = "B-WEBFRAMEWORK_TECH"
+            label = "WEBFRAMEWORK_TECH"
         elif word_lower in frameworks_and_libraries:
-            label = "B-FRAMEWORK_LIB"
+            label = "FRAMEWORK_LIB"
         elif word_lower in embedded_technologies:
-            label = "B-EMBEDDEDTECH"
+            label = "EMBEDDEDTECH"
 
         if label:
             temp_labels.append(
@@ -137,17 +137,17 @@ def refine_labels(ner_results, text):
                 label = None
 
                 if word_lower in programming_languages:
-                    label = "B-PROGRAMMINGLANG"
+                    label = "PROGRAMMINGLANG"
                 elif word_lower in cloud_platforms:
-                    label = "B-CLOUDPLATFORM"
+                    label = "CLOUDPLATFORM"
                 elif word_lower in databases:
-                    label = "B-DATABASE"
+                    label = "DATABASE"
                 elif word_lower in web_frameworks_and_technologies:
-                    label = "B-WEBFRAMEWORK_TECH"
+                    label = "WEBFRAMEWORK_TECH"
                 elif word_lower in frameworks_and_libraries:
-                    label = "B-FRAMEWORK_LIB"
+                    label = "FRAMEWORK_LIB"
                 elif word_lower in embedded_technologies:
-                    label = "B-EMBEDDEDTECH"
+                    label = "EMBEDDEDTECH"
 
                 if label:
                     temp_labels.append(

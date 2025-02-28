@@ -26,7 +26,8 @@ class DataCleaning:
         self.url_pattern = re.compile(r"http\S+|www\S+")
         self.css_inline_pattern = re.compile(r"\.[a-zA-Z0-9_-]+\s*\{.*?\}", re.DOTALL)
         self.bullet_point_pattern = re.compile(r"[-•*]")
-        self.non_alphanumeric_pattern = re.compile(r"[^a-zA-Z0-9.'\"#\+\-\._, ]+")
+        self.non_alphanumeric_pattern = re.compile(r"[^a-zA-Z0-9.'\"#\+\-\._, /\\&]+")
+        self.hashtag = re.compile(r"#\w+")
 
     def filter_non_thai(self, text):
         """Removes Thai characters"""
@@ -45,6 +46,7 @@ class DataCleaning:
         text = self.phone_pattern.sub("", text)
         text = self.url_pattern.sub("", text)
         text = self.bullet_point_pattern.sub("", text)
+        text = self.hashtag.sub("", text)
         text = self.non_alphanumeric_pattern.sub(" ", text)
         text = re.sub(r"\s+", " ", text).strip()
         return text
@@ -77,7 +79,7 @@ class DataQualityCheck:
     def check_duplicates(self):
         """Checks for duplicate values"""
         duplicated_values = self.df.duplicated().sum()
-        print("\n Duplicated Values in: ", duplicated_values)
+        print("\n Duplicated Values : ", duplicated_values)
 
     def run_checks(self):
         """Runs data quality checks."""
@@ -120,8 +122,10 @@ class JobDataProcessor:
         df = df.explode("Segmented_Qualification").reset_index(drop=True)
         df = df[["Topic", "Sentence_Index", "Segmented_Qualification"]]
 
+        df.drop_duplicates(subset=["Segmented_Qualification"], inplace=True)
+
         # Save processed data
-        df.to_csv(self.interim_data_path / "test.csv", index=False)
+        df.to_csv(self.interim_data_path / "segmented_data.csv", index=False)
 
         # Run data quality checks
         data_quality = DataQualityCheck(df)

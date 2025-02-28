@@ -15,6 +15,7 @@ keywords:
     - php
     - powershell
     - golang
+    - go
     - rust
     - kotlin
     - lua
@@ -54,6 +55,7 @@ keywords:
 
   Cloud_platforms:
     - aws
+    - aws cloud
     - azure
     - google cloud
     - cloudflare
@@ -125,7 +127,7 @@ keywords:
     - react
     - jquery
     - nextjs
-    - express
+    - expressjs
     - angular
     - asp.net core
     - vuejs

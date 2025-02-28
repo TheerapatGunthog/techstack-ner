@@ -14,7 +14,7 @@ ner_pipeline = pipeline(
 )
 
 # Input text for Named Entity Recognition
-text = "Familiarity with Excel, Powerpoint, and Google Workspace products."
+text = "Rigor and organization skills are required, whilst working to tight deadlines A commitment to quality and a thorough approach to the work Willing to go the extra mile Banking knowledge is a plus."
 entities = ner_pipeline(text)
 
 for entity in entities:
