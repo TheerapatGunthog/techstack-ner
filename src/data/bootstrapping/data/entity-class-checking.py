@@ -79,7 +79,6 @@ class NERClassChecking:
 
         return self.entities_df
 
-    # คงฟังก์ชันอื่นๆ ไว้เหมือนเดิม
     def get_entities_by_label(self, label):
         if self.entities_df is None:
             self.process_annotations()
@@ -132,10 +131,7 @@ class NERClassChecking:
 
 # Example usage
 if __name__ == "__main__":
-    # ตัวอย่างการใช้งานเมื่อมี path
-    json_file_path = (
-        INTERIM_DATA_PATH / "project-58-at-2025-02-28-14-33-5fa3cffa (1).json"
-    )  # ปรับ path ตามจริง
+    json_file_path = INTERIM_DATA_PATH / "project-3-at-2025-03-01-22-23-fd6863ce.json"
     ner_checker = NERClassChecking(json_path=json_file_path)
 
     # Process the annotations

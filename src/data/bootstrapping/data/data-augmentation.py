@@ -11,9 +11,9 @@ from data.interim import INTERIM_DATA_PATH
 # Keywords dictionary (เหมือนเดิม)
 KEYWORDS = {
     "Programming_Scripting_and_Markup_languages": [
-        "javascript",
-        "html",
-        "css",
+        "JavaScript",
+        "HTML",
+        "CSS",
         "python",
         "sql",
         "typescript",
