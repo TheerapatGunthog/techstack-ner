@@ -3,6 +3,7 @@ import pandas as pd
 from pathlib import Path
 from tqdm import tqdm
 import json
+from transformers import RobertaTokenizerFast  # เพิ่มการนำเข้า
 
 sys.path.append(str(Path(__file__).resolve().parent.parent.parent.parent.parent))
 
@@ -24,6 +25,11 @@ class NERClassChecking:
         )  # Convert to Path object if provided
         self.processed_data = None
         self.entities_df = None
+
+        # Initialize tokenizer for RoBERTa-large
+        self.tokenizer = RobertaTokenizerFast.from_pretrained(
+            "FacebookAI/roberta-large", add_prefix_space=True
+        )
 
         # If json_path is provided but no json_data, load the data
         if self.json_path is not None and self.json_data is None:
@@ -128,6 +134,43 @@ class NERClassChecking:
             )
         return pd.DataFrame(validation_results)
 
+    def get_max_token_length(self):
+        """
+        Calculate the maximum token length in the dataset using RoBERTa-large tokenizer.
+        Uses 'tokens' if available in json_data, otherwise tokenizes 'text' with RoBERTa tokenizer.
+        """
+        if not self.json_data:
+            raise ValueError(
+                "No JSON data available. Please provide json_data or valid json_path"
+            )
+
+        max_length = 0
+
+        for item in tqdm(self.json_data, desc="Calculating max token length"):
+            # ตรวจสอบว่ามีฟิลด์ 'tokens' หรือไม่
+            if "tokens" in item["data"]:
+                tokens = item["data"]["tokens"]
+                # Tokenize tokens with RoBERTa tokenizer to ensure consistency
+                encoded = self.tokenizer(
+                    tokens,
+                    is_split_into_words=True,
+                    return_tensors="pt",
+                    padding=False,
+                    truncation=False,
+                )
+                length = len(encoded["input_ids"][0])  # จำนวน subword tokens
+            else:
+                # หากไม่มี 'tokens' ให้ tokenize 'text' ด้วย RoBERTa tokenizer
+                text = item["data"]["text"]
+                encoded = self.tokenizer(
+                    text, return_tensors="pt", padding=False, truncation=False
+                )
+                length = len(encoded["input_ids"][0])  # จำนวน subword tokens
+
+            max_length = max(max_length, length)
+
+        return max_length
+
 
 # Example usage
 if __name__ == "__main__":
@@ -144,3 +187,9 @@ if __name__ == "__main__":
     print("\nStatistics:")
     for key, value in stats.items():
         print(f"{key}: {value}")
+
+    # Get maximum token length using RoBERTa tokenizer
+    max_token_length = ner_checker.get_max_token_length()
+    print(
+        f"\nMaximum token length in the dataset (using RoBERTa tokenizer): {max_token_length}"
+    )
