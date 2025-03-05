@@ -174,7 +174,10 @@ class NERClassChecking:
 
 # Example usage
 if __name__ == "__main__":
-    json_file_path = INTERIM_DATA_PATH / "project-3-at-2025-03-01-22-23-fd6863ce.json"
+    json_file_path = (
+        INTERIM_DATA_PATH
+        / "./bootstrapping/002/project-6-at-2025-03-03-15-17-3d7c6540.json"
+    )
     ner_checker = NERClassChecking(json_path=json_file_path)
 
     # Process the annotations

@@ -81,7 +81,9 @@ def process_labelstudio_to_ner_format(raw_data: str) -> List[Dict]:
 
 
 # Define the path of the data file
-input_file = INTERIM_DATA_PATH / "project-3-at-2025-03-01-22-23-fd6863ce.conll"
+input_file = (
+    INTERIM_DATA_PATH / "./bootrapping/002/project-6-at-2025-03-03-12-04-d2bbce64.conll"
+)
 
 # Check if the file exists
 if not input_file.exists():
@@ -115,9 +117,17 @@ print(f"Validate data size: {len(validate_data)}")
 PROCESS_DATA_PATH.mkdir(parents=True, exist_ok=True)
 
 # Save data as JSON
-with open(PROCESS_DATA_PATH / "train_data.json", "w", encoding="utf-8") as f:
+with open(
+    PROCESS_DATA_PATH / "./bootstrapping/train-001/train_data.json",
+    "w",
+    encoding="utf-8",
+) as f:
     json.dump(train_data, f, ensure_ascii=False, indent=2)
-with open(PROCESS_DATA_PATH / "validate_data.json", "w", encoding="utf-8") as f:
+with open(
+    PROCESS_DATA_PATH / "./bootstrapping/train-001/validate_data.json",
+    "w",
+    encoding="utf-8",
+) as f:
     json.dump(validate_data, f, ensure_ascii=False, indent=2)
 
 print("Data processing completed and saved successfully!")

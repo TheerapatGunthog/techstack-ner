@@ -521,7 +521,10 @@ def merge_datasets(original_data, augmented_data):
 
 # Example Usage
 if __name__ == "__main__":
-    json_file_path = INTERIM_DATA_PATH / "project-3-at-2025-03-01-22-23-fd6863ce.json"
+    json_file_path = (
+        INTERIM_DATA_PATH
+        / ".bootstrapping/001/project-3-at-2025-03-01-22-23-fd6863ce.json"
+    )
     augmenter = NERDataAugmenterWithReplacement(
         json_path=json_file_path, frequency_threshold=1
     )
