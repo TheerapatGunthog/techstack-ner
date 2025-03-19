@@ -3,9 +3,9 @@ import pandas as pd
 from pathlib import Path
 from tqdm import tqdm
 import json
-from transformers import RobertaTokenizerFast  # เพิ่มการนำเข้า
+from transformers import RobertaTokenizerFast
 
-sys.path.append(str(Path(__file__).resolve().parent.parent.parent.parent.parent))
+sys.path.append(str(Path(__file__).resolve().parent.parent.parent.parent))
 
 from data.interim import INTERIM_DATA_PATH
 

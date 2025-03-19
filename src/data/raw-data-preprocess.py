@@ -70,6 +70,11 @@ class DataQualityCheck:
     def __init__(self, df):
         self.df = df
 
+    def check_data_shape(self):
+        """Checks the shape of the dataset."""
+        print("\n Data Shape:")
+        print(self.df.shape)
+
     def check_missing_values(self):
         """Checks for missing values"""
         missing_values = self.df.isnull().sum()
@@ -86,6 +91,7 @@ class DataQualityCheck:
         print("\n Running Data Quality Checks...")
         self.check_missing_values()
         self.check_duplicates()
+        self.check_data_shape()
 
 
 class JobDataProcessor:
@@ -99,7 +105,7 @@ class JobDataProcessor:
 
     def process(self):
         """segmenting, and checking quality."""
-        df = pd.read_csv(self.raw_data_path / "merged.csv").iloc[0:1000]
+        df = pd.read_csv(self.raw_data_path / "merged.csv")
 
         # Drop duplicate qualifications
         df.drop_duplicates(subset=["Qualification"], inplace=True)
@@ -124,12 +130,12 @@ class JobDataProcessor:
 
         df.drop_duplicates(subset=["Segmented_Qualification"], inplace=True)
 
-        # Save processed data
-        df.to_csv(self.interim_data_path / "segmented_data.csv", index=False)
-
         # Run data quality checks
         data_quality = DataQualityCheck(df)
         data_quality.run_checks()
+
+        # Save processed data
+        df.to_csv(self.interim_data_path / "segmented_data.csv", index=False)
 
 
 if __name__ == "__main__":

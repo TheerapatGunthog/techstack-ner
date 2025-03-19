@@ -2,7 +2,7 @@ import sys
 from pathlib import Path
 
 # Add path to import data.interim and data.processed
-sys.path.append(str(Path(__file__).resolve().parent.parent.parent.parent.parent))
+sys.path.append(str(Path(__file__).resolve().parent.parent.parent.parent.parent.parent))
 
 from data.interim import INTERIM_DATA_PATH
 from data.processed import PROCESS_DATA_PATH
@@ -18,7 +18,6 @@ ENTITY_MAPPING = {
     "WEBFRAMEWORK_TECH": (7, 8),
     "DATABASE": (9, 10),
     "EMBEDDEDTECH": (11, 12),
-    # Add other entity types found in the data
 }
 
 
@@ -82,7 +81,7 @@ def process_labelstudio_to_ner_format(raw_data: str) -> List[Dict]:
 
 # Define the path of the data file
 input_file = (
-    INTERIM_DATA_PATH / "./bootrapping/002/project-6-at-2025-03-03-12-04-d2bbce64.conll"
+    INTERIM_DATA_PATH / "bootstrapping/001/project-6-at-2025-03-03-12-04-d2bbce64.conll"
 )
 
 # Check if the file exists
@@ -118,13 +117,13 @@ PROCESS_DATA_PATH.mkdir(parents=True, exist_ok=True)
 
 # Save data as JSON
 with open(
-    PROCESS_DATA_PATH / "./bootstrapping/train-001/train_data.json",
+    INTERIM_DATA_PATH / "./bootstrapping/train-001/train_data.json",
     "w",
     encoding="utf-8",
 ) as f:
     json.dump(train_data, f, ensure_ascii=False, indent=2)
 with open(
-    PROCESS_DATA_PATH / "./bootstrapping/train-001/validate_data.json",
+    INTERIM_DATA_PATH / "./bootstrapping/train-001/validate_data.json",
     "w",
     encoding="utf-8",
 ) as f:

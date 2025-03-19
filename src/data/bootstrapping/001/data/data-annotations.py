@@ -8,7 +8,7 @@ import json
 import re
 from tqdm import tqdm
 
-sys.path.append(str(Path(__file__).resolve().parent.parent.parent.parent.parent))
+sys.path.append(str(Path(__file__).resolve().parent.parent.parent.parent.parent.parent))
 
 from data.interim import INTERIM_DATA_PATH
 from data.keywords import KEYWORDS_DATA_PATH

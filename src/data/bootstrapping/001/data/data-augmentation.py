@@ -4,7 +4,7 @@ from tqdm import tqdm
 import json
 import random
 
-sys.path.append(str(Path(__file__).resolve().parent.parent.parent.parent.parent))
+sys.path.append(str(Path(__file__).resolve().parent.parent.parent.parent.parent.parent))
 
 from data.interim import INTERIM_DATA_PATH
 from data.raw import RAW_DATA_PATH
