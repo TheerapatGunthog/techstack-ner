@@ -1,8 +1,7 @@
 import sys
 from pathlib import Path
 
-# Add path to import data.interim and data.processed
-sys.path.append(str(Path(__file__).resolve().parent.parent.parent.parent.parent.parent))
+sys.path.append(str(Path(__file__).resolve().parent.parent.parent.parent))
 
 from data.interim import INTERIM_DATA_PATH
 from data.processed import PROCESS_DATA_PATH
