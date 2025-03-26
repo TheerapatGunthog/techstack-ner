@@ -9,7 +9,6 @@ sys.path.append(str(Path(__file__).resolve().parent.parent.parent.parent))
 from data.interim import INTERIM_DATA_PATH
 from data.raw import RAW_DATA_PATH
 
-# Keywords dictionary (เหมือนเดิม)
 KEYWORDS = {
     "Programming_Scripting_and_Markup_languages": [
         "JavaScript",

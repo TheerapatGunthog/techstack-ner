@@ -116,13 +116,13 @@ PROCESS_DATA_PATH.mkdir(parents=True, exist_ok=True)
 
 # Save data as JSON
 with open(
-    INTERIM_DATA_PATH / "./bootstrapping/train-001/train_data.json",
+    INTERIM_DATA_PATH / "./bootstrapping/train-002/train_data.json",
     "w",
     encoding="utf-8",
 ) as f:
     json.dump(train_data, f, ensure_ascii=False, indent=2)
 with open(
-    INTERIM_DATA_PATH / "./bootstrapping/train-001/validate_data.json",
+    INTERIM_DATA_PATH / "./bootstrapping/train-002/validate_data.json",
     "w",
     encoding="utf-8",
 ) as f:

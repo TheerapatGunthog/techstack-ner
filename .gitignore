@@ -2,3 +2,7 @@
 /data/raw
 /data/processed
 /data/interim
+
+# Ignore a models directory
+
+/models

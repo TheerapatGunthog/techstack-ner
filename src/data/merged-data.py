@@ -1,35 +1,71 @@
+"""
+Module for merging multiple CSV files into a single dataset.
+"""
+
 import sys
 from pathlib import Path
+from typing import Optional
 import pandas as pd
 
-# Add parent directory to sys.path (assuming this is for importing RAW_DATA_PATH)
+# Add parent directory to sys.path
 sys.path.append(str(Path(__file__).resolve().parent.parent.parent))
 
 from data.raw import RAW_DATA_PATH
 
-# Define the folder path
-fd_path0 = Path(RAW_DATA_PATH / "first-data/csv1/")
-fd_path1 = Path(RAW_DATA_PATH / "first-data/csv2/")
 
-# List to store DataFrames
-df_list = []
+def read_csv_files_from_folder(folder_path: Path) -> Optional[pd.DataFrame]:
+    """
+    Read all CSV files from a folder and combine them into a single DataFrame.
 
-# Iterate over all CSV files in the folder
-for csv_file in fd_path0.glob("*.csv"):
-    # Read each CSV file, selecting only the desired columns
-    df = pd.read_csv(csv_file, usecols=["Topic", "Position", "Qualification"])
-    df_list.append(df)
+    Args:
+        folder_path: Path to folder containing CSV files
 
-for csv_file in fd_path1.glob("*.csv"):
-    # Read each CSV file, selecting only the desired columns
-    df = pd.read_csv(csv_file, usecols=["Topic", "Position", "Qualification"])
-    df_list.append(df)
+    Returns:
+        Combined DataFrame or None if no files found
+    """
+    csv_files = list(folder_path.glob("*.csv"))
+    if not csv_files:
+        print(f"No CSV files found in {folder_path}")
+        return None
 
-# Concatenate all DataFrames into a single DataFrame
-merged_df = pd.concat(df_list, ignore_index=True)
+    return pd.concat(
+        [
+            pd.read_csv(file, usecols=["Topic", "Position", "Qualification"])
+            for file in csv_files
+        ],
+        ignore_index=True,
+    )
 
-# Show sum of rows and columns
-print(merged_df.shape)
 
-# Save the merged DataFrame to a CSV file
-merged_df.to_csv(RAW_DATA_PATH / "merged.csv", index=False)
+def main():
+    """Main function to process and merge CSV files."""
+    # Define the folder paths
+    fd_paths = [
+        RAW_DATA_PATH / "first-data/csv1/",
+        RAW_DATA_PATH / "first-data/csv2/",
+        RAW_DATA_PATH / "first-data/csv3/",
+    ]
+
+    # Process all folders and combine into one DataFrame
+    dataframes = [
+        df for path in fd_paths if (df := read_csv_files_from_folder(path)) is not None
+    ]
+
+    if not dataframes:
+        print("No data found in any folder.")
+        return
+
+    # Concatenate all DataFrames into a single DataFrame
+    merged_df = pd.concat(dataframes, ignore_index=True)
+
+    # Show sum of rows and columns
+    print(f"Merged data shape: {merged_df.shape}")
+
+    # Save the merged DataFrame to a CSV file
+    output_path = RAW_DATA_PATH / "merged.csv"
+    merged_df.to_csv(output_path, index=False)
+    print(f"Successfully saved merged data to {output_path}")
+
+
+if __name__ == "__main__":
+    main()
