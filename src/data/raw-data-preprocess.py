@@ -39,14 +39,14 @@ class DataCleaning:
         """Cleans text"""
         if not isinstance(text, str):
             return ""
-        text = self.css_pattern.sub("", text)
-        text = self.css_inline_pattern.sub("", text)
-        text = self.html_tags_pattern.sub("", text)
-        text = self.email_pattern.sub("", text)
-        text = self.phone_pattern.sub("", text)
-        text = self.url_pattern.sub("", text)
-        text = self.bullet_point_pattern.sub("", text)
-        text = self.hashtag.sub("", text)
+        text = self.css_pattern.sub(" ", text)
+        text = self.css_inline_pattern.sub(" ", text)
+        text = self.html_tags_pattern.sub(" ", text)
+        text = self.email_pattern.sub(" ", text)
+        text = self.phone_pattern.sub(" ", text)
+        text = self.url_pattern.sub(" ", text)
+        text = self.bullet_point_pattern.sub(" ", text)
+        text = self.hashtag.sub(" ", text)
         text = self.non_alphanumeric_pattern.sub(" ", text)
         text = re.sub(r"\s+", " ", text).strip()
         return text
@@ -126,7 +126,13 @@ class JobDataProcessor:
             self.segmenter.split_sentences
         )
         df = df.explode("Segmented_Qualification").reset_index(drop=True)
-        df = df[["Topic", "Sentence_Index", "Segmented_Qualification"]]
+
+        # Combine Topic and Position with Segmented_Qualification
+        df["Segmented_Qualification"] = df.apply(
+            lambda row: f"{row['Topic']}: {row['Segmented_Qualification']}",
+            axis=1,
+        )
+        df = df[["Sentence_Index", "Segmented_Qualification"]]
 
         df.drop_duplicates(subset=["Segmented_Qualification"], inplace=True)
 
