@@ -219,7 +219,7 @@ for index, row in tqdm(
         all_entities.extend([label["entity"] for label in refined_labels])
 
 # Save the results as JSON
-output_path = INTERIM_DATA_PATH / "./bootstrapping/labeled_by_code_data.json"
+output_path = INTERIM_DATA_PATH / "./bootstrapping/002/labeled_by_code_data.json"
 with open(output_path, "w", encoding="utf-8") as f:
     json.dump(label_studio_data, f, ensure_ascii=False, indent=4)
 

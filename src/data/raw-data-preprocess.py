@@ -105,7 +105,9 @@ class JobDataProcessor:
 
     def process(self):
         """segmenting, and checking quality."""
-        df = pd.read_csv(self.raw_data_path / "merged.csv")
+        df_full = pd.read_csv(self.raw_data_path / "merged.csv")
+        quarter_size = len(df_full) // 5
+        df = df_full.iloc[:quarter_size]
 
         # Drop duplicate qualifications
         df.drop_duplicates(subset=["Qualification"], inplace=True)
@@ -129,7 +131,7 @@ class JobDataProcessor:
 
         # Combine Topic and Position with Segmented_Qualification
         df["Segmented_Qualification"] = df.apply(
-            lambda row: f"{row['Topic']}: {row['Segmented_Qualification']}",
+            lambda row: f"[{row['Topic']}] {row['Segmented_Qualification']}",
             axis=1,
         )
         df = df[["Sentence_Index", "Segmented_Qualification"]]
