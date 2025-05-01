@@ -1,0 +1,305 @@
+## Programming_Scripting_and_Markup_languages:
+
+- Pyspark
+- VB
+- RPG IV
+- ABAP
+- J2EE
+- XML
+- AJAX
+- VB.Net
+- Unix shell script
+- pl
+- javascript
+- html
+- css
+- python
+- sql
+- typescript
+- bash
+- shell
+- java
+- c#
+- c++
+- c
+- php
+- powershell
+- golang
+- go
+- rust
+- kotlin
+- lua
+- dart
+- assembly
+- ruby
+- swift
+- r
+- visual basic
+- matlab
+- vba
+- groovy
+- scala
+- perl
+- gdscript
+- objective-c
+- elixir
+- haskell
+- delphi
+- micropython
+- lisp
+- clojure
+- julia
+- zig
+- fortran
+- solidity
+- ada
+- erlang
+- f#
+- apex
+- prolog
+- ocaml
+- cobol
+- crystal
+- nim
+- zephyr
+
+## Cloud_platforms:
+
+- S3
+- Terraform
+- SAP Business Technology Platform
+- BTP
+- SAP Cloud Platform
+- CPI
+- aws
+- aws cloud
+- GCP
+- azure
+- Terraform
+- Azure ARM
+- Azure AD
+- google cloud
+- cloudflare
+- firebase
+- vercel
+- digital ocean
+- heroku
+- netlify
+- vmware
+- hetzner
+- supabase
+- linode
+- akamai
+- ovh
+- managed hosting
+- coi
+- render
+- fly.io
+- openshift
+- databricks
+- pythonanywhere
+- vultr
+- openstack
+- alibaba cloud
+- ibm cloud
+- watson
+- scaleway
+- colocation
+
+## Database:
+
+- MSSQL Server
+- sql server
+- SAP HANA Studio
+- postgresql
+- mysql
+- sqlite
+- microsoft sql server
+- mongodb
+- redis
+- mariadb
+- elasticsearch
+- oracle
+- dynamodb
+- firebase realtime database
+- cloud firestore
+- bigquery
+- microsoft access
+- supabase
+- h2
+- cosmos db
+- snowflake
+- influxdb
+- cassandra
+- databricks sql
+- neo4j
+- ibm db2
+- DB2
+- clickhouse
+- solr
+- duckdb
+- firebird
+- couch db
+- cockroachdb
+- couchbase
+- presto
+- datamic
+- eventstoredb
+- ravendb
+- tidb
+
+## Web_Framework_and_Technologies:
+
+- Saleforce
+- Hibernate
+- EJB
+- RestAPI
+- Bootstrap
+- SpringBoot
+- SAP UI5
+- SAP Webdynpro
+- Rest
+- SOAP
+- nodejs
+- react
+- jquery
+- nextjs
+- expressjs
+- angular
+- asp.net core
+- vuejs
+- asp.net
+- flask
+- spring boot
+- django
+- wordpress
+- fastapi
+- laravel
+- angularjs
+- svelte
+- nestjs
+- blazor
+- ruby
+- rails
+- nextjs
+- htmx
+- symfony
+- astro
+- fastify
+- deno
+- phoenix
+- drupal
+- strapi
+- codelgniter
+- gatsby
+- remix
+- solidjs
+- yii 2
+- play framework
+- elm
+
+## Other_Framework_and_libraries:
+
+- Talend
+- Crystal Reports
+- WebSphere
+- WebLogic
+- JBoss
+- Liberty
+- TFVC
+- Prometheus
+- Grafana
+- ELK stack
+- Eclipse
+- Netbean
+- JBuilder
+- UML
+- SAP BW
+- SAP ECC
+- LabVIEW
+- MS.net
+- MS Excel Macro
+- SAP Mobile Platform
+- SAP Conversational AI
+- SAP Analytics Cloud
+- Plateau Report Designer
+- git
+- Kafka
+- Oracle ERP
+- Oracle Retail
+- Oracle Retail Suite
+- Power BI
+- O365
+- SSIS
+- SSAS
+- SSRS
+- Power BI
+- SAP AO
+- .net
+- numpy
+- pandas
+- .ent framework
+- spring framework
+- rabbitmq
+- scikit learn
+- torch
+- pytorch
+- Spring
+- Confluence
+- Jenkins
+- Jira
+- Maven
+- tensorflow
+- apache kafka
+- flutter
+- opencv
+- react native
+- qt
+- opengl
+- electron
+- cuda
+- hugging face transformers
+- apache spark
+- swiftui
+- keras
+- .net maui
+- ruff
+- xamarin
+- gtk
+- inonic
+- tauri
+- hadoop
+- cordova
+- directx
+- capacitor
+- opencl
+- tidyverse
+- roslyn
+- quarkus
+- ktor
+- mlflow
+- jax
+- mfc
+
+## Embedded_Technologies:
+
+- AS400
+- respberry pi
+- arduino
+- gnu gcc
+- cmake
+- llvm clang
+- cargo
+- msvc
+- ninja
+- platformio
+- meson
+- qmake
+- catch2
+- cppunit
+- doctest
+- scons
+- zmk
+- micronaut
+- build2
+- cute

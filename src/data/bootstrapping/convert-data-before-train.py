@@ -101,31 +101,43 @@ for sentence in processed_data[:2]:
     print(f"NER Tags: {sentence['ner_tags']}")
     print()
 
-# Split Train and Validate
+# Split Train, Validate and Test
 random.shuffle(processed_data)  # Shuffle data
-train_size = int(0.8 * len(processed_data))  # 80% for Train
+train_size = int(0.7 * len(processed_data))  # 70% for Train
+test_validate_size = len(processed_data) - train_size
+validate_size = int(
+    0.5 * test_validate_size
+)  # 15% for Validate (half of the remaining 30%)
+test_size = test_validate_size - validate_size  # 15% for Test (the other half)
+
 train_data = processed_data[:train_size]
-validate_data = processed_data[train_size:]
+validate_data = processed_data[train_size : train_size + validate_size]
+test_data = processed_data[train_size + validate_size :]
 
 # Display data size
 print(f"Train data size: {len(train_data)}")
-print(f"Validate data size: {len(validate_data)}")
-
 # Create directories for saving data if not exist
 PROCESS_DATA_PATH.mkdir(parents=True, exist_ok=True)
+(INTERIM_DATA_PATH / "./bootstrapping/test-001").mkdir(parents=True, exist_ok=True)
 
 # Save data as JSON
 with open(
-    INTERIM_DATA_PATH / "./bootstrapping/train-002/train_data.json",
+    INTERIM_DATA_PATH / "./bootstrapping/test-001/train_data.json",
     "w",
     encoding="utf-8",
 ) as f:
     json.dump(train_data, f, ensure_ascii=False, indent=2)
 with open(
-    INTERIM_DATA_PATH / "./bootstrapping/train-002/validate_data.json",
+    INTERIM_DATA_PATH / "./bootstrapping/test-001/validate_data.json",
     "w",
     encoding="utf-8",
 ) as f:
     json.dump(validate_data, f, ensure_ascii=False, indent=2)
+with open(
+    INTERIM_DATA_PATH / "./bootstrapping/test-001/test_data.json",
+    "w",
+    encoding="utf-8",
+) as f:
+    json.dump(test_data, f, ensure_ascii=False, indent=2)
 
 print("Data processing completed and saved successfully!")
