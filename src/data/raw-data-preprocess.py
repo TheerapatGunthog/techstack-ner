@@ -6,7 +6,7 @@ import pandas as pd
 from tqdm import tqdm
 import spacy
 import logging
-from typing import List, Dict, Optional, Union
+from typing import List, Dict, Optional, Union, Set
 import multiprocessing as mp
 from functools import partial
 import string
@@ -16,6 +16,20 @@ import json
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import networkx as nx
+
+
+try:
+    import wordninja
+    WORDNINJA_AVAILABLE = True
+except ImportError:
+    WORDNINJA_AVAILABLE = False
+
+try:
+    import wordsegment
+    wordsegment.load()
+    WORDSEGMENT_AVAILABLE = True
+except ImportError:
+    WORDSEGMENT_AVAILABLE = False
 
 # Add path to the project root
 sys.path.append(str(Path(__file__).resolve().parent.parent.parent))
@@ -550,6 +564,484 @@ class SimilarSentenceRemover:
         self.logger.info(f"Removed {removed_count} similar sentences ({removed_count/original_count:.2%})")
         
         return df_filtered
+    
+
+class SmartWordSeparator:
+    """Smart word separator using statistical models with tech-aware whitelist."""
+    
+    def __init__(self, use_wordninja: bool = True):
+        """
+        Initialize with word segmentation library preference.
+        
+        Args:
+            use_wordninja: Prefer wordninja over wordsegment if both available
+        """
+        self.segmentation_method = self._init_segmentation_method(use_wordninja)
+        self.tech_whitelist = self._create_tech_whitelist()
+        self.protected_patterns = self._create_protected_patterns()
+        
+        logger.info(f"SmartWordSeparator initialized with method: {self.segmentation_method}")
+    
+    def _init_segmentation_method(self, prefer_wordninja: bool) -> str:
+        """Initialize the best available segmentation method."""
+        if prefer_wordninja and WORDNINJA_AVAILABLE:
+            return "wordninja"
+        elif WORDSEGMENT_AVAILABLE:
+            return "wordsegment"
+        elif WORDNINJA_AVAILABLE:
+            return "wordninja"
+        else:
+            logger.warning("No word segmentation library available. Install 'wordninja' or 'wordsegment'")
+            return "fallback"
+    
+    def _create_tech_whitelist(self) -> Set[str]:
+        """Create comprehensive whitelist of tech terms that should not be segmented."""
+        
+        tech_terms = {
+            # Programming Languages & Runtimes
+            'javascript', 'typescript', 'coffeescript', 'actionscript',
+            'python', 'cpython', 'jython', 'ironpython', 'micropython',
+            'java', 'openjdk', 'oraclejdk', 'javase', 'javaee', 'javafx',
+            'csharp', 'fsharp', 'visualbasic', 'dotnet', 'netcore', 'netframework',
+            'cplusplus', 'objectivec', 'swift', 'swiftui', 'uikit',
+            'golang', 'rustlang', 'kotlinlang', 'scala', 'clojure', 'groovy',
+            'ruby', 'rubyonrails', 'rubygems', 'bundler',
+            'php', 'hack', 'hhvm', 'composer',
+            'perl', 'python', 'haskell', 'erlang', 'elixir',
+            'matlab', 'octave', 'rlang', 'julia',
+            'powershell', 'bash', 'zsh', 'fish',
+            
+            # JavaScript Frameworks & Libraries
+            'react', 'reactjs', 'reactnative', 'redux', 'mobx', 'recoil',
+            'angular', 'angularjs', 'rxjs', 'ngrx',
+            'vue', 'vuejs', 'vuex', 'nuxtjs', 'vuepress',
+            'svelte', 'sveltekit', 'ember', 'emberjs',
+            'backbone', 'backbonejs', 'marionette',
+            'jquery', 'jqueryui', 'zepto',
+            'lodash', 'underscore', 'ramda',
+            'momentjs', 'dayjs', 'datejs',
+            'd3js', 'chartjs', 'highcharts', 'plotly',
+            'threejs', 'babylonjs', 'aframe',
+            
+            # Node.js & Backend
+            'nodejs', 'nodemon', 'npm', 'yarn', 'pnpm',
+            'express', 'expressjs', 'fastify', 'koajs', 'nestjs',
+            'nextjs', 'gatsby', 'gridsome', 'vuepress',
+            'webpack', 'rollup', 'parcel', 'vite', 'snowpack',
+            'babel', 'typescript', 'eslint', 'prettier', 'husky',
+            'jest', 'mocha', 'jasmine', 'cypress', 'playwright', 'puppeteer',
+            
+            # Python Frameworks & Libraries
+            'django', 'djangorest', 'flask', 'fastapi', 'tornado',
+            'pyramid', 'bottle', 'cherrypy', 'falcon',
+            'numpy', 'pandas', 'matplotlib', 'seaborn', 'plotly',
+            'scipy', 'scikit', 'scikitlearn', 'tensorflow', 'pytorch',
+            'keras', 'theano', 'caffe', 'mxnet',
+            'jupyter', 'ipython', 'anaconda', 'miniconda',
+            'requests', 'urllib', 'httpx', 'aiohttp',
+            'sqlalchemy', 'peewee', 'tortoise',
+            'celery', 'redis', 'rabbitmq',
+            'pytest', 'unittest', 'nose', 'tox',
+            
+            # Java Frameworks & Libraries
+            'spring', 'springboot', 'springframework', 'springmvc',
+            'hibernate', 'mybatis', 'jpa', 'jdbc',
+            'junit', 'testng', 'mockito', 'easymock',
+            'maven', 'gradle', 'ant', 'sbt',
+            'tomcat', 'jetty', 'undertow', 'netty',
+            'jackson', 'gson', 'fastjson',
+            'log4j', 'logback', 'slf4j',
+            
+            # Databases
+            'mysql', 'mariadb', 'percona',
+            'postgresql', 'postgis', 'timescaledb',
+            'mongodb', 'mongoose', 'mongoengine',
+            'redis', 'memcached', 'hazelcast',
+            'elasticsearch', 'opensearch', 'solr', 'lucene',
+            'cassandra', 'scylladb', 'datastax',
+            'dynamodb', 'cosmosdb', 'firestore', 'firebase',
+            'neo4j', 'arangodb', 'orientdb',
+            'influxdb', 'prometheus', 'grafana',
+            'clickhouse', 'bigquery', 'snowflake', 'redshift',
+            'sqlite', 'leveldb', 'rocksdb',
+            'oracle', 'oracledb', 'sqlserver', 'mssql',
+            
+            # Cloud Platforms & Services
+            'aws', 'amazonwebservices', 'awslambda', 'awsec2', 'awss3',
+            'azure', 'azuredevops', 'azuread', 'azuresql',
+            'gcp', 'googlecloud', 'googlecloudplatform', 'firebase',
+            'heroku', 'netlify', 'vercel', 'digitalocean',
+            'linode', 'vultr', 'hetzner', 'ovh',
+            'cloudflare', 'fastly', 'maxcdn',
+            
+            # DevOps & Infrastructure
+            'docker', 'dockerfile', 'dockercompose', 'podman',
+            'kubernetes', 'k8s', 'kubectl', 'helm', 'istio',
+            'terraform', 'terragrunt', 'pulumi', 'cloudformation',
+            'ansible', 'puppet', 'chef', 'saltstack',
+            'vagrant', 'packer', 'consul', 'vault',
+            'jenkins', 'jenkinsx', 'bamboo', 'teamcity',
+            'gitlab', 'gitlabci', 'github', 'githubactions',
+            'travis', 'travisci', 'circleci', 'appveyor',
+            'nginx', 'apache', 'httpd', 'haproxy', 'envoy',
+            'prometheus', 'grafana', 'jaeger', 'zipkin',
+            'fluentd', 'logstash', 'filebeat', 'metricbeat',
+            
+            # Mobile Development
+            'android', 'androidx', 'androidstudio',
+            'ios', 'xcode', 'swift', 'swiftui', 'objectivec',
+            'flutter', 'dart', 'flutterflow',
+            'reactnative', 'expo', 'metro',
+            'ionic', 'cordova', 'phonegap', 'capacitor',
+            'xamarin', 'nativescript', 'titanium',
+            'unity', 'unreal', 'godot', 'cocos2d',
+            
+            # Frontend & CSS
+            'html', 'html5', 'xhtml', 'xml', 'svg',
+            'css', 'css3', 'sass', 'scss', 'less', 'stylus',
+            'postcss', 'autoprefixer', 'cssnano',
+            'bootstrap', 'tailwindcss', 'bulma', 'foundation',
+            'materialui', 'antdesign', 'chakraui', 'semanticui',
+            'styledcomponents', 'emotion', 'stitches',
+            
+            # Version Control & Collaboration
+            'git', 'github', 'gitlab', 'bitbucket', 'sourceforge',
+            'svn', 'subversion', 'mercurial', 'bazaar',
+            'gitflow', 'githubflow', 'gitlabflow',
+            'slack', 'discord', 'teams', 'zoom', 'jira',
+            'confluence', 'notion', 'miro', 'figma', 'sketch',
+            
+            # Data & Analytics
+            'apache', 'spark', 'hadoop', 'hdfs', 'yarn',
+            'kafka', 'pulsar', 'nats', 'rabbitmq',
+            'airflow', 'luigi', 'prefect', 'dagster',
+            'dbt', 'fivetran', 'stitch', 'airbyte',
+            'tableau', 'powerbi', 'looker', 'metabase',
+            'superset', 'grafana', 'kibana', 'datadog',
+            'snowflake', 'databricks', 'palantir',
+            
+            # Security & Authentication
+            'oauth', 'oauth2', 'openid', 'saml', 'ldap',
+            'jwt', 'json', 'jsonwebtoken', 'passport',
+            'auth0', 'okta', 'keycloak', 'firebase',
+            'ssl', 'tls', 'https', 'certificates',
+            'vault', 'secrets', 'kubernetes', 'helm',
+            
+            # API & Communication
+            'rest', 'restful', 'restapi', 'graphql',
+            'grpc', 'protobuf', 'thrift', 'avro',
+            'soap', 'wsdl', 'xml', 'json', 'yaml',
+            'websocket', 'socketio', 'webrtc', 'sse',
+            'swagger', 'openapi', 'postman', 'insomnia',
+            
+            # Operating Systems & Platforms
+            'linux', 'ubuntu', 'debian', 'centos', 'redhat',
+            'fedora', 'opensuse', 'archlinux', 'gentoo',
+            'alpine', 'busybox', 'scratch',
+            'windows', 'windowsserver', 'powershell',
+            'macos', 'osx', 'homebrew', 'macports',
+            'freebsd', 'openbsd', 'netbsd', 'solaris',
+            
+            # Protocols & Standards
+            'http', 'https', 'http2', 'http3', 'quic',
+            'tcp', 'udp', 'ip', 'ipv4', 'ipv6',
+            'dns', 'dhcp', 'ntp', 'snmp', 'ssh', 'ftp', 'sftp',
+            'smtp', 'pop3', 'imap', 'mime',
+            'cors', 'csrf', 'xss', 'owasp',
+            
+            # Design & UX Tools
+            'figma', 'sketch', 'adobexd', 'invision', 'zeplin',
+            'photoshop', 'illustrator', 'aftereffects', 'premiere',
+            'blender', 'maya', 'cinema4d', 'unity', 'unreal',
+            'framer', 'principle', 'protopie', 'marvel',
+            
+            # Certifications & Methodologies
+            'scrum', 'agile', 'kanban', 'devops', 'sre',
+            'itil', 'prince2', 'pmp', 'csm', 'psm',
+            'aws', 'azure', 'gcp', 'cissp', 'cisa', 'cism',
+            
+            # File Formats & Extensions
+            'json', 'xml', 'yaml', 'toml', 'ini', 'csv', 'tsv',
+            'pdf', 'docx', 'xlsx', 'pptx', 'odt', 'ods', 'odp',
+            'jpg', 'jpeg', 'png', 'gif', 'svg', 'webp', 'avif',
+            'mp4', 'webm', 'avi', 'mov', 'wmv', 'flv',
+            'mp3', 'wav', 'flac', 'ogg', 'aac', 'm4a',
+            
+            # Version Numbers & Patterns
+            'v1', 'v2', 'v3', 'v4', 'v5', 'v6', 'v7', 'v8', 'v9', 'v10',
+            'es6', 'es2015', 'es2016', 'es2017', 'es2018', 'es2019', 'es2020',
+            'python2', 'python3', 'node12', 'node14', 'node16', 'node18',
+            'java8', 'java11', 'java17', 'java19',
+            
+            # Common Compound Terms
+            'fullstack', 'frontend', 'backend', 'devops', 'sre',
+            'microservices', 'serverless', 'cloudnative', 'containerization',
+            'machinelearning', 'artificialintelligence', 'deeplearning',
+            'blockchain', 'cryptocurrency', 'fintech', 'healthtech',
+            'edtech', 'adtech', 'martech', 'proptech',
+            'iot', 'ar', 'vr', 'xr', 'metaverse',
+            'webrtc', 'websocket', 'sse', 'pwa', 'spa', 'ssr', 'ssg',
+            'jamstack', 'headless', 'cms', 'ecommerce',
+            'saas', 'paas', 'iaas', 'faas', 'baas',
+            'cicd', 'gitops', 'infrastructure', 'monitoring',
+            'observability', 'telemetry', 'logging', 'tracing'
+        }
+        
+        # Add variations (uppercase, mixed case)
+        extended_terms = set()
+        for term in tech_terms:
+            extended_terms.add(term.lower())
+            extended_terms.add(term.upper())
+            extended_terms.add(term.title())
+            extended_terms.add(term.capitalize())
+        
+        return extended_terms
+    
+    def _create_protected_patterns(self) -> List[str]:
+        """Create regex patterns for terms that should be protected from segmentation."""
+        return [
+            # Version patterns
+            r'\b[a-zA-Z]+\d+(\.\d+)*\b',  # e.g., Python3.9, Node16.14
+            r'\bv\d+(\.\d+)*\b',          # e.g., v1.0, v2.3.1
+            r'\bes\d+\b',                 # e.g., ES6, ES2020
+            
+            # Tech with numbers
+            r'\b[a-zA-Z]+\d+[a-zA-Z]*\b', # e.g., HTML5, CSS3, HTTP2
+            
+            # Camel/Pascal case tech terms
+            r'\b[A-Z][a-z]+[A-Z][a-zA-Z]*\b',  # e.g., JavaScript, TypeScript
+            
+            # Acronyms
+            r'\b[A-Z]{2,}\b',             # e.g., API, REST, JWT, SQL
+            
+            # Domain extensions and URLs
+            r'\b\w+\.(com|org|net|io|dev|tech|app)\b',
+            
+            # File extensions
+            r'\b\w+\.(js|ts|py|java|cpp|cs|rb|php|go|rs)\b',
+        ]
+    
+    def _is_protected_term(self, word: str) -> bool:
+        """Check if a word should be protected from segmentation."""
+        word_lower = word.lower()
+        
+        # Check whitelist
+        if word_lower in self.tech_whitelist:
+            return True
+        
+        # Check protected patterns
+        for pattern in self.protected_patterns:
+            if re.match(pattern, word, re.IGNORECASE):
+                return True
+        
+        return False
+    
+    def _segment_word(self, word: str) -> List[str]:
+        """Segment a single word using the available method."""
+        if self.segmentation_method == "wordninja":
+            return wordninja.split(word)
+        elif self.segmentation_method == "wordsegment":
+            return wordsegment.segment(word)
+        else:
+            # Fallback: simple heuristic segmentation
+            return self._fallback_segment(word)
+    
+    def _fallback_segment(self, word: str) -> List[str]:
+        """Fallback segmentation using simple heuristics."""
+        # Basic camelCase/PascalCase splitting
+        segments = re.findall(r'[A-Z]?[a-z]+|[A-Z]+(?=[A-Z][a-z]|$)|\d+', word)
+        return segments if segments else [word]
+    
+    def separate_concatenated_words(self, text: str) -> str:
+        """
+        Separate concatenated words while preserving tech terms.
+        
+        Args:
+            text: Input text with potentially concatenated words
+            
+        Returns:
+            Text with intelligently separated words
+        """
+        if not isinstance(text, str) or not text.strip():
+            return text
+        
+        # Tokenize while preserving spaces and punctuation
+        tokens = re.findall(r'\S+|\s+', text)
+        result_tokens = []
+        
+        for token in tokens:
+            # Skip whitespace and punctuation-only tokens
+            if re.match(r'\s+$', token) or re.match(r'^[^\w]+$', token):
+                result_tokens.append(token)
+                continue
+            
+            # Clean token for processing (remove leading/trailing punctuation)
+            clean_token = re.sub(r'^[^\w]+|[^\w]+$', '', token)
+            prefix = token[:len(token) - len(token.lstrip(''.join(re.findall(r'^[^\w]+', token))))]
+            suffix = token[len(token) - len(token.rstrip(''.join(re.findall(r'[^\w]+$', token)))):]
+            
+            if not clean_token:
+                result_tokens.append(token)
+                continue
+            
+            # Check if the clean token should be protected
+            if self._is_protected_term(clean_token):
+                result_tokens.append(token)
+                continue
+            
+            # Skip if token is too short or already well-separated
+            if len(clean_token) <= 4:
+                result_tokens.append(token)
+                continue
+            
+            # Segment the clean token
+            try:
+                segments = self._segment_word(clean_token)
+                
+                # Filter out single characters and very short segments
+                # except for meaningful ones
+                meaningful_segments = []
+                for seg in segments:
+                    if len(seg) >= 2 or seg.lower() in {'i', 'a', 'x', 'y', 'z'}:
+                        meaningful_segments.append(seg)
+                
+                if len(meaningful_segments) > 1:
+                    # Reconstruct with spaces, preserving original prefix/suffix
+                    segmented = prefix + ' '.join(meaningful_segments) + suffix
+                    result_tokens.append(segmented)
+                else:
+                    result_tokens.append(token)
+                    
+            except Exception as e:
+                logger.debug(f"Error segmenting '{clean_token}': {e}")
+                result_tokens.append(token)
+        
+        # Join tokens and clean up excessive spaces
+        result = ''.join(result_tokens)
+        result = re.sub(r'\s+', ' ', result).strip()
+        
+        return result
+
+
+class EnhancedDataCleaning:
+    """Enhanced DataCleaning class with smart word separation."""
+    
+    def __init__(self, config=None):
+        """
+        Initialize with configuration.
+        
+        Args:
+            config: Optional configuration dictionary
+        """
+        # Default configuration
+        self.config = {
+            'remove_emails': True,
+            'remove_phones': True,
+            'remove_urls': True,
+            'remove_html': True,
+            'remove_css': True,
+            'normalize_whitespace': True,
+            'remove_special_chars': True,
+            'min_text_length': 10,
+            'remove_stopwords': False,
+            'lowercase': False,
+            'separate_concatenated_words': True,
+            'use_wordninja': True,  # Prefer wordninja over wordsegment
+        }
+        
+        # Override with provided config
+        if config:
+            self.config.update(config)
+        
+        # Initialize word separator if enabled
+        self.word_separator = None
+        if self.config['separate_concatenated_words']:
+            self.word_separator = SmartWordSeparator(
+                use_wordninja=self.config['use_wordninja']
+            )
+        
+        # Compile regex patterns for better performance
+        self.patterns = {
+            'html_tags': re.compile(r"<[^>]+>"),
+            'email': re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"),
+            'phone': re.compile(r"(\+\d{1,3}[- ]?)?\(?\d{3}\)?[- ]?\d{3}[- ]?\d{4}"),
+            'css': re.compile(r"<style.*?>.*?</style>", re.DOTALL),
+            'url': re.compile(r"(http|https)://[^\s]+|www\.[^\s]+"),
+            'css_inline': re.compile(r"\.[a-zA-Z0-9_-]+\s*\{.*?\}", re.DOTALL),
+            'bullet_point': re.compile(r"[-•*]"),
+            'non_alphanumeric': re.compile(r"[^a-zA-Z0-9.'\"#\+\-\._, /\\&]+"),
+            'hashtag': re.compile(r"#\w+"),
+            'excessive_whitespace': re.compile(r"\s+"),
+        }
+    
+    def clean_text(self, text):
+        """
+        Enhanced text cleaning with smart word separation.
+        
+        Args:
+            text: Input text
+            
+        Returns:
+            Cleaned text with separated words
+        """
+        if not isinstance(text, str):
+            return ""
+        
+        # Apply word separation first (before other cleaning that might affect segmentation)
+        if self.config['separate_concatenated_words'] and self.word_separator:
+            text = self.word_separator.separate_concatenated_words(text)
+        
+        # Apply cleaning operations
+        if self.config['remove_css']:
+            text = self.patterns['css'].sub(" ", text)
+            text = self.patterns['css_inline'].sub(" ", text)
+        
+        if self.config['remove_html']:
+            text = self.patterns['html_tags'].sub(" ", text)
+        
+        if self.config['remove_emails']:
+            text = self.patterns['email'].sub(" ", text)
+        
+        if self.config['remove_phones']:
+            text = self.patterns['phone'].sub(" ", text)
+        
+        if self.config['remove_urls']:
+            text = self.patterns['url'].sub(" ", text)
+        
+        # Replace bullet points with space
+        text = self.patterns['bullet_point'].sub(" ", text)
+        
+        # Remove hashtags
+        text = self.patterns['hashtag'].sub(" ", text)
+        
+        if self.config['remove_special_chars']:
+            text = self.patterns['non_alphanumeric'].sub(" ", text)
+        
+        if self.config['normalize_whitespace']:
+            text = self.patterns['excessive_whitespace'].sub(" ", text).strip()
+        
+        if self.config['lowercase']:
+            text = text.lower()
+        
+        return text
+    
+    def filter_non_thai(self, text: Optional[str]) -> Optional[str]:
+        """
+        Keep only text that doesn't contain Thai characters.
+        
+        Args:
+            text: Input text
+            
+        Returns:
+            Text if no Thai characters present, None otherwise
+        """
+        if not isinstance(text, str):
+            return None
+        
+        # Check for Thai Unicode range
+        if re.search(r"[\u0E00-\u0E7F]", text):
+            return None
+        return text
 
 
 class DataQualityCheck:
@@ -730,6 +1222,7 @@ class JobDataProcessor:
             'input_file': 'merged.csv',
             'output_file': 'segmented_data.csv',
             'quality_report_file': 'data_quality_report.json',
+            'separate_concatenated_words': True,
             'sample_fraction': 0.2,  # Use 20% of data by default
             'random_seed': 42,
             'min_sentence_length': 5,  # Minimum characters for a valid sentence
@@ -746,7 +1239,7 @@ class JobDataProcessor:
             self.config.update(config)
         
         # Initialize components
-        self.cleaner = DataCleaning()
+        self.cleaner = EnhancedDataCleaning(config)
         self.segmenter = DataSegmentation(batch_size=self.config['batch_size'])
         self.similar_remover = SimilarSentenceRemover(
             similarity_threshold=self.config['similarity_threshold'],
@@ -893,6 +1386,8 @@ class JobDataProcessor:
 
 if __name__ == "__main__":
     config = {
+        'separate_concatenated_words': True,
+        'use_wordninja': True,
         'sample_fraction': 1,
         'min_sentence_length': 10,
         'parallelize': True,
