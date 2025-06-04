@@ -1,9 +1,23 @@
-import wordninja
-import wordsegment
+from transformers import RobertaTokenizer
 
-wordsegment.load()
+# โหลด RoBERTa tokenizer
+tokenizer = RobertaTokenizer.from_pretrained('roberta-base')
 
-sample = "We are building IoT devices with C++andFreeRTOS, using AWSIoTCore for cloudconnectivity and InfluxDBfor time-series data storage."
+# ตัวอย่างข้อความ
+texts = [
+    "Hello world, how are you?",
+    "RoBERTa tokenization example",
+    "Transformers are amazing for NLP tasks!",
+    "Let's see how RoBERTa handles this",
+]
 
-print("wordninja:", wordninja.split(sample))
-print("wordsegment:", wordsegment.segment(sample))
+print("=== RoBERTa Tokenization ===\n")
+
+for text in texts:
+    print(f"ข้อความ: {text}")
+    
+    # แยกคำด้วย tokenize
+    tokens = tokenizer.tokenize(text)
+    print(f"Tokens: {tokens}")
+    print(f"จำนวน tokens: {len(tokens)}")
+    print("-" * 40)
