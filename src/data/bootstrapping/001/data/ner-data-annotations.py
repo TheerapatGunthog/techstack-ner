@@ -1,4 +1,3 @@
-import sys
 import pandas as pd
 import yaml
 from pathlib import Path
@@ -8,17 +7,17 @@ import json
 import re
 from tqdm import tqdm
 
-sys.path.append(str(Path(__file__).resolve().parent.parent.parent.parent.parent.parent))
-
-from data.interim import INTERIM_DATA_PATH
-from data.keywords import KEYWORDS_DATA_PATH
+KEYWORDS_DATA_PATH = Path("/home/whilebell/Code/Project/TechStack-NER/data/keywords")
+INTERIM_DATA_PATH = Path("/home/whilebell/Code/Project/TechStack-NER/data/interim")
 
 # Load the model
 model_name = "FacebookAI/xlm-roberta-large-finetuned-conll03-english"
 ner = pipeline("ner", model=model_name, tokenizer=model_name, device=0)
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 
-df = pd.read_csv(INTERIM_DATA_PATH / "segmented_data.csv")
+df = pd.read_csv(INTERIM_DATA_PATH / "segmented-data/kaggle-segmented-data.csv")
+
+print(df)
 
 # Load keywords from YAML file
 with open(KEYWORDS_DATA_PATH / "classification-keyword.yaml", "r") as file:
@@ -36,22 +35,41 @@ def flatten_and_lower(keyword_list):
 
 
 # Extract keyword categories
+# PSML
 programming_languages = flatten_and_lower(
     classification_keywords["keywords"]["Programming_Scripting_and_Markup_languages"]
 )
+# CP
 cloud_platforms = flatten_and_lower(
     classification_keywords["keywords"]["Cloud_platforms"]
 )
+# DB
 databases = flatten_and_lower(classification_keywords["keywords"]["Database"])
+# WFT
 web_frameworks_and_technologies = flatten_and_lower(
     classification_keywords["keywords"]["Web_Framework_and_Technologies"]
 )
+# OFL
 frameworks_and_libraries = flatten_and_lower(
     classification_keywords["keywords"]["Other_Framework_and_libraries"]
 )
+
+# Merge a Web_Framework and Technologies with Other Framework and Libraries
+tech_frameworks_and_libraries = (
+    web_frameworks_and_technologies | frameworks_and_libraries
+)
+
+# ET
 embedded_technologies = flatten_and_lower(
     classification_keywords["keywords"]["Embedded_Technologies"]
 )
+
+
+def clean_word(word):
+    """
+    Clean subword artifacts like '▁', '##', '@@' etc.
+    """
+    return re.sub(r"^[▁#Ġ@]+", "", word).strip().lower()
 
 
 def refine_labels(ner_results, text):
@@ -64,8 +82,7 @@ def refine_labels(ner_results, text):
         programming_languages
         | cloud_platforms
         | databases
-        | web_frameworks_and_technologies
-        | frameworks_and_libraries
+        | tech_frameworks_and_libraries
         | embedded_technologies
     )
 
@@ -79,8 +96,6 @@ def refine_labels(ner_results, text):
 
     # Step 1: Process NER results (only MISC entities)
     for entity in ner_results:
-        word = entity.get("word", "").strip()
-        word_lower = word.lower()
         start = entity.get("start")
         end = entity.get("end")
         entity_label = entity.get("entity")
@@ -91,26 +106,29 @@ def refine_labels(ner_results, text):
         if start is None or end is None:
             continue
 
+        raw_word = text[start:end]
+        word_clean = clean_word(raw_word)
+
         label = None
-        if word_lower in programming_languages:
-            label = "PROGRAMMINGLANG"
-        elif word_lower in cloud_platforms:
-            label = "CLOUDPLATFORM"
-        elif word_lower in databases:
-            label = "DATABASE"
-        elif word_lower in web_frameworks_and_technologies:
-            label = "WEBFRAMEWORK_TECH"
-        elif word_lower in frameworks_and_libraries:
-            label = "FRAMEWORK_LIB"
-        elif word_lower in embedded_technologies:
-            label = "EMBEDDEDTECH"
+        if word_clean in programming_languages:
+            label = "PSML"
+        elif word_clean in cloud_platforms:
+            label = "CP"
+        elif word_clean in databases:
+            label = "DB"
+        elif word_clean in tech_frameworks_and_libraries:
+            label = "TFL"
+        elif word_clean in embedded_technologies:
+            label = "ET"
+        else:
+            label = "OTHER"
 
         if label:
             temp_labels.append(
-                {"entity": label, "start": start, "end": end, "text": word}
+                {"entity": label, "start": start, "end": end, "text": raw_word}
             )
 
-    # Step 2: Use offset_mapping to find start-end positions
+    # Step 2: Use regex to match any keyword in original text
     for keyword in all_keywords:
         pattern = r"(?<!\w)" + re.escape(keyword) + r"(?!\w)"
         for match in re.finditer(pattern, text, re.IGNORECASE):
@@ -123,7 +141,7 @@ def refine_labels(ner_results, text):
                     break
 
             if token_start is None:
-                for i, (s, e) in enumerate(offset_mapping):
+                for s, e in offset_mapping:
                     if s <= start < e or s < end <= e:
                         token_start = s if token_start is None else min(token_start, s)
                         token_end = e if token_end is None else max(token_end, e)
@@ -133,21 +151,19 @@ def refine_labels(ner_results, text):
                 for label in temp_labels
             ):
                 word = text[token_start:token_end]
-                word_lower = word.lower()
+                word_clean = clean_word(word)
                 label = None
 
-                if word_lower in programming_languages:
-                    label = "PROGRAMMINGLANG"
-                elif word_lower in cloud_platforms:
-                    label = "CLOUDPLATFORM"
-                elif word_lower in databases:
-                    label = "DATABASE"
-                elif word_lower in web_frameworks_and_technologies:
-                    label = "WEBFRAMEWORK_TECH"
-                elif word_lower in frameworks_and_libraries:
-                    label = "FRAMEWORK_LIB"
-                elif word_lower in embedded_technologies:
-                    label = "EMBEDDEDTECH"
+                if word_clean in programming_languages:
+                    label = "PSML"
+                elif word_clean in cloud_platforms:
+                    label = "CP"
+                elif word_clean in databases:
+                    label = "DB"
+                elif word_clean in tech_frameworks_and_libraries:
+                    label = "TFL"
+                elif word_clean in embedded_technologies:
+                    label = "ET"
 
                 if label:
                     temp_labels.append(
@@ -219,7 +235,9 @@ for index, row in tqdm(
         all_entities.extend([label["entity"] for label in refined_labels])
 
 # Save the results as JSON
-output_path = INTERIM_DATA_PATH / "./bootstrapping/002/labeled_by_code_data.json"
+output_path = (
+    INTERIM_DATA_PATH / "./bootstrapping/001/kaggle-data/labels-by-ner-001.json"
+)
 with open(output_path, "w", encoding="utf-8") as f:
     json.dump(label_studio_data, f, ensure_ascii=False, indent=4)
 
