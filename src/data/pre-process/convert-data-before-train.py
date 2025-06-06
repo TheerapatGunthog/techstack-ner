@@ -1,14 +1,11 @@
-import sys
 from pathlib import Path
-
-sys.path.append(str(Path(__file__).resolve().parent.parent.parent.parent))
-
-from data.interim import INTERIM_DATA_PATH
-from data.processed import PROCESS_DATA_PATH
 import random
 from typing import List, Dict
 import json
 from transformers import AutoTokenizer
+
+INTERIM_DATA_PATH = Path("/home/whilebell/Code/Project/TechStack-NER/data/interim/")
+PROCESS_DATA_PATH = Path("/home/whilebell/Code/Project/TechStack-NER/data/processed/")
 
 # Initialize RoBERTa tokenizer
 tokenizer = AutoTokenizer.from_pretrained("FacebookAI/roberta-large")

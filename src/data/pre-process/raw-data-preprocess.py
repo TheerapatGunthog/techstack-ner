@@ -1920,6 +1920,7 @@ if __name__ == "__main__":
     config = {
         "input_file": "classified/classified_jobs.csv",
         "output_file": "segmented-data/scraping-segmented-data.csv",
+        "quality_report_file": "data_quality_report.json",
         "separate_concatenated_words": False,
         "use_wordninja": True,
         "sample_fraction": 1,
