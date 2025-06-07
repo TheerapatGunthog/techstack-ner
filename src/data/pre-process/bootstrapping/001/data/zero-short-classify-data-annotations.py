@@ -46,15 +46,9 @@ label_mapping = {
     "other_word": "OTHER",  # Non-tech words
 }
 
-df = pd.read_csv(INTERIM_DATA_PATH / "segmented-data/kaggle-segmented-data.csv").iloc[
-    :200
-]
+df = pd.read_csv(INTERIM_DATA_PATH / "segmented-data/kaggle-segmented-data.csv")
 
 print(df)
-
-# # Load keywords from YAML file
-# with open(KEYWORDS_DATA_PATH / "classification-keyword.yaml", "r") as file:
-#     classification_keywords = yaml.safe_load(file)
 
 # Setup logging for medium confidence predictions (0.48 - 0.6)
 logging.basicConfig(
@@ -69,48 +63,6 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger(__name__)
-
-
-# def flatten_and_lower(keyword_list):
-#     flattened_list = []
-#     for item in keyword_list:
-#         if isinstance(item, list):
-#             flattened_list.extend([sub_item.lower() for sub_item in item])
-#         else:
-#             flattened_list.append(item.lower())
-#     return set(flattened_list)
-
-
-# # Extract keyword categories for reference
-# programming_languages = flatten_and_lower(
-#     classification_keywords["keywords"]["Programming_Scripting_and_Markup_languages"]
-# )
-# cloud_platforms = flatten_and_lower(
-#     classification_keywords["keywords"]["Cloud_platforms"]
-# )
-# databases = flatten_and_lower(classification_keywords["keywords"]["Database"])
-# web_frameworks_and_technologies = flatten_and_lower(
-#     classification_keywords["keywords"]["Web_Framework_and_Technologies"]
-# )
-# frameworks_and_libraries = flatten_and_lower(
-#     classification_keywords["keywords"]["Other_Framework_and_libraries"]
-# )
-# embedded_technologies = flatten_and_lower(
-#     classification_keywords["keywords"]["Embedded_Technologies"]
-# )
-#
-# # Combine web frameworks and frameworks/libraries into a single category
-# tech_frameworks_and_libraries = (
-#     web_frameworks_and_technologies | frameworks_and_libraries
-# )
-#
-# all_keywords = (
-#     programming_languages
-#     | cloud_platforms
-#     | databases
-#     | tech_frameworks_and_libraries
-#     | embedded_technologies
-# )
 
 
 def is_word_worth_classifying(word):

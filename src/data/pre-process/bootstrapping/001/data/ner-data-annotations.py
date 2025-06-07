@@ -45,16 +45,15 @@ cloud_platforms = flatten_and_lower(
 )
 # DB
 databases = flatten_and_lower(classification_keywords["keywords"]["Database"])
-# WFT
+
 web_frameworks_and_technologies = flatten_and_lower(
     classification_keywords["keywords"]["Web_Framework_and_Technologies"]
 )
-# OFL
 frameworks_and_libraries = flatten_and_lower(
     classification_keywords["keywords"]["Other_Framework_and_libraries"]
 )
-
 # Merge a Web_Framework and Technologies with Other Framework and Libraries
+# TFL
 tech_frameworks_and_libraries = (
     web_frameworks_and_technologies | frameworks_and_libraries
 )
