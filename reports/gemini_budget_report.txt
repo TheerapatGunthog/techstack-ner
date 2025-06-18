@@ -1,0 +1,353 @@
+--- Gemini API Budget Report ---
+Report generated on: Thu Jun 19 03:07:20 2025
+Saving all console output to: /home/whilebell/Code/techstack-ner/reports/gemini_budget_report.txt
+
+DataFrame Head:
+                                     Job_Description
+0  We are looking for hire experts flutter develo...
+1  PYTHON/DJANGO Developer/Lead Job Code PDJ 04 S...
+2  Experience working with API Frameworks Django/...
+3  Experience evaluating and improving the effici...
+4                          Working knowledge of SQL.
+Total Rows in DataFrame: 8559
+
+--- Gemini API Pricing (Per 1M Tokens) ---
+Input price (text/image/video): $0.30 USD
+Output price: $2.50 USD
+Context cache write price (example): $0.075 USD
+Context cache storage price (per 1M token/hr): $1.0 USD
+
+--- Processing 100 Sample Rows for Token Estimation and NER ---
+Row 0 (OK): Input Tokens=664, Output Tokens=26
+Row 1 (OK): Input Tokens=678, Output Tokens=130
+Row 2 (OK): Input Tokens=665, Output Tokens=44
+Row 3 (OK): Input Tokens=668, Output Tokens=27
+Row 4 (OK): Input Tokens=660, Output Tokens=39
+Row 5 (OK): Input Tokens=665, Output Tokens=48
+Row 6 (OK): Input Tokens=682, Output Tokens=67
+Row 7 (OK): Input Tokens=680, Output Tokens=51
+Row 8 (OK): Input Tokens=668, Output Tokens=54
+Row 9 (OK): Input Tokens=692, Output Tokens=28
+Row 10 (OK): Input Tokens=690, Output Tokens=123
+Row 11 (OK): Input Tokens=740, Output Tokens=66
+Row 12 (OK): Input Tokens=667, Output Tokens=6
+Row 13 (OK): Input Tokens=665, Output Tokens=52
+Row 14 (OK): Input Tokens=674, Output Tokens=84
+Row 15 (OK): Input Tokens=666, Output Tokens=6
+Row 16 (OK): Input Tokens=993, Output Tokens=406
+Row 17 (OK): Input Tokens=670, Output Tokens=67
+Row 18 (OK): Input Tokens=668, Output Tokens=68
+Row 19 (OK): Input Tokens=671, Output Tokens=104
+Row 20 (OK): Input Tokens=704, Output Tokens=27
+Row 21 (OK): Input Tokens=872, Output Tokens=390
+Row 22 (OK): Input Tokens=712, Output Tokens=153
+Row 23 (OK): Input Tokens=675, Output Tokens=82
+Row 24 (OK): Input Tokens=685, Output Tokens=100
+Row 25 (OK): Input Tokens=681, Output Tokens=84
+Row 26 (OK): Input Tokens=687, Output Tokens=90
+Row 27 (OK): Input Tokens=714, Output Tokens=143
+Row 28 (OK): Input Tokens=736, Output Tokens=390
+Row 29 (OK): Input Tokens=669, Output Tokens=6
+Row 30 (OK): Input Tokens=733, Output Tokens=28
+Row 31 (OK): Input Tokens=817, Output Tokens=487
+Row 32 (OK): Input Tokens=1037, Output Tokens=100
+Row 33 (OK): Input Tokens=722, Output Tokens=209
+Row 34 (OK): Input Tokens=840, Output Tokens=390
+Row 35 (OK): Input Tokens=721, Output Tokens=150
+Row 36 (OK): Input Tokens=688, Output Tokens=6
+Row 37 (OK): Input Tokens=690, Output Tokens=28
+Row 38 (OK): Input Tokens=679, Output Tokens=28
+Row 39 (OK): Input Tokens=853, Output Tokens=336
+Row 40 (OK): Input Tokens=676, Output Tokens=28
+Row 41 (OK): Input Tokens=814, Output Tokens=88
+Row 42 (OK): Input Tokens=698, Output Tokens=161
+Row 43 (OK): Input Tokens=666, Output Tokens=65
+Row 44 (OK): Input Tokens=677, Output Tokens=52
+Row 45 (OK): Input Tokens=662, Output Tokens=28
+Row 46 (OK): Input Tokens=685, Output Tokens=209
+Row 47 (OK): Input Tokens=688, Output Tokens=28
+Row 48 (OK): Input Tokens=688, Output Tokens=28
+Row 49 (OK): Input Tokens=669, Output Tokens=56
+Row 50 (OK): Input Tokens=828, Output Tokens=312
+Row 51 (OK): Input Tokens=679, Output Tokens=51
+Row 52 (OK): Input Tokens=678, Output Tokens=49
+Error processing row 53 (API Error): 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. [violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerMinutePerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.5-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+  quota_value: 10
+}
+, links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+, retry_delay {
+  seconds: 50
+}
+]
+Error processing row 54 (API Error): 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. [violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerMinutePerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.5-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+  quota_value: 10
+}
+, links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+, retry_delay {
+  seconds: 48
+}
+]
+Error processing row 55 (API Error): 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. [violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerMinutePerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.5-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+  quota_value: 10
+}
+, links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+, retry_delay {
+  seconds: 45
+}
+]
+Row 56 (OK): Input Tokens=666, Output Tokens=29
+Row 57 (OK): Input Tokens=665, Output Tokens=31
+Error processing row 58 (API Error): 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. [violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerMinutePerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.5-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+  quota_value: 10
+}
+, links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+, retry_delay {
+  seconds: 38
+}
+]
+Row 59 (OK): Input Tokens=664, Output Tokens=67
+Row 60 (OK): Input Tokens=670, Output Tokens=67
+Row 61 (OK): Input Tokens=667, Output Tokens=6
+Row 62 (OK): Input Tokens=701, Output Tokens=6
+Row 63 (OK): Input Tokens=756, Output Tokens=6
+Row 64 (OK): Input Tokens=685, Output Tokens=6
+Row 65 (OK): Input Tokens=832, Output Tokens=6
+Row 66 (OK): Input Tokens=672, Output Tokens=26
+Row 67 (OK): Input Tokens=689, Output Tokens=37
+Row 68 (OK): Input Tokens=700, Output Tokens=27
+Error processing row 69 (API Error): 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. [violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerMinutePerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.5-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+  quota_value: 10
+}
+, links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+, retry_delay {
+  seconds: 2
+}
+]
+Error processing row 70 (API Error): 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. [violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerMinutePerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.5-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+  quota_value: 10
+}
+, links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+, retry_delay {
+}
+]
+Error processing row 71 (API Error): 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. [violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerMinutePerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.5-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+  quota_value: 10
+}
+, links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+, retry_delay {
+  seconds: 58
+}
+]
+Error processing row 72 (API Error): 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. [violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerMinutePerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.5-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+  quota_value: 10
+}
+, links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+, retry_delay {
+  seconds: 56
+}
+]
+Row 73 (OK): Input Tokens=679, Output Tokens=101
+Row 74 (OK): Input Tokens=673, Output Tokens=48
+Error processing row 75 (API Error): 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. [violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerMinutePerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.5-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+  quota_value: 10
+}
+, links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+, retry_delay {
+  seconds: 42
+}
+]
+Error processing row 76 (API Error): 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. [violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerMinutePerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.5-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+  quota_value: 10
+}
+, links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+, retry_delay {
+  seconds: 40
+}
+]
+Error processing row 77 (API Error): 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. [violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerMinutePerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.5-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+  quota_value: 10
+}
+, links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+, retry_delay {
+  seconds: 38
+}
+]
+Row 78 (OK): Input Tokens=678, Output Tokens=90
+Row 79 (OK): Input Tokens=662, Output Tokens=33
+Row 80 (OK): Input Tokens=689, Output Tokens=165
+Row 81 (OK): Input Tokens=674, Output Tokens=46
+Row 82 (OK): Input Tokens=669, Output Tokens=100
+Row 83 (OK): Input Tokens=702, Output Tokens=142
+Row 84 (OK): Input Tokens=677, Output Tokens=105
+Row 85 (OK): Input Tokens=789, Output Tokens=6
+Row 86 (OK): Input Tokens=904, Output Tokens=225
+Row 87 (OK): Input Tokens=689, Output Tokens=26
+Row 88 (OK): Input Tokens=674, Output Tokens=34
+Row 89 (OK): Input Tokens=661, Output Tokens=26
+Row 90 (OK): Input Tokens=663, Output Tokens=6
+Row 91 (OK): Input Tokens=669, Output Tokens=6
+Row 92 (OK): Input Tokens=663, Output Tokens=26
+Row 93 (OK): Input Tokens=672, Output Tokens=97
+Row 94 (OK): Input Tokens=684, Output Tokens=108
+Row 95 (OK): Input Tokens=712, Output Tokens=34
+Row 96 (OK): Input Tokens=683, Output Tokens=6
+Row 97 (OK): Input Tokens=696, Output Tokens=197
+Row 98 (OK): Input Tokens=670, Output Tokens=31
+Row 99 (OK): Input Tokens=674, Output Tokens=28
+
+--- Token Averages from 89 Sample Rows ---
+Average Input Tokens per Row (including prompt template): 794.61
+Average Output Tokens per Row (NER JSON output): 88.52
+
+--- Estimated Cost for 89 Sample Rows ---
+Input Cost (89 rows): $0.021216
+Output Cost (89 rows): $0.019695
+Total Cost (89 rows): $0.040911
+
+--- Estimated Total Cost for 8559 Rows ---
+Scaling Factor (Target Rows / Sample Rows): 96.17
+Estimated Total Cost for 8559 Rows: $3.934351
+This is an estimation based on the average token usage from 89 sample rows.
