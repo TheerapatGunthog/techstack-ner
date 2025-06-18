@@ -4,5 +4,7 @@
 /data/interim
 
 # Ignore a models directory
-
 /models
+
+# Ignore .env files
+.env
