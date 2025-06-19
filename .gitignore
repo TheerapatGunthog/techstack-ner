@@ -2,6 +2,7 @@
 /data/raw
 /data/processed
 /data/interim
+/data/gemini_api_reports
 
 # Ignore a models directory
 /models
