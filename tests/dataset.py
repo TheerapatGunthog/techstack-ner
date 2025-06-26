@@ -1,15 +1,19 @@
-import sys
 from pathlib import Path
 import pandas as pd
 
-sys.path.append(str(Path(__file__).resolve().parent.parent))
+PROJECT_PATH = Path("/home/whilebell/Code/techstack-ner/")
 
-from data.raw import RAW_DATA_PATH
+df = pd.read_csv(PROJECT_PATH / "data/raw/summarize_text/kaggle_data.csv")
 
+df.head()
 
-df_full = pd.read_csv(RAW_DATA_PATH / "merged.csv")
-third_size = len(df_full) // 5
-df = df_full.iloc[:third_size]
+# show all cloumn names
+print(df.columns.tolist())
 
-print(df.shape)
-print(df_full.shape)
+# Select specific columns
+df[["Topic", "Qualification_Summary"]]
+
+# Shave to csv with no index
+df[["Topic", "Qualification_Summary"]].to_csv(
+    PROJECT_PATH / "data/raw/summarize_text/kaggle_data.csv", index=False
+)
