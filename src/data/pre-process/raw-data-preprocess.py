@@ -1741,6 +1741,7 @@ class JobDataProcessor:
             "save_intermediate": True,
             "keep_original_columns": False,  # Whether to keep all original columns
             "similarity_threshold": 0.85,  # Threshold for SimilarSentenceRemover
+            "segment_sentences": True,  #  <-- ADDED: Control sentence segmentation
         }
 
         # Override with provided config
@@ -1850,40 +1851,47 @@ class JobDataProcessor:
             df_full.to_csv(interim_path, index=False)
             logger.info(f"Saved cleaned data to {interim_path}")
 
-        # Segment qualification text into sentences
-        logger.info("Segmenting qualification text into sentences...")
+        # --- MODIFIED PART: Conditional Sentence Segmentation ---
         df_full["Sentence_Index"] = df_full.index
 
-        if self.config["parallelize"]:
-            # Process in batches for better memory management
-            df_full["Segmented_Qualification"] = self.segmenter.split_sentences_batch(
-                df_full["Qualification"].tolist()
-            )
+        if self.config["segment_sentences"]:
+            # Segment qualification text into sentences
+            logger.info("Segmenting qualification text into sentences...")
+            if self.config["parallelize"]:
+                df_full["Segmented_Qualification"] = self.segmenter.split_sentences_batch(
+                    df_full["Qualification"].tolist()
+                )
+            else:
+                df_full["Segmented_Qualification"] = df_full[
+                    "Qualification"
+                ].progress_apply(self.segmenter.split_sentences)
+
+            # Explode the list of sentences to separate rows
+            logger.info("Exploding sentences to individual rows...")
+            df = df_full.explode("Segmented_Qualification").reset_index(drop=True)
+
+            # Filter out None, empty sentences and sentences that are too short
+            before_filter = len(df)
+            df = df[df["Segmented_Qualification"].notna()]
+            df = df[df["Segmented_Qualification"].str.strip().astype(bool)]
+            df = df[
+                df["Segmented_Qualification"].str.len()
+                >= self.config["min_sentence_length"]
+            ]
+            logger.info(f"Removed {before_filter - len(df)} invalid or too short sentences")
         else:
-            df_full["Segmented_Qualification"] = df_full[
-                "Qualification"
-            ].progress_apply(self.segmenter.split_sentences)
+            logger.info("Skipping sentence segmentation as per configuration.")
+            # Rename 'Qualification' to 'Segmented_Qualification' for consistency
+            df_full.rename(columns={"Qualification": "Segmented_Qualification"}, inplace=True)
+            df = df_full
+            # Filter out empty or whitespace-only qualifications
+            before_filter = len(df)
+            df = df[df["Segmented_Qualification"].notna()]
+            df = df[df["Segmented_Qualification"].str.strip().astype(bool)]
+            if before_filter > len(df):
+                logger.info(f"Removed {before_filter - len(df)} rows with empty qualifications")
 
-        # Explode the list of sentences to separate rows
-        logger.info("Exploding sentences to individual rows...")
-        df = df_full.explode("Segmented_Qualification").reset_index(drop=True)
-
-        # Filter out None, empty sentences and sentences that are too short
-        before_filter = len(df)
-        df = df[df["Segmented_Qualification"].notna()]
-        df = df[df["Segmented_Qualification"].str.strip().astype(bool)]
-        df = df[
-            df["Segmented_Qualification"].str.len()
-            >= self.config["min_sentence_length"]
-        ]
-        logger.info(f"Removed {before_filter - len(df)} invalid or too short sentences")
-
-        # # Combine Topic and Segmented_Qualification
-        # logger.info("Combining Topic with Segmented_Qualification...")
-        # df["Segmented_Qualification"] = df.apply(
-        #     lambda row: f"[{row['Topic']}] {row['Segmented_Qualification']}",
-        #     axis=1,
-        # )
+        # --- END OF MODIFIED PART ---
 
         # Remove duplicate segmented qualifications
         before_dedup = len(df)
@@ -1894,7 +1902,10 @@ class JobDataProcessor:
 
         # Remove similar sentences
         logger.info("Removing similar sentences...")
-        df = self.similar_remover.remove_similar_sentences_parallel(df)
+        if self.config["similarity_threshold"] < 1.0:
+            df = self.similar_remover.remove_similar_sentences_parallel(df)
+        else:
+            logger.info("Skipping similar sentence removal (threshold is 1.0).")
 
         # Run data quality checks
         data_quality = DataQualityCheck(df)
@@ -1908,7 +1919,7 @@ class JobDataProcessor:
         )
         data_quality.save_report(quality_report_path)
 
-        # Save only Sentence_Index and Segmented_Qualification
+        # Save only essential columns
         df = df[["Topic", "Position", "Sentence_Index", "Segmented_Qualification"]]
 
         # Save processed data
@@ -1920,19 +1931,24 @@ class JobDataProcessor:
 
 
 if __name__ == "__main__":
+    # Example configuration: Set segment_sentences to True or False to test
+    # True:  Will split qualifications into individual sentences.
+    # False: Will process the entire qualification as a single entry.
+
     config = {
         "input_file": "classified/classified_jobs.csv",
         "output_file": "segmented-data/scraping-segmented-data.csv",
         "quality_report_file": "data_quality_report.json",
         "separate_concatenated_words": False,
-        "use_wordninja": True,
+        "use_wordninja": False,
         "sample_fraction": 1,
         "min_sentence_length": 10,
         "parallelize": True,
         "batch_size": 1000,
         "save_intermediate": True,
         "keep_original_columns": False,
-        "similarity_threshold": 1.00,
+        "similarity_threshold": 0.95,
+        "segment_sentences": False,
     }
 
     processor = JobDataProcessor(RAW_DATA_PATH, INTERIM_DATA_PATH, config)
@@ -1940,4 +1956,7 @@ if __name__ == "__main__":
 
     # Print summary statistics
     print("\nProcessing Complete!")
-    print(f"Final dataset has {len(df)} rows with segmented qualifications")
+    if config["segment_sentences"]:
+        print(f"Final dataset has {len(df)} rows with segmented qualifications.")
+    else:
+        print(f"Final dataset has {len(df)} rows with full qualifications (no segmentation).")
