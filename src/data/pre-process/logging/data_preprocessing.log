@@ -585,3 +585,81 @@
 2025-06-03 14:14:59,529 - INFO - - Length statistics: min=10.0, max=4519.0, avg=148.07
 2025-06-03 14:14:59,547 - INFO - Quality report saved to /home/whilebell/Code/Project/TechStack-NER/data/interim/data_quality_report.json
 2025-06-03 14:15:00,209 - INFO - Saved processed data to /home/whilebell/Code/Project/TechStack-NER/data/interim/segmented-data/scraping-segmented-data.csv
+2025-06-26 11:12:29,345 - ERROR - Error loading spaCy model: [E050] Can't find model 'en_core_web_sm'. It doesn't seem to be a Python package or a valid path to a data directory.
+2025-06-26 11:12:29,346 - INFO - Trying to download the model...
+2025-06-26 11:12:38,680 - INFO - JobDataProcessor initialized with config: {'input_file': 'summarize_text/kaggle_data.csv', 'output_file': 'preprocessed-data/kaggle_data.csv', 'quality_report_file': 'data_quality_report.json', 'separate_concatenated_words': False, 'sample_fraction': 1, 'random_seed': 42, 'min_sentence_length': 10, 'max_tokens_per_sentence': 100, 'parallelize': True, 'batch_size': 1000, 'save_intermediate': True, 'keep_original_columns': False, 'similarity_threshold': 0.95, 'segment_sentences': False, 'use_wordninja': False}
+2025-06-26 11:12:38,680 - INFO - Loading data from /home/whilebell/Code/techstack-ner/data/raw/summarize_text/kaggle_data.csv
+2025-06-26 11:12:38,696 - INFO - Loaded data with shape: (2277, 2)
+2025-06-26 11:13:16,625 - INFO - JobDataProcessor initialized with config: {'input_file': 'summarize_text/kaggle_data.csv', 'output_file': 'preprocessed-data/kaggle_data.csv', 'quality_report_file': 'data_quality_report.json', 'separate_concatenated_words': False, 'sample_fraction': 1, 'random_seed': 42, 'min_sentence_length': 10, 'max_tokens_per_sentence': 100, 'parallelize': True, 'batch_size': 1000, 'save_intermediate': True, 'keep_original_columns': False, 'similarity_threshold': 0.95, 'segment_sentences': False, 'use_wordninja': False}
+2025-06-26 11:13:16,625 - INFO - Loading data from /home/whilebell/Code/techstack-ner/data/raw/summarize_text/kaggle_data.csv
+2025-06-26 11:13:16,639 - INFO - Loaded data with shape: (2277, 2)
+2025-06-26 11:13:16,646 - INFO - Removed 0 duplicate qualifications
+2025-06-26 11:13:16,646 - INFO - Filtering non-Thai content...
+2025-06-26 11:13:16,905 - INFO - Removed 0 rows with Thai content
+2025-06-26 11:13:16,905 - INFO - Cleaning qualification text...
+2025-06-26 11:13:17,188 - INFO - Saved cleaned data to /home/whilebell/Code/techstack-ner/data/interim/cleaned_data.csv
+2025-06-26 11:13:17,189 - INFO - Skipping sentence segmentation as per configuration.
+2025-06-26 11:13:17,193 - INFO - Removed 0 duplicate segmented qualifications
+2025-06-26 11:13:17,193 - INFO - Removing similar sentences...
+2025-06-26 11:13:17,193 - INFO - Finding and removing similar sentences in parallel with 15 processes...
+2025-06-26 11:13:17,391 - INFO - Finding and removing similar sentences with threshold 0.95...
+2025-06-26 11:13:17,394 - INFO - Finding and removing similar sentences with threshold 0.95...
+2025-06-26 11:13:17,394 - INFO - Finding and removing similar sentences with threshold 0.95...
+2025-06-26 11:13:17,460 - INFO - Removed 0 similar sentences (0.00%)
+2025-06-26 11:13:17,460 - INFO - Found 277 clusters of similar sentences
+2025-06-26 11:13:17,650 - INFO - Removed 0 similar sentences (0.00%)
+2025-06-26 11:13:17,650 - INFO - Found 1000 clusters of similar sentences
+2025-06-26 11:13:17,650 - INFO - Removed 0 similar sentences (0.00%)
+2025-06-26 11:13:17,650 - INFO - Found 1000 clusters of similar sentences
+2025-06-26 11:13:17,680 - INFO - Performing final pass to catch cross-boundary similarities...
+2025-06-26 11:13:17,680 - INFO - Finding and removing similar sentences with threshold 0.95...
+2025-06-26 11:13:18,104 - INFO - Removed 0 similar sentences (0.00%)
+2025-06-26 11:13:18,104 - INFO - Found 2277 clusters of similar sentences
+2025-06-26 11:13:18,104 - INFO - Removed 0 similar sentences (0.00%)
+2025-06-26 11:13:18,105 - INFO - Running data quality checks...
+2025-06-26 11:13:18,105 - INFO - Data Shape: 2277 rows, 3 columns
+2025-06-26 11:13:18,106 - INFO - Total missing values: 0
+2025-06-26 11:13:18,112 - INFO - Duplicated rows: 0 (0.00%)
+2025-06-26 11:13:18,113 - INFO - - Column 'Topic' has 2262 duplicate values (99.34%)
+2025-06-26 11:13:18,118 - INFO - Text quality for column 'Segmented_Qualification':
+2025-06-26 11:13:18,118 - INFO - - Empty strings: 0 (0.00%)
+2025-06-26 11:13:18,118 - INFO - - Very short texts (<10 chars): 0 (0.00%)
+2025-06-26 11:13:18,118 - INFO - - Length statistics: min=51.0, max=1788.0, avg=656.19
+2025-06-26 11:13:18,119 - INFO - Quality report saved to /home/whilebell/Code/techstack-ner/data/interim/data_quality_report.json
+2025-06-26 11:15:01,466 - INFO - JobDataProcessor initialized with config: {'input_file': 'summarize_text/kaggle_data.csv', 'output_file': 'preprocessed-data/kaggle_data.csv', 'quality_report_file': 'data_quality_report.json', 'separate_concatenated_words': False, 'sample_fraction': 1, 'random_seed': 42, 'min_sentence_length': 10, 'max_tokens_per_sentence': 100, 'parallelize': True, 'batch_size': 1000, 'save_intermediate': True, 'keep_original_columns': False, 'similarity_threshold': 0.95, 'segment_sentences': False, 'use_wordninja': False}
+2025-06-26 11:15:01,466 - INFO - Loading data from /home/whilebell/Code/techstack-ner/data/raw/summarize_text/kaggle_data.csv
+2025-06-26 11:15:01,482 - INFO - Loaded data with shape: (2277, 2)
+2025-06-26 11:15:01,483 - INFO - Removed 0 duplicate qualifications
+2025-06-26 11:15:01,484 - INFO - Filtering non-Thai content...
+2025-06-26 11:15:01,756 - INFO - Removed 0 rows with Thai content
+2025-06-26 11:15:01,756 - INFO - Cleaning qualification text...
+2025-06-26 11:15:02,056 - INFO - Saved cleaned data to /home/whilebell/Code/techstack-ner/data/interim/cleaned_data.csv
+2025-06-26 11:15:02,058 - INFO - Skipping sentence segmentation as per configuration.
+2025-06-26 11:15:02,061 - INFO - Removed 0 duplicate segmented qualifications
+2025-06-26 11:15:02,061 - INFO - Removing similar sentences...
+2025-06-26 11:15:02,061 - INFO - Finding and removing similar sentences in parallel with 15 processes...
+2025-06-26 11:15:02,248 - INFO - Finding and removing similar sentences with threshold 0.95...
+2025-06-26 11:15:02,251 - INFO - Finding and removing similar sentences with threshold 0.95...
+2025-06-26 11:15:02,252 - INFO - Finding and removing similar sentences with threshold 0.95...
+2025-06-26 11:15:02,300 - INFO - Removed 0 similar sentences (0.00%)
+2025-06-26 11:15:02,301 - INFO - Found 277 clusters of similar sentences
+2025-06-26 11:15:02,459 - INFO - Removed 0 similar sentences (0.00%)
+2025-06-26 11:15:02,460 - INFO - Found 1000 clusters of similar sentences
+2025-06-26 11:15:02,460 - INFO - Removed 0 similar sentences (0.00%)
+2025-06-26 11:15:02,460 - INFO - Found 1000 clusters of similar sentences
+2025-06-26 11:15:02,501 - INFO - Performing final pass to catch cross-boundary similarities...
+2025-06-26 11:15:02,501 - INFO - Finding and removing similar sentences with threshold 0.95...
+2025-06-26 11:15:02,911 - INFO - Removed 0 similar sentences (0.00%)
+2025-06-26 11:15:02,912 - INFO - Found 2277 clusters of similar sentences
+2025-06-26 11:15:02,912 - INFO - Removed 0 similar sentences (0.00%)
+2025-06-26 11:15:02,912 - INFO - Running data quality checks...
+2025-06-26 11:15:02,915 - INFO - Data Shape: 2277 rows, 3 columns
+2025-06-26 11:15:02,915 - INFO - Total missing values: 0
+2025-06-26 11:15:02,918 - INFO - Duplicated rows: 0 (0.00%)
+2025-06-26 11:15:02,918 - INFO - - Column 'Topic' has 2262 duplicate values (99.34%)
+2025-06-26 11:15:02,921 - INFO - Text quality for column 'Segmented_Qualification':
+2025-06-26 11:15:02,921 - INFO - - Empty strings: 0 (0.00%)
+2025-06-26 11:15:02,921 - INFO - - Very short texts (<10 chars): 0 (0.00%)
+2025-06-26 11:15:02,921 - INFO - - Length statistics: min=51.0, max=1788.0, avg=656.19
+2025-06-26 11:15:02,922 - INFO - Quality report saved to /home/whilebell/Code/techstack-ner/data/interim/data_quality_report.json
+2025-06-26 11:15:02,941 - INFO - Saved processed data to /home/whilebell/Code/techstack-ner/data/interim/preprocessed-data/kaggle_data.csv

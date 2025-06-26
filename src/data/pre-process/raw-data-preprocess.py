@@ -1920,7 +1920,7 @@ class JobDataProcessor:
         data_quality.save_report(quality_report_path)
 
         # Save only essential columns
-        df = df[["Topic", "Position", "Sentence_Index", "Segmented_Qualification"]]
+        df = df[["Topic", "Sentence_Index", "Segmented_Qualification"]]
 
         # Save processed data
         output_path = self.interim_data_path / self.config["output_file"]
@@ -1936,8 +1936,8 @@ if __name__ == "__main__":
     # False: Will process the entire qualification as a single entry.
 
     config = {
-        "input_file": "classified/classified_jobs.csv",
-        "output_file": "segmented-data/scraping-segmented-data.csv",
+        "input_file": "summarize_text/kaggle_data.csv",
+        "output_file": "preprocessed-data/kaggle_data.csv",
         "quality_report_file": "data_quality_report.json",
         "separate_concatenated_words": False,
         "use_wordninja": False,
