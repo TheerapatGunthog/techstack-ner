@@ -7,20 +7,19 @@ import json
 import re
 from tqdm import tqdm
 
-KEYWORDS_DATA_PATH = Path("/home/whilebell/Code/Project/TechStack-NER/data/keywords")
-INTERIM_DATA_PATH = Path("/home/whilebell/Code/Project/TechStack-NER/data/interim")
+PROJECT_PATH = Path("/home/whilebell/Code/techstack-ner/")
 
 # Load the model
 model_name = "FacebookAI/xlm-roberta-large-finetuned-conll03-english"
 ner = pipeline("ner", model=model_name, tokenizer=model_name, device=0)
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 
-df = pd.read_csv(INTERIM_DATA_PATH / "segmented-data/kaggle-segmented-data.csv")
+df = pd.read_csv(PROJECT_PATH / "data/interim/preprocessed-data/kaggle_data.csv")
 
 print(df)
 
 # Load keywords from YAML file
-with open(KEYWORDS_DATA_PATH / "classification-keyword.yaml", "r") as file:
+with open(PROJECT_PATH / "data/keywords/classification-keyword.yaml", "r") as file:
     classification_keywords = yaml.safe_load(file)
 
 
@@ -235,7 +234,8 @@ for index, row in tqdm(
 
 # Save the results as JSON
 output_path = (
-    INTERIM_DATA_PATH / "./bootstrapping/001/kaggle-data/labels-by-ner-001.json"
+    PROJECT_PATH
+    / "data/interim/bootstrapping/001/labeled-by-code-data/labels-by-ner-001.json"
 )
 with open(output_path, "w", encoding="utf-8") as f:
     json.dump(label_studio_data, f, ensure_ascii=False, indent=4)
