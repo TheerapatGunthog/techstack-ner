@@ -27,12 +27,13 @@ JOB_DESCRIPTION_COLUMN = "Segmented_Qualification"
 # Gemini API model to be used
 GEMINI_API_MODEL = "gemini-2.5-flash"
 # Path for saving interim (checkpoint) results
-INTERIM_RESULTS_PATH = (
-    PROJECT_PATH / "data/interim/bootstrapping/001/gemini_ner_interim_results.json"
+CHECKPOINT_PATH = (
+    PROJECT_PATH / "data/interim/bootstrapping/001/gemini_api_checkpoint.json"
 )
 # Path for the final output file
-FINAL_RESULTS_PATH = (
-    PROJECT_PATH / "data/interim/bootstrapping/001/labels-by-gemini-api.json"
+RESULTS_PATH = (
+    PROJECT_PATH
+    / "data/interim/bootstrapping/001/labeled-by-code-data/labels-by-gemini-001.json"
 )
 
 # --- API & Processing Settings ---
@@ -77,19 +78,16 @@ We are looking for a Software Engineer with strong experience in Java, Spring Bo
 **Expected Output Example:**
 ```json
 [
-  {"text": "Java", "label": "PSML", "start": 59, "end": 63},
-  {"text": "Spring Boot", "label": "FAL", "start": 65, "end": 76},
-  {"text": "AWS", "label": "CP", "start": 82, "end": 85},
-  {"text": "PostgreSQL", "label": "DB", "start": 100, "end": 110},
-  {"text": "Kafka", "label": "FAL", "start": 112, "end": 117},
-  {"text": "Docker", "label": "CP", "start": 123, "end": 129},
-  {"text": "Agile", "label": "TAS", "start": 164, "end": 169},
-  {"text": "CI/CD", "label": "TAS", "start": 188, "end": 193}
+  {{"text": "Java", "label": "PSML", "start": 59, "end": 63}},
+  {{"text": "Spring Boot", "label": "FAL", "start": 65, "end": 76}},
+  {{"text": "AWS", "label": "CP", "start": 82, "end": 85}},
+  {{"text": "PostgreSQL", "label": "DB", "start": 100, "end": 110}},
+  {{"text": "Kafka", "label": "FAL", "start": 112, "end": 117}},
+  {{"text": "Docker", "label": "CP", "start": 123, "end": 129}},
+  {{"text": "Agile", "label": "TAS", "start": 164, "end": 169}},
+  {{"text": "CI/CD", "label": "TAS", "start": 188, "end": 193}}
 ]
-```
----
-
-**Job Description to Analyze:**
+Job Description to Analyze:
 {job_desc_content}
 """
 
@@ -157,7 +155,7 @@ def main():
         return
 
     # --- Load Checkpoint & Prepare for Processing ---
-    results_ner = load_checkpoint(INTERIM_RESULTS_PATH)
+    results_ner = load_checkpoint(CHECKPOINT_PATH)
     start_index = len(results_ner)
 
     if start_index >= len(df):
@@ -266,13 +264,13 @@ def main():
 
         # --- Checkpointing ---
         if len(results_ner) % CHECKPOINT_INTERVAL == 0:
-            save_checkpoint(results_ner, INTERIM_RESULTS_PATH)
+            save_checkpoint(results_ner, CHECKPOINT_PATH)
             tqdm.write(f"Checkpoint: Saved {len(results_ner)} total results.")
 
     # --- Final Save ---
     print("\nProcessing complete.")
-    save_checkpoint(results_ner, FINAL_RESULTS_PATH)
-    print(f"All {len(results_ner)} NER results saved to: {FINAL_RESULTS_PATH}")
+    save_checkpoint(results_ner, RESULTS_PATH)
+    print(f"All {len(results_ner)} NER results saved to: {RESULTS_PATH}")
 
 
 if __name__ == "__main__":
