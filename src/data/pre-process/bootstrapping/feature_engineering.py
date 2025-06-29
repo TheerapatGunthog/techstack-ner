@@ -13,7 +13,7 @@ PROJECT_PATH = Path("/home/whilebell/Code/techstack-ner/")
 # Specify the path to your single CoNLL file here
 single_file_path = (
     PROJECT_PATH
-    / "data/interim/bootstrapping/001/project-10-at-2025-06-28-11-54-fc910d27.conll"
+    / "data/interim/bootstrapping/001/project-13-at-2025-06-29-03-58-c919e3bc.conll"
 )
 
 
@@ -234,6 +234,6 @@ print(f"Label mappings saved to: {output_dir / 'label_mappings.json'}")
 print("\n[Sample Data Verification]")
 print("First 3 sentences from the dataset:")
 for i, sentence in enumerate(sentences[:3]):
-    print(f"\nSentence {i+1}:")
+    print(f"\nSentence {i + 1}:")
     print(f"Tokens: {sentence['tokens'][:10]}...")  # Show first 10 tokens
     print(f"NER Tags: {sentence['ner_tags'][:10]}...")  # Show first 10 tags
