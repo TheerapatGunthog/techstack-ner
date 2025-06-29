@@ -663,3 +663,45 @@
 2025-06-26 11:15:02,921 - INFO - - Length statistics: min=51.0, max=1788.0, avg=656.19
 2025-06-26 11:15:02,922 - INFO - Quality report saved to /home/whilebell/Code/techstack-ner/data/interim/data_quality_report.json
 2025-06-26 11:15:02,941 - INFO - Saved processed data to /home/whilebell/Code/techstack-ner/data/interim/preprocessed-data/kaggle_data.csv
+2025-06-29 17:02:11,003 - INFO - JobDataProcessor initialized with config: {'input_file': 'classified/tech_jobs_only.csv', 'output_file': 'preprocessed-data/scraping-segmented-data.csv', 'quality_report_file': 'data_quality_report.json', 'separate_concatenated_words': False, 'sample_fraction': 1, 'random_seed': 42, 'min_sentence_length': 10, 'max_tokens_per_sentence': 100, 'parallelize': True, 'batch_size': 1000, 'save_intermediate': True, 'keep_original_columns': False, 'similarity_threshold': 0.95, 'segment_sentences': False, 'use_wordninja': False}
+2025-06-29 17:02:11,003 - INFO - Loading data from /home/whilebell/Code/techstack-ner/data/raw/classified/tech_jobs_only.csv
+2025-06-29 17:02:11,320 - INFO - Loaded data with shape: (16325, 7)
+2025-06-29 17:02:11,329 - INFO - Removed 11512 duplicate qualifications
+2025-06-29 17:02:11,329 - INFO - Filtering non-Thai content...
+2025-06-29 17:02:11,720 - INFO - Removed 1354 rows with Thai content
+2025-06-29 17:02:11,720 - INFO - Cleaning qualification text...
+2025-06-29 17:02:12,288 - INFO - Saved cleaned data to /home/whilebell/Code/techstack-ner/data/interim/cleaned_data.csv
+2025-06-29 17:02:12,289 - INFO - Skipping sentence segmentation as per configuration.
+2025-06-29 17:02:12,295 - INFO - Removed 2 duplicate segmented qualifications
+2025-06-29 17:02:12,295 - INFO - Removing similar sentences...
+2025-06-29 17:02:12,296 - INFO - Finding and removing similar sentences in parallel with 15 processes...
+2025-06-29 17:02:12,488 - INFO - Finding and removing similar sentences with threshold 0.95...
+2025-06-29 17:02:12,502 - INFO - Finding and removing similar sentences with threshold 0.95...
+2025-06-29 17:02:12,516 - INFO - Finding and removing similar sentences with threshold 0.95...
+2025-06-29 17:02:12,524 - INFO - Finding and removing similar sentences with threshold 0.95...
+2025-06-29 17:02:12,859 - INFO - Removed 11 similar sentences (2.41%)
+2025-06-29 17:02:12,859 - INFO - Found 446 clusters of similar sentences
+2025-06-29 17:02:13,265 - INFO - Removed 17 similar sentences (1.70%)
+2025-06-29 17:02:13,265 - INFO - Found 983 clusters of similar sentences
+2025-06-29 17:02:13,298 - INFO - Removed 23 similar sentences (2.30%)
+2025-06-29 17:02:13,298 - INFO - Found 977 clusters of similar sentences
+2025-06-29 17:02:13,337 - INFO - Removed 30 similar sentences (3.00%)
+2025-06-29 17:02:13,337 - INFO - Found 970 clusters of similar sentences
+2025-06-29 17:02:13,374 - INFO - Performing final pass to catch cross-boundary similarities...
+2025-06-29 17:02:13,375 - INFO - Finding and removing similar sentences with threshold 0.95...
+2025-06-29 17:02:15,619 - INFO - Removed 0 similar sentences (0.00%)
+2025-06-29 17:02:15,619 - INFO - Found 3376 clusters of similar sentences
+2025-06-29 17:02:15,619 - INFO - Removed 81 similar sentences (2.34%)
+2025-06-29 17:02:15,619 - INFO - Running data quality checks...
+2025-06-29 17:02:15,620 - INFO - Data Shape: 3376 rows, 8 columns
+2025-06-29 17:02:15,621 - INFO - Total missing values: 0
+2025-06-29 17:02:15,636 - INFO - Duplicated rows: 0 (0.00%)
+2025-06-29 17:02:15,637 - INFO - - Column 'Topic' has 347 duplicate values (10.28%)
+2025-06-29 17:02:15,637 - INFO - - Column 'Position' has 3152 duplicate values (93.36%)
+2025-06-29 17:02:15,639 - INFO - - Column 'predicted_label' has 3375 duplicate values (99.97%)
+2025-06-29 17:02:15,644 - INFO - Text quality for column 'Segmented_Qualification':
+2025-06-29 17:02:15,644 - INFO - - Empty strings: 0 (0.00%)
+2025-06-29 17:02:15,644 - INFO - - Very short texts (<10 chars): 0 (0.00%)
+2025-06-29 17:02:15,644 - INFO - - Length statistics: min=31.0, max=12756.0, avg=2503.75
+2025-06-29 17:02:15,645 - INFO - Quality report saved to /home/whilebell/Code/techstack-ner/data/interim/data_quality_report.json
+2025-06-29 17:02:15,731 - INFO - Saved processed data to /home/whilebell/Code/techstack-ner/data/interim/preprocessed-data/scraping-segmented-data.csv

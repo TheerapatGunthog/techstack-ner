@@ -1741,7 +1741,7 @@ class JobDataProcessor:
             "save_intermediate": True,
             "keep_original_columns": False,  # Whether to keep all original columns
             "similarity_threshold": 0.85,  # Threshold for SimilarSentenceRemover
-            "segment_sentences": True,  #  <-- ADDED: Control sentence segmentation
+            "segment_sentences": True,  # <-- ADDED: Control sentence segmentation
         }
 
         # Override with provided config
@@ -1936,8 +1936,8 @@ if __name__ == "__main__":
     # False: Will process the entire qualification as a single entry.
 
     config = {
-        "input_file": "summarize_text/kaggle_data.csv",
-        "output_file": "preprocessed-data/kaggle_data.csv",
+        "input_file": "classified/tech_jobs_only.csv",
+        "output_file": "preprocessed-data/scraping-segmented-data.csv",
         "quality_report_file": "data_quality_report.json",
         "separate_concatenated_words": False,
         "use_wordninja": False,
