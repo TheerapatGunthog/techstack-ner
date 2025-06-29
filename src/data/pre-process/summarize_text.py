@@ -38,9 +38,9 @@ PROJECT_PATH = Path(
     "/home/whilebell/Code/techstack-ner/"
 )  # Assuming the script runs in the project root
 DATA_PATH = (
-    PROJECT_PATH / "data/raw/kaggle-data/job_title_des.csv"
+    PROJECT_PATH / "data/interim/preprocessed-data/scraping-segmented-data.csv"
 )  # Adjusted for local testing
-OUTPUT_PATH = PROJECT_PATH / "data/raw/summarize_text/kaggle_data.csv"
+OUTPUT_PATH = PROJECT_PATH / "data/interim/summarize_text/scraping-summarize-data.csv"
 
 # --- Load the dataset ---
 print(f"Loading dataset from: {DATA_PATH}")
@@ -54,7 +54,7 @@ except FileNotFoundError:
 
 # Define the columns you need
 TOPIC_COLUMN = "Topic"
-QUALIFICATION_COLUMN = "Qualification"
+QUALIFICATION_COLUMN = "Segmented_Qualification"
 
 # Ensure the columns exist in the DataFrame
 if TOPIC_COLUMN not in df.columns or QUALIFICATION_COLUMN not in df.columns:
