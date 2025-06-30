@@ -40,8 +40,8 @@ def create_canonical_dictionary(data):
                 and canonical_dict[entity_text] != entity_label
             ):
                 print(
-                    f"⚠️  Warning: Inconsistent label for '{entity_text}'. "
-                    f"Found '{entity_label}', but already have '{canonical_dict[entity_text]}'. "
+                    f"️Warning: Inconsistent label for '{entity_text}'."
+                    f"Found '{entity_label}', but already have '{canonical_dict[entity_text]}'."
                     "Overwriting with the new one."
                 )
 
@@ -60,19 +60,19 @@ if __name__ == "__main__":
     # 1. Read data from input file
     try:
         with open(INPUT_FILENAME, "r", encoding="utf-8") as f:
-            print(f"🔄 Reading data from '{INPUT_FILENAME}'...")
+            print(f"Reading data from '{INPUT_FILENAME}'...")
             input_data = json.load(f)
     except FileNotFoundError:
-        print(f"❌ Error: File '{INPUT_FILENAME}' not found.")
+        print(f"Error: File '{INPUT_FILENAME}' not found.")
         exit()
     except json.JSONDecodeError:
-        print(f"❌ Error: File '{INPUT_FILENAME}' is not a valid JSON format.")
+        print(f"Error: File '{INPUT_FILENAME}' is not a valid JSON format.")
         exit()
 
     # Build the dictionary from the data
     canonical_dictionary = create_canonical_dictionary(input_data)
 
-    print("\n✅  Canonical dictionary created successfully!")
+    print("\nCanonical dictionary created successfully!")
     print("=" * 50)
 
     # Print the result as pretty JSON
@@ -80,6 +80,6 @@ if __name__ == "__main__":
         try:
             with open(OUTPUT_FILENAME, "w", encoding="utf-8") as f:
                 json.dump(canonical_dictionary, f, ensure_ascii=False, indent=2)
-            print(f"✅ Conversion successful! Result saved to '{OUTPUT_FILENAME}'")
+            print(f"Conversion successful! Result saved to '{OUTPUT_FILENAME}'")
         except IOError as e:
-            print(f"❌ Error: Could not write file '{OUTPUT_FILENAME}': {e}")
+            print(f"Error: Could not write file '{OUTPUT_FILENAME}': {e}")

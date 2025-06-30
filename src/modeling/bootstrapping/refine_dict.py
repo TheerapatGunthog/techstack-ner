@@ -22,15 +22,14 @@ def refine_dictionary(input_path, output_path):
     try:
         with open(input_path, "r", encoding="utf-8") as f:
             data = json.load(f)
-            print(f"✅ Loaded {len(data)} words from '{input_path}'")
+            print(f"Loaded {len(data)} words from '{input_path}'")
     except FileNotFoundError:
-        print(f"❌ Error: File '{input_path}' not found.")
+        print(f"Error: File '{input_path}' not found.")
         return
 
     # Define word groups to move and new Labels
     # You can add or remove words in these lists as needed
     refinement_rules = {
-        # "CERT": ["a+", "ccie", "ccna", "ccnp", "mcsa", "rhce"],
         "FAL": [
             "ajax",
             "api",
@@ -77,19 +76,19 @@ def refine_dictionary(input_path, output_path):
             for key, current_label in data.items():
                 if key.startswith(word):
                     if current_label != new_label:
-                        # print(f"🔄 Changing '{key}': from '{current_label}' -> '{new_label}'")
+                        # print(f"Changing '{key}': from '{current_label}' -> '{new_label}'")
                         data[key] = new_label
                         refined_count += 1
 
-    print(f"✨ Refined {refined_count} labels.")
+    print(f"Refined {refined_count} labels.")
 
     # Save the result to a new file
     try:
         with open(output_path, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
-        print(f"✅ Successfully saved refined dictionary to '{output_path}'")
+        print(f"Successfully saved refined dictionary to '{output_path}'")
     except IOError as e:
-        print(f"❌ Error writing file: {e}")
+        print(f"Error writing file: {e}")
 
 
 # --- Main ---
