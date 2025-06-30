@@ -17,11 +17,13 @@ print(f"Dataframe shape: {df.shape}")
 
 x = int(df.shape[0])
 
-# Split the dataframe into two parts
-df1 = df.iloc[0 : int(x / 2)]
-df2 = df.iloc[int(x / 2) : x]
+# Split the dataframe into three parts
+part_size = int(x / 3)
+df1 = df.iloc[0:part_size]
+df2 = df.iloc[part_size : 2 * part_size]
+df3 = df.iloc[2 * part_size : x]
 
 # Save the split dataframes to CSV files
-for i, df_part in enumerate([df1, df2], start=1):
+for i, df_part in enumerate([df1, df2, df3], start=1):
     output_path = output_dir / f"splitted-scraping-data-{i}.csv"
     df_part.to_csv(output_path, index=False)
