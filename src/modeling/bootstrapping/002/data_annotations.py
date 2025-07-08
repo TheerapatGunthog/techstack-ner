@@ -18,13 +18,16 @@ DATA_PATH = PROJECT_PATH / "data/interim/summarize_text/scraping-data-1.csv"
 # Output file path
 OUTPUT_FILENAME = (
     PROJECT_PATH
-    / "data/interim/bootstrapping/002/labels_by_boostrapping_models_one.json"
+    / "data/interim/bootstrapping/002/labels_by_boostrapping_models_one_filtered_rows.json"
 )
 
 # Read data from the CSV file and handle empty values (NaN)
 df = pd.read_csv(DATA_PATH).fillna({"Qualification_Summary": ""})
 
+# --- ✨ Configuration ---
 SCORE_THRESHOLD = 0.65
+# Define the labels that qualify a row for inclusion
+DESIRED_LABELS = {"PSML", "DB", "CP", "ET"}
 
 tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH)
 model = AutoModelForTokenClassification.from_pretrained(MODEL_PATH)
@@ -123,23 +126,36 @@ if __name__ == "__main__":
         ):
             grouped_results = group_ner_entities(raw_results)
 
-            detected_labels = []
+            # --- ✨ MODIFIED LOGIC ---
+
+            # 1. First, collect all entities that meet the score threshold.
+            high_score_labels = []
             if grouped_results:
                 for entity in grouped_results:
                     if entity["score"] >= SCORE_THRESHOLD:
-                        detected_labels.append(
+                        high_score_labels.append(
                             {
                                 "text": original_text[entity["start"] : entity["end"]],
                                 "label": entity["label"],
                             }
                         )
 
-            # --- ✨ Added section ---
-            # Add data to the list only if an entity is detected
-            if detected_labels:
-                all_processed_data.append(
-                    {"original_text": original_text, "ner_labels": detected_labels}
+            # 2. Proceed only if we found any high-score labels.
+            if high_score_labels:
+                # 3. Check if any of the found labels are in our desired set.
+                has_desired_label = any(
+                    entity["label"] in DESIRED_LABELS for entity in high_score_labels
                 )
+
+                # 4. If the condition is met, add the original text and the *complete*
+                #    list of high-score labels to our final data.
+                if has_desired_label:
+                    all_processed_data.append(
+                        {
+                            "original_text": original_text,
+                            "ner_labels": high_score_labels,
+                        }
+                    )
 
         # --- Custom JSON Formatting ---
         placeholder_map = {}
