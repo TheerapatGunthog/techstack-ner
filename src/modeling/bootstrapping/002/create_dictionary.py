@@ -69,10 +69,10 @@ def process_labels_with_conflict_detection(file_path, json_column_name):
                                     del final_labels[term]
 
                     except json.JSONDecodeError:
-                        print(f"Warning: JSON decode error in row {i+2}. Skipping.")
+                        print(f"Warning: JSON decode error in row {i + 2}. Skipping.")
                     except (TypeError, KeyError) as e:
                         print(
-                            f"Warning: Data structure error in row {i+2}: {e}. Skipping."
+                            f"Warning: Data structure error in row {i + 2}: {e}. Skipping."
                         )
 
     except FileNotFoundError:
@@ -129,6 +129,3 @@ print("\n--- Processing Complete ---")
 # Save
 save_dict_to_json(clean_data, CLEAN_JSON_OUTPUT)
 save_dict_to_json(conflict_data, CONFLICT_JSON_OUTPUT)
-
-print("---------------------------\n")
-
