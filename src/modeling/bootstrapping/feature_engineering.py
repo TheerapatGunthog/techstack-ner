@@ -13,7 +13,7 @@ PROJECT_PATH = Path("/home/whilebell/Code/techstack-ner/")
 # Specify the path to your single CoNLL file here
 single_file_path = (
     PROJECT_PATH
-    / "data/interim/bootstrapping/001/project-13-at-2025-06-29-03-58-c919e3bc.conll"
+    / "data/interim/bootstrapping/002/project-38-at-2025-07-16-06-05-e5215e79.conll"
 )
 
 
@@ -211,7 +211,7 @@ print("\n" + "=" * 50)
 # Step 5: Save Processed Dataset to Disk
 
 # Specify the folder name to save the dataset
-output_dir = PROJECT_PATH / "data/processed/bootstrapping/001/"
+output_dir = PROJECT_PATH / "data/processed/bootstrapping/002/"
 
 # Create the folder if it does not exist
 os.makedirs(output_dir, exist_ok=True)

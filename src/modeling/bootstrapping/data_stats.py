@@ -12,7 +12,7 @@ from pathlib import Path
 # and we will load them for analysis.
 
 PROJECT_PATH = Path("/home/whilebell/Code/techstack-ner/")
-processed_data_dir = PROJECT_PATH / "data/processed/bootstrapping/001/"
+processed_data_dir = PROJECT_PATH / "data/processed/bootstrapping/002/"
 
 print(f"Loading processed dataset from: '{processed_data_dir}'")
 

@@ -705,3 +705,119 @@
 2025-06-29 17:02:15,644 - INFO - - Length statistics: min=31.0, max=12756.0, avg=2503.75
 2025-06-29 17:02:15,645 - INFO - Quality report saved to /home/whilebell/Code/techstack-ner/data/interim/data_quality_report.json
 2025-06-29 17:02:15,731 - INFO - Saved processed data to /home/whilebell/Code/techstack-ner/data/interim/preprocessed-data/scraping-segmented-data.csv
+2025-08-15 04:00:14,407 - INFO - JobDataProcessor initialized with config: {'input_file': '/first-data/Embedded.csv', 'output_file': 'preprocessed-data/scraping_data_embedded.csv', 'quality_report_file': 'data_quality_report.json', 'separate_concatenated_words': False, 'sample_fraction': 1, 'random_seed': 42, 'min_sentence_length': 10, 'max_tokens_per_sentence': 100, 'parallelize': True, 'batch_size': 1000, 'save_intermediate': True, 'keep_original_columns': False, 'similarity_threshold': 0.95, 'segment_sentences': False, 'use_wordninja': False}
+2025-08-15 04:00:14,408 - INFO - Loading data from /first-data/Embedded.csv
+2025-08-15 04:00:14,409 - ERROR - Error loading data: [Errno 2] No such file or directory: '/first-data/Embedded.csv'
+2025-08-15 04:00:26,806 - INFO - JobDataProcessor initialized with config: {'input_file': 'first-data/Embedded.csv', 'output_file': 'preprocessed-data/scraping_data_embedded.csv', 'quality_report_file': 'data_quality_report.json', 'separate_concatenated_words': False, 'sample_fraction': 1, 'random_seed': 42, 'min_sentence_length': 10, 'max_tokens_per_sentence': 100, 'parallelize': True, 'batch_size': 1000, 'save_intermediate': True, 'keep_original_columns': False, 'similarity_threshold': 0.95, 'segment_sentences': False, 'use_wordninja': False}
+2025-08-15 04:00:26,806 - INFO - Loading data from /home/whilebell/Code/techstack-ner/data/raw/first-data/Embedded.csv
+2025-08-15 04:00:26,826 - INFO - Loaded data with shape: (960, 7)
+2025-08-15 04:00:26,829 - INFO - Removed 928 duplicate qualifications
+2025-08-15 04:00:26,829 - INFO - Filtering non-Thai content...
+2025-08-15 04:00:27,031 - INFO - Removed 3 rows with Thai content
+2025-08-15 04:00:27,031 - INFO - Cleaning qualification text...
+2025-08-15 04:00:27,252 - INFO - Saved cleaned data to /home/whilebell/Code/techstack-ner/data/interim/cleaned_data.csv
+2025-08-15 04:00:27,253 - INFO - Skipping sentence segmentation as per configuration.
+2025-08-15 04:00:27,254 - INFO - Removed 0 duplicate segmented qualifications
+2025-08-15 04:00:27,254 - INFO - Removing similar sentences...
+2025-08-15 04:00:27,254 - INFO - Finding and removing similar sentences with threshold 0.95...
+2025-08-15 04:00:27,273 - INFO - Removed 0 similar sentences (0.00%)
+2025-08-15 04:00:27,273 - INFO - Found 29 clusters of similar sentences
+2025-08-15 04:00:27,273 - INFO - Running data quality checks...
+2025-08-15 04:00:27,273 - INFO - Data Shape: 29 rows, 8 columns
+2025-08-15 04:00:27,274 - INFO - Total missing values: 41
+2025-08-15 04:00:27,274 - INFO - - Link: 29 missing values (100.00%)
+2025-08-15 04:00:27,274 - INFO - - Position: 12 missing values (41.38%)
+2025-08-15 04:00:27,275 - INFO - Duplicated rows: 0 (0.00%)
+2025-08-15 04:00:27,275 - INFO - - Column 'web-scraper-start-url' has 28 duplicate values (96.55%)
+2025-08-15 04:00:27,275 - INFO - - Column 'Position' has 19 duplicate values (65.52%)
+2025-08-15 04:00:27,278 - INFO - Text quality for column 'Segmented_Qualification':
+2025-08-15 04:00:27,278 - INFO - - Empty strings: 0 (0.00%)
+2025-08-15 04:00:27,278 - INFO - - Very short texts (<10 chars): 0 (0.00%)
+2025-08-15 04:00:27,279 - INFO - - Length statistics: min=459.0, max=6918.0, avg=1961.86
+2025-08-15 04:00:27,279 - INFO - Quality report saved to /home/whilebell/Code/techstack-ner/data/interim/data_quality_report.json
+2025-08-15 04:00:27,281 - INFO - Saved processed data to /home/whilebell/Code/techstack-ner/data/interim/preprocessed-data/scraping_data_embedded.csv
+2025-08-15 04:57:19,184 - INFO - JobDataProcessor initialized with config: {'input_file': 'scraping-data/IoT.csv', 'output_file': 'preprocessed-data/scraping_data_iot.csv', 'quality_report_file': 'data_quality_report.json', 'separate_concatenated_words': False, 'sample_fraction': 1, 'random_seed': 42, 'min_sentence_length': 10, 'max_tokens_per_sentence': 100, 'parallelize': True, 'batch_size': 1000, 'save_intermediate': True, 'keep_original_columns': False, 'similarity_threshold': 0.95, 'segment_sentences': False, 'use_wordninja': False}
+2025-08-15 04:57:19,184 - INFO - Loading data from /home/whilebell/Code/techstack-ner/data/raw/scraping-data/IoT.csv
+2025-08-15 04:57:19,199 - INFO - Loaded data with shape: (960, 7)
+2025-08-15 04:57:19,200 - INFO - Removed 928 duplicate qualifications
+2025-08-15 04:57:19,201 - INFO - Filtering non-Thai content...
+2025-08-15 04:57:19,385 - INFO - Removed 2 rows with Thai content
+2025-08-15 04:57:19,385 - INFO - Cleaning qualification text...
+2025-08-15 04:57:19,584 - INFO - Saved cleaned data to /home/whilebell/Code/techstack-ner/data/interim/cleaned_data.csv
+2025-08-15 04:57:19,585 - INFO - Skipping sentence segmentation as per configuration.
+2025-08-15 04:57:19,586 - INFO - Removed 0 duplicate segmented qualifications
+2025-08-15 04:57:19,586 - INFO - Removing similar sentences...
+2025-08-15 04:57:19,587 - INFO - Finding and removing similar sentences with threshold 0.95...
+2025-08-15 04:57:19,604 - INFO - Removed 0 similar sentences (0.00%)
+2025-08-15 04:57:19,604 - INFO - Found 30 clusters of similar sentences
+2025-08-15 04:57:19,604 - INFO - Running data quality checks...
+2025-08-15 04:57:19,604 - INFO - Data Shape: 30 rows, 8 columns
+2025-08-15 04:57:19,605 - INFO - Total missing values: 43
+2025-08-15 04:57:19,605 - INFO - - Link: 30 missing values (100.00%)
+2025-08-15 04:57:19,605 - INFO - - Position: 13 missing values (43.33%)
+2025-08-15 04:57:19,606 - INFO - Duplicated rows: 0 (0.00%)
+2025-08-15 04:57:19,606 - INFO - - Column 'web-scraper-start-url' has 29 duplicate values (96.67%)
+2025-08-15 04:57:19,606 - INFO - - Column 'Position' has 21 duplicate values (70.00%)
+2025-08-15 04:57:19,609 - INFO - Text quality for column 'Segmented_Qualification':
+2025-08-15 04:57:19,609 - INFO - - Empty strings: 0 (0.00%)
+2025-08-15 04:57:19,610 - INFO - - Very short texts (<10 chars): 0 (0.00%)
+2025-08-15 04:57:19,610 - INFO - - Length statistics: min=459.0, max=6918.0, avg=1942.07
+2025-08-15 04:57:19,610 - INFO - Quality report saved to /home/whilebell/Code/techstack-ner/data/interim/data_quality_report.json
+2025-08-15 04:57:19,612 - INFO - Saved processed data to /home/whilebell/Code/techstack-ner/data/interim/preprocessed-data/scraping_data_iot.csv
+2025-08-15 04:57:51,370 - INFO - JobDataProcessor initialized with config: {'input_file': 'scraping-data/Arduino.csv', 'output_file': 'preprocessed-data/scraping_data_arduino.csv', 'quality_report_file': 'data_quality_report.json', 'separate_concatenated_words': False, 'sample_fraction': 1, 'random_seed': 42, 'min_sentence_length': 10, 'max_tokens_per_sentence': 100, 'parallelize': True, 'batch_size': 1000, 'save_intermediate': True, 'keep_original_columns': False, 'similarity_threshold': 0.95, 'segment_sentences': False, 'use_wordninja': False}
+2025-08-15 04:57:51,370 - INFO - Loading data from /home/whilebell/Code/techstack-ner/data/raw/scraping-data/Arduino.csv
+2025-08-15 04:57:51,372 - INFO - Loaded data with shape: (96, 7)
+2025-08-15 04:57:51,373 - INFO - Removed 64 duplicate qualifications
+2025-08-15 04:57:51,373 - INFO - Filtering non-Thai content...
+2025-08-15 04:57:51,547 - INFO - Removed 4 rows with Thai content
+2025-08-15 04:57:51,547 - INFO - Cleaning qualification text...
+2025-08-15 04:57:51,751 - INFO - Saved cleaned data to /home/whilebell/Code/techstack-ner/data/interim/cleaned_data.csv
+2025-08-15 04:57:51,752 - INFO - Skipping sentence segmentation as per configuration.
+2025-08-15 04:57:51,753 - INFO - Removed 0 duplicate segmented qualifications
+2025-08-15 04:57:51,753 - INFO - Removing similar sentences...
+2025-08-15 04:57:51,753 - INFO - Finding and removing similar sentences with threshold 0.95...
+2025-08-15 04:57:51,764 - INFO - Removed 0 similar sentences (0.00%)
+2025-08-15 04:57:51,764 - INFO - Found 28 clusters of similar sentences
+2025-08-15 04:57:51,764 - INFO - Running data quality checks...
+2025-08-15 04:57:51,764 - INFO - Data Shape: 28 rows, 8 columns
+2025-08-15 04:57:51,764 - INFO - Total missing values: 40
+2025-08-15 04:57:51,764 - INFO - - Link: 28 missing values (100.00%)
+2025-08-15 04:57:51,764 - INFO - - Position: 12 missing values (42.86%)
+2025-08-15 04:57:51,765 - INFO - Duplicated rows: 0 (0.00%)
+2025-08-15 04:57:51,765 - INFO - - Column 'web-scraper-start-url' has 27 duplicate values (96.43%)
+2025-08-15 04:57:51,765 - INFO - - Column 'Position' has 17 duplicate values (60.71%)
+2025-08-15 04:57:51,767 - INFO - Text quality for column 'Segmented_Qualification':
+2025-08-15 04:57:51,767 - INFO - - Empty strings: 0 (0.00%)
+2025-08-15 04:57:51,767 - INFO - - Very short texts (<10 chars): 0 (0.00%)
+2025-08-15 04:57:51,767 - INFO - - Length statistics: min=459.0, max=2700.0, avg=1592.61
+2025-08-15 04:57:51,768 - INFO - Quality report saved to /home/whilebell/Code/techstack-ner/data/interim/data_quality_report.json
+2025-08-15 04:57:51,769 - INFO - Saved processed data to /home/whilebell/Code/techstack-ner/data/interim/preprocessed-data/scraping_data_arduino.csv
+2025-08-15 04:58:12,535 - INFO - JobDataProcessor initialized with config: {'input_file': 'scraping-data/Robot.csv', 'output_file': 'preprocessed-data/scraping_data_robot.csv', 'quality_report_file': 'data_quality_report.json', 'separate_concatenated_words': False, 'sample_fraction': 1, 'random_seed': 42, 'min_sentence_length': 10, 'max_tokens_per_sentence': 100, 'parallelize': True, 'batch_size': 1000, 'save_intermediate': True, 'keep_original_columns': False, 'similarity_threshold': 0.95, 'segment_sentences': False, 'use_wordninja': False}
+2025-08-15 04:58:12,535 - INFO - Loading data from /home/whilebell/Code/techstack-ner/data/raw/scraping-data/Robot.csv
+2025-08-15 04:58:12,549 - INFO - Loaded data with shape: (960, 7)
+2025-08-15 04:58:12,549 - INFO - Removed 928 duplicate qualifications
+2025-08-15 04:58:12,549 - INFO - Filtering non-Thai content...
+2025-08-15 04:58:12,725 - INFO - Removed 6 rows with Thai content
+2025-08-15 04:58:12,725 - INFO - Cleaning qualification text...
+2025-08-15 04:58:12,914 - INFO - Saved cleaned data to /home/whilebell/Code/techstack-ner/data/interim/cleaned_data.csv
+2025-08-15 04:58:12,915 - INFO - Skipping sentence segmentation as per configuration.
+2025-08-15 04:58:12,916 - INFO - Removed 0 duplicate segmented qualifications
+2025-08-15 04:58:12,916 - INFO - Removing similar sentences...
+2025-08-15 04:58:12,916 - INFO - Finding and removing similar sentences with threshold 0.95...
+2025-08-15 04:58:12,928 - INFO - Removed 0 similar sentences (0.00%)
+2025-08-15 04:58:12,928 - INFO - Found 26 clusters of similar sentences
+2025-08-15 04:58:12,928 - INFO - Running data quality checks...
+2025-08-15 04:58:12,928 - INFO - Data Shape: 26 rows, 8 columns
+2025-08-15 04:58:12,929 - INFO - Total missing values: 31
+2025-08-15 04:58:12,929 - INFO - - Link: 26 missing values (100.00%)
+2025-08-15 04:58:12,929 - INFO - - Position: 5 missing values (19.23%)
+2025-08-15 04:58:12,929 - INFO - Duplicated rows: 0 (0.00%)
+2025-08-15 04:58:12,929 - INFO - - Column 'web-scraper-start-url' has 25 duplicate values (96.15%)
+2025-08-15 04:58:12,930 - INFO - - Column 'Topic' has 2 duplicate values (7.69%)
+2025-08-15 04:58:12,930 - INFO - - Column 'Position' has 17 duplicate values (65.38%)
+2025-08-15 04:58:12,931 - INFO - Text quality for column 'Segmented_Qualification':
+2025-08-15 04:58:12,931 - INFO - - Empty strings: 0 (0.00%)
+2025-08-15 04:58:12,931 - INFO - - Very short texts (<10 chars): 0 (0.00%)
+2025-08-15 04:58:12,931 - INFO - - Length statistics: min=688.0, max=3840.0, avg=2065.96
+2025-08-15 04:58:12,932 - INFO - Quality report saved to /home/whilebell/Code/techstack-ner/data/interim/data_quality_report.json
+2025-08-15 04:58:12,933 - INFO - Saved processed data to /home/whilebell/Code/techstack-ner/data/interim/preprocessed-data/scraping_data_robot.csv

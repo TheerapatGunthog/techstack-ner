@@ -8,21 +8,16 @@ from pathlib import Path
 PROJECT_PATH = Path("/home/whilebell/Code/techstack-ner/")
 
 # 1. Raw data file to be converted
-INPUT_FILENAME = (
-    PROJECT_PATH
-    / "data/interim/bootstrapping/001/labeled-by-code-data/labels-by-gemini-001.json"
-)
+INPUT_FILENAME = PROJECT_PATH / "data/interim/bootstrapping/002/clean_label.json"
 
 # 2. [NEW] Main canonical dictionary file after filtering
 CANONICAL_DICT_PATH = (
-    PROJECT_PATH / "data/keywords/canonical_dictionary_v2.json"  # Edit Path here
+    PROJECT_PATH
+    / "data/interim/bootstrapping/002/dictionary/dictionary.json"  # Edit Path here
 )
 
 # 3. Output file to be generated
-OUTPUT_FILENAME = (
-    PROJECT_PATH
-    / "data/interim/bootstrapping/001/labeled-by-code-data/gemini_001_labels-studio_form_CLEANED.json"
-)
+OUTPUT_FILENAME = PROJECT_PATH / "data/interim/bootstrapping/002/studio_form.json"
 
 # ===================================================================
 

@@ -25,7 +25,7 @@ OUTPUT_FILENAME = (
 df = pd.read_csv(DATA_PATH).fillna({"Qualification_Summary": ""})
 
 # --- ✨ Configuration ---
-SCORE_THRESHOLD = 0.65
+SCORE_THRESHOLD = 0
 # Define the labels that qualify a row for inclusion
 DESIRED_LABELS = {"PSML", "DB", "CP", "ET"}
 

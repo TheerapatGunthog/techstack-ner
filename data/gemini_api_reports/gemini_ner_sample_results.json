@@ -1,0 +1,1790 @@
+[
+  {
+    "original_text": "We are looking for hire experts flutter developer.",
+    "ner_labels": [
+      {
+        "text": "flutter",
+        "label": "Framework_and_Libraries"
+      }
+    ]
+  },
+  {
+    "original_text": "PYTHON/DJANGO Developer/Lead Job Code PDJ 04 Strong Python experience in API development REST/RPC .",
+    "ner_labels": [
+      {
+        "text": "PYTHON",
+        "label": "Programming_Scripting_and_Markup_languages"
+      },
+      {
+        "text": "DJANGO",
+        "label": "Framework_and_Libraries"
+      },
+      {
+        "text": "Python",
+        "label": "Programming_Scripting_and_Markup_languages"
+      },
+      {
+        "text": "API development",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "REST",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "RPC",
+        "label": "Technique_and_Skill"
+      }
+    ]
+  },
+  {
+    "original_text": "Experience working with API Frameworks Django/flask .",
+    "ner_labels": [
+      {
+        "text": "Django",
+        "label": "Framework_and_Libraries"
+      },
+      {
+        "text": "flask",
+        "label": "Framework_and_Libraries"
+      }
+    ]
+  },
+  {
+    "original_text": "Experience evaluating and improving the efficiency of programs in a Linux environment.",
+    "ner_labels": [
+      {
+        "text": "Linux",
+        "label": "Technique_and_Skill"
+      }
+    ]
+  },
+  {
+    "original_text": "Working knowledge of SQL.",
+    "ner_labels": [
+      {
+        "text": "SQL",
+        "label": "Programming_Scripting_and_Markup_languages"
+      }
+    ]
+  },
+  {
+    "original_text": "Good knowledge in automated unit testing using PyUnit.",
+    "ner_labels": [
+      {
+        "text": "automated unit testing",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "PyUnit",
+        "label": "Framework_and_Libraries"
+      }
+    ]
+  },
+  {
+    "original_text": "This person s responsibilities include research, design and development of Machine Learning and Deep Learning algorithms to tackle a variety of Fraud oriented challenges.",
+    "ner_labels": [
+      {
+        "text": "Machine Learning",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "Deep Learning",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "algorithms",
+        "label": "Technique_and_Skill"
+      }
+    ]
+  },
+  {
+    "original_text": "Qualifications At least 3 years of hands on development of complex Machine Learning models using modern frameworks and tools, ideally Python based.",
+    "ner_labels": [
+      {
+        "text": "Machine Learning",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "Python",
+        "label": "Programming_Scripting_and_Markup_languages"
+      }
+    ]
+  },
+  {
+    "original_text": "Experience in software development using Python, Java or a similar language.",
+    "ner_labels": [
+      {
+        "text": "Python",
+        "label": "Programming_Scripting_and_Markup_languages"
+      },
+      {
+        "text": "Java",
+        "label": "Programming_Scripting_and_Markup_languages"
+      }
+    ]
+  },
+  {
+    "original_text": "Any Graduate or M.Sc. in Computer Science, Mathematics or equivalent, preferably in Machine Learning Ability to write clean and concise code Quick learner, independent, methodical, and detail oriented.",
+    "ner_labels": [
+      {
+        "text": "Machine Learning",
+        "label": "Technique_and_Skill"
+      }
+    ]
+  },
+  {
+    "original_text": "Advantages Prior experience as a software developer or data engineer advantage Experience with Big data advantage Experience with Spark big advantage Experience with Deep Learning frameworks PyTorch, TensorFlow, Keras advantage.",
+    "ner_labels": [
+      {
+        "text": "Big data",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "Spark",
+        "label": "Framework_and_Libraries"
+      },
+      {
+        "text": "Deep Learning",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "PyTorch",
+        "label": "Framework_and_Libraries"
+      },
+      {
+        "text": "TensorFlow",
+        "label": "Framework_and_Libraries"
+      },
+      {
+        "text": "Keras",
+        "label": "Framework_and_Libraries"
+      }
+    ]
+  },
+  {
+    "original_text": "JOB DESCRIPTION Strong framework outside of iOS is always a plus iOS experience and generalist engineers with backgrounds in related technologies is a plus A disciplined approach to development, documentation and file structure Strong visual design sense and excellent taste A constant desire to improve, learn more and take things higher An excellent understanding of networking, mobile network issues, concurrency and threading Experience working with internationalized apps RESPONSIBILITIES Design and build advanced applications for the iOS platform.",
+    "ner_labels": [
+      {
+        "text": "networking",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "concurrency",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "threading",
+        "label": "Technique_and_Skill"
+      }
+    ]
+  },
+  {
+    "original_text": "Have published one or more iOS apps in the app store.",
+    "ner_labels": []
+  },
+  {
+    "original_text": "A deep familiarity with Objective C and Cocoa Touch.",
+    "ner_labels": [
+      {
+        "text": "Objective C",
+        "label": "Programming_Scripting_and_Markup_languages"
+      },
+      {
+        "text": "Cocoa Touch",
+        "label": "Framework_and_Libraries"
+      }
+    ]
+  },
+  {
+    "original_text": "Experience working with iOS frameworks such as Core Data, Core Animation, Core Graphics and Core Text.",
+    "ner_labels": [
+      {
+        "text": "Core Data",
+        "label": "Framework_and_Libraries"
+      },
+      {
+        "text": "Core Animation",
+        "label": "Framework_and_Libraries"
+      },
+      {
+        "text": "Core Graphics",
+        "label": "Framework_and_Libraries"
+      },
+      {
+        "text": "Core Text",
+        "label": "Framework_and_Libraries"
+      }
+    ]
+  },
+  {
+    "original_text": "Responsible for working on different layers of the iOS apps.",
+    "ner_labels": []
+  },
+  {
+    "original_text": "job responsibility full stack engineer react role make impact petsmart transforming engineering team meet need rapidly changing retail environment role foundational helping build craft petsmart prowess making react j native key framework across mobile web property working across web mobile application part building amazing mobile first customer experience impact customer store digital channel goal responsibility include act full stack developer across petsmart various web mobile solution full stack engineer help build petsmart competency using react j native across mobile web property partner web engineering team strategy share component across application best practice new advancement react community work product ux team review design concept offer suggestion decrease complexity maintaining spirit experience proactively make recommendation technical enhancement better performance scalability maintainability accountable delivering agile environment creates/oversees completion technical development mobile web solution work cross functional business team design develop solution based business requirement identify area improvement design implementation process tooling automated testing quality assurance mentor le experienced developer remain current latest web technology seeking integrate solution appropriate bring table 5+ year hands on experience web development 2+ year recent experience working react strong experience various j library framework redux angular vue etc expert understanding javascript html cs restful apis http networking concept full stack web development architecture expertise experience mvc object oriented programming concept experience implementing responsive design adaptive design demonstrated strong front end development skill especially concerning accessibility extensibility client side computing object oriented design pattern object oriented cs experience sass/less/postcss framework demonstrated passion user experience design usability familiar experienced making use open source component ability address short term tactical requirement without losing site longer range strategic direction self motivated discipline meet deadline speed accuracy professional attitude excellent written oral communication skill excellent analytical trouble shooting skill collaborative team player ability resolve conflict constructive manner work around obstacle ensure project success b computer science equivalent team growing faster pace ever investing heavily cutting edge technology importantly _our people.",
+    "ner_labels": [
+      {
+        "text": "react",
+        "label": "Framework_and_Libraries"
+      },
+      {
+        "text": "agile",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "redux",
+        "label": "Framework_and_Libraries"
+      },
+      {
+        "text": "angular",
+        "label": "Framework_and_Libraries"
+      },
+      {
+        "text": "vue",
+        "label": "Framework_and_Libraries"
+      },
+      {
+        "text": "javascript",
+        "label": "Programming_Scripting_and_Markup_languages"
+      },
+      {
+        "text": "html",
+        "label": "Programming_Scripting_and_Markup_languages"
+      },
+      {
+        "text": "restful apis",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "http",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "mvc",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "object oriented programming concept",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "responsive design",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "adaptive design",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "object oriented design pattern",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "sass",
+        "label": "Framework_and_Libraries"
+      },
+      {
+        "text": "less",
+        "label": "Framework_and_Libraries"
+      },
+      {
+        "text": "postcss",
+        "label": "Framework_and_Libraries"
+      },
+      {
+        "text": "automated testing",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "trouble shooting skill",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "communication skill",
+        "label": "Technique_and_Skill"
+      }
+    ]
+  },
+  {
+    "original_text": "Familiar with standard software design patterns, methodologies, and the MVC architecture.",
+    "ner_labels": [
+      {
+        "text": "design patterns",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "methodologies",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "MVC",
+        "label": "Technique_and_Skill"
+      }
+    ]
+  },
+  {
+    "original_text": "Proficient in the following technologies C#, .NET, .NET",
+    "ner_labels": [
+      {
+        "text": "C#",
+        "label": "Programming_Scripting_and_Markup_languages"
+      },
+      {
+        "text": ".NET",
+        "label": "Framework_and_Libraries"
+      },
+      {
+        "text": ".NET",
+        "label": "Framework_and_Libraries"
+      }
+    ]
+  },
+  {
+    "original_text": "Core, HTML5, CSS3, MsSQL, MySQL, ReactJS.",
+    "ner_labels": [
+      {
+        "text": "HTML5",
+        "label": "Programming_Scripting_and_Markup_languages"
+      },
+      {
+        "text": "CSS3",
+        "label": "Programming_Scripting_and_Markup_languages"
+      },
+      {
+        "text": "MsSQL",
+        "label": "Database"
+      },
+      {
+        "text": "MySQL",
+        "label": "Database"
+      },
+      {
+        "text": "ReactJS",
+        "label": "Framework_and_Libraries"
+      }
+    ]
+  },
+  {
+    "original_text": "Experience working with and/or administering Microsoft IIS Experience with SYSPRO s ERP package a plus but not required Candidates must be able to execute the following functions Creates and deploys code and configuration associated with support and project work across our application portfolio.",
+    "ner_labels": [
+      {
+        "text": "Microsoft IIS",
+        "label": "Framework_and_Libraries"
+      }
+    ]
+  },
+  {
+    "original_text": "senior full stack developer \\ 1800026h cwt looking senior full stack developer proven back end skill well strong front end skill role use cutting edge technology help develop next generation business travel solution million user worldwide participate lead architecture review technology standard definition lead effort find implement support new technology framework standard experiment implement propose new process technology develop back end system designed scale analyze business software requirement develop back end software test learn new technology broaden tech stack provide tier 3 production support handle live production issue participate develop agile software development process qualification b.sc degree computer science engineering relevant field equivalent industry experience minimum 2 year experience developing following nodejs java experience nosql solution mongodb elasticsearch redis experience react/angular knowledge single page application spa development advantage experience javascript cs html responsive ui & cross browser advantage experienced developing rich large scale web application advantage experience developing robust http apis back end service passion technology building product team player excellent interpersonal skill self motivated independent learner eligible candidate must valid passport able travel israel 6 week training shortly hired primary location us il chicago work home employment type standard job family information technology scope global travel",
+    "ner_labels": [
+      {
+        "text": "nodejs",
+        "label": "Framework_and_Libraries"
+      },
+      {
+        "text": "java",
+        "label": "Programming_Scripting_and_Markup_languages"
+      },
+      {
+        "text": "nosql",
+        "label": "Database"
+      },
+      {
+        "text": "mongodb",
+        "label": "Database"
+      },
+      {
+        "text": "elasticsearch",
+        "label": "Database"
+      },
+      {
+        "text": "redis",
+        "label": "Database"
+      },
+      {
+        "text": "react/angular",
+        "label": "Framework_and_Libraries"
+      },
+      {
+        "text": "single page application spa",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "javascript",
+        "label": "Programming_Scripting_and_Markup_languages"
+      },
+      {
+        "text": "html",
+        "label": "Programming_Scripting_and_Markup_languages"
+      },
+      {
+        "text": "responsive ui",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "cross browser",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "http apis",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "agile software development process",
+        "label": "Technique_and_Skill"
+      }
+    ]
+  },
+  {
+    "original_text": "Job Description ReactJS + NodeJs, Azure Functions, and GraphQL capability Strong hands on experience on javascript frameworks like reactjs Having hands on experience on nodejs Hands on experience on Azure function and integrations Strong hands on experience on HTML5/CSS3/Javascript Excellent written and verbal communication.",
+    "ner_labels": [
+      {
+        "text": "ReactJS",
+        "label": "Framework_and_Libraries"
+      },
+      {
+        "text": "NodeJs",
+        "label": "Framework_and_Libraries"
+      },
+      {
+        "text": "Azure Functions",
+        "label": "Cloud_platforms"
+      },
+      {
+        "text": "GraphQL",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "javascript",
+        "label": "Programming_Scripting_and_Markup_languages"
+      },
+      {
+        "text": "HTML5",
+        "label": "Programming_Scripting_and_Markup_languages"
+      },
+      {
+        "text": "CSS3",
+        "label": "Programming_Scripting_and_Markup_languages"
+      }
+    ]
+  },
+  {
+    "original_text": "Skills Required ReactJS, NodeJS, Azure Functions, GraphQL, Job Code DP3PZB64",
+    "ner_labels": [
+      {
+        "text": "ReactJS",
+        "label": "Framework_and_Libraries"
+      },
+      {
+        "text": "NodeJS",
+        "label": "Framework_and_Libraries"
+      },
+      {
+        "text": "Azure Functions",
+        "label": "Cloud_platforms"
+      },
+      {
+        "text": "GraphQL",
+        "label": "Technique_and_Skill"
+      }
+    ]
+  },
+  {
+    "original_text": "On an ongoing basis configure, tune and troubleshoot automations to achieve optimal application performance and stability Strong scripting experience with Bash, Ruby, Python, Java.",
+    "ner_labels": [
+      {
+        "text": "Bash",
+        "label": "Programming_Scripting_and_Markup_languages"
+      },
+      {
+        "text": "Ruby",
+        "label": "Programming_Scripting_and_Markup_languages"
+      },
+      {
+        "text": "Python",
+        "label": "Programming_Scripting_and_Markup_languages"
+      },
+      {
+        "text": "Java",
+        "label": "Programming_Scripting_and_Markup_languages"
+      }
+    ]
+  },
+  {
+    "original_text": "Solid experience working with commercial grade automated deployment & configuration mgmt. tools such as Puppet, Chef, Cloudify, CFEngine.",
+    "ner_labels": [
+      {
+        "text": "Puppet",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "Chef",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "Cloudify",
+        "label": "Cloud_platforms"
+      },
+      {
+        "text": "CFEngine",
+        "label": "Technique_and_Skill"
+      }
+    ]
+  },
+  {
+    "original_text": "Strong hands on experience with open source and provisioning tools such as Cobbler, Foreman, PHP, and Linux or other likewise open source systems, tools /utilities.",
+    "ner_labels": [
+      {
+        "text": "Cobbler",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "Foreman",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "PHP",
+        "label": "Programming_Scripting_and_Markup_languages"
+      },
+      {
+        "text": "Linux",
+        "label": "Technique_and_Skill"
+      }
+    ]
+  },
+  {
+    "original_text": "Strong senior level Linux & Windows OS experience & troubleshooting skills Experience with application debugging, performance, scalability & capacity planning expertise Manage full system lifecycle of automations including configuration and code deployment in user acceptance test and production environments Improve automated product performance health checks and self healing capabilities in complex highly available Cloud environments.",
+    "ner_labels": [
+      {
+        "text": "Linux",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "Windows OS",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "application debugging",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "performance",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "scalability",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "capacity planning",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "Cloud environments",
+        "label": "Cloud_platforms"
+      }
+    ]
+  },
+  {
+    "original_text": "Drive the adoption of Infrastructure as Code in a DevOps oriented organization Partner with R&D teams to engineer resilient, supportable and scalable products Architect solutions to leverage the best of Cloud infrastructure Experience with tools and software such as Urban Code, Hadoop, Tomcat, Mule, OpenAM and Apache Experience with F5 load balancers, networking theory and protocols TCP/IP, HTTP, NTP, DNS and hardware components.",
+    "ner_labels": [
+      {
+        "text": "Infrastructure as Code",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "DevOps",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "Cloud infrastructure",
+        "label": "Cloud_platforms"
+      },
+      {
+        "text": "Urban Code",
+        "label": "Framework_and_Libraries"
+      },
+      {
+        "text": "Hadoop",
+        "label": "Framework_and_Libraries"
+      },
+      {
+        "text": "Tomcat",
+        "label": "Framework_and_Libraries"
+      },
+      {
+        "text": "Mule",
+        "label": "Framework_and_Libraries"
+      },
+      {
+        "text": "OpenAM",
+        "label": "Framework_and_Libraries"
+      },
+      {
+        "text": "Apache",
+        "label": "Framework_and_Libraries"
+      },
+      {
+        "text": "F5 load balancers",
+        "label": "Embedded_Technologies"
+      },
+      {
+        "text": "TCP/IP",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "HTTP",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "NTP",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "DNS",
+        "label": "Technique_and_Skill"
+      }
+    ]
+  },
+  {
+    "original_text": "Tintri solutions serve the needs of enterprise data centres with intelligent infrastructure.",
+    "ner_labels": []
+  },
+  {
+    "original_text": "Job Description Job Location Pune RED Senior Software Engineer REST API Dev Job Description Responsibilities We are looking for a Senior Software Engineer for our RED Tintri Storage engineering team who will design, build and deliver the configuration and deployment tools of DDN RED software storage product Participate in the definition and implementation of the RED REST API allowing to configure, deploy and manage the RED solution on premises and on cloud.",
+    "ner_labels": [
+      {
+        "text": "REST API",
+        "label": "Technique_and_Skill"
+      }
+    ]
+  },
+  {
+    "original_text": "Development competencies Knowledge of REST API Strong experience in developing and debugging C/C++ for Linux/Unix Experience in developing with Python, Go Experiences with Git, Gerrit and Jenkins Very good written/verbal communication skills in English The ideal candidate has knowledge of and experience in several of the following subjects Knowledge of configuration and deployment large systems on cloud or on premise Knowledge of deployment on VMs and containers Knowledge of development or utilization of control or data plane API for systems' management Skills and Experience Minimum 7 years of software development experience Excellent written/verbal communication skills Excellent time management skills, with the ability to independently prioritize, multitask, and work under deadlines in a fast paced environment Strong interpersonal skills and ability to interact effectively with program staff Strong team player Highly effective analytical, problem solving, decision making and influencing capabilities Storage industry experience desired.",
+    "ner_labels": [
+      {
+        "text": "REST API",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "C/C++",
+        "label": "Programming_Scripting_and_Markup_languages"
+      },
+      {
+        "text": "Python",
+        "label": "Programming_Scripting_and_Markup_languages"
+      },
+      {
+        "text": "Go",
+        "label": "Programming_Scripting_and_Markup_languages"
+      },
+      {
+        "text": "Git",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "Gerrit",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "Jenkins",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "communication skills",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "VMs",
+        "label": "Cloud_platforms"
+      },
+      {
+        "text": "containers",
+        "label": "Cloud_platforms"
+      },
+      {
+        "text": "API",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "time management skills",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "interpersonal skills",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "team player",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "analytical",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "problem solving",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "decision making",
+        "label": "Technique_and_Skill"
+      }
+    ]
+  },
+  {
+    "original_text": "richardsontexasunited state bausp4 boeing company currently seeking database administrator join 's richardson texas location responsibility include limited following partner customer gather document requirement produce product specified customer must able work across diverse team software system engineer training development specialist software technician security specialist dynamic high paced environment must able successfully develop plan establish database performance baseline monitoring performance trend identify correct problem customizing existing application life project must able assure curriculum integrity security configuration management version control must able collaborate architect technical specialist identify proper hardware software upgrade implementation must able plan install test software upgrade patch must implement database security infrastructure manages user account must work closely project manager database programmer multimedia program develop implement customer learning management system business system development environment must prepare database documentation including standard procedure definition deliverable data dictionary metadata boeing world 's largest aerospace company leading manufacturer commercial airplane defense space security system engineer technician skilled scientist thinker bold innovator dreamer join u build something better customer world typical education/experience technical bachelor 's degree typically 9 year ' related work experience master 's degree typically 7 year ' phd degree typically 4 year ' related work experience equivalent combination education experience technical degree defined four year degree greater mathematic scientific information technology field study basic qualification required position requires active ability obtain u.s. security clearance u government requires u citizenship position requires active top secret clearance security clearance/special program access government access requirement mandatory position much work boeing company classified nature many position require security clearance granting discretion government authority applicant must current top secret security clearance additionally applicant must able obtain program access security clearance upgrade and/or program access request initiated applicant 's acceptance contingent offer filling requisition contingent based applicant 's ability obtain required program access time frame established program management relocation dallas texas authorized appropriate access granted must advanced sql/oracle database design administration knowledge able write script query system generate customer report desired qualification knowledge ibm rational clearcase bnh advisor enterprise yes 10 time commercial derivative aircraft individual contributor standard united state boeing company",
+    "ner_labels": [
+      {
+        "text": "database",
+        "label": "Database"
+      },
+      {
+        "text": "version control",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "SQL",
+        "label": "Programming_Scripting_and_Markup_languages"
+      },
+      {
+        "text": "Oracle",
+        "label": "Database"
+      },
+      {
+        "text": "IBM Rational ClearCase",
+        "label": "Framework_and_Libraries"
+      }
+    ]
+  },
+  {
+    "original_text": "Remote, Any where 2 4 years 8L 12L / yr ESOP available Skills TensorFlow OpenCV Python Artificial Neural Network ANN Deep Learning Image Processing PyTorch Amazon Web Services AWS Cloud Computing computer vision Job description ClearQuote app helps assess damages in cars based on images/videos used by insurers, mobility providers and workshops.",
+    "ner_labels": [
+      {
+        "text": "TensorFlow",
+        "label": "Framework_and_Libraries"
+      },
+      {
+        "text": "OpenCV",
+        "label": "Framework_and_Libraries"
+      },
+      {
+        "text": "Python",
+        "label": "Programming_Scripting_and_Markup_languages"
+      },
+      {
+        "text": "Artificial Neural Network ANN",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "Deep Learning",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "Image Processing",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "PyTorch",
+        "label": "Framework_and_Libraries"
+      },
+      {
+        "text": "Amazon Web Services AWS",
+        "label": "Cloud_platforms"
+      },
+      {
+        "text": "Cloud Computing",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "computer vision",
+        "label": "Technique_and_Skill"
+      }
+    ]
+  },
+  {
+    "original_text": "What s on offer Opportunity to lead development of a global tech product, competitive pay and stock options Role 1 Work on identifying and implementing pre processing of various datasets images, videos 2 Identifying / testing the right techniques / deeplearning libraries to use to train the model and infer parts and degree of damage in test data 3 Deploy training and inferencing models on cloud and edge if required 4 Work on improving accuracy of detection 5 Based on experience and ability lead the rest of the computer vision engineering team Requirements 1 Experience in Deep learning using Convolutional Neural Networks 2 Sound knowledge of Object detection,Semantic segmentation,Instance segmentation Faster RCNN,Single shot multibox detector SSD ,Mask RCNN,Mobile net 3 Classic Image processing techniques using OpenCV 4 Proficiency in Python 5 Should be comfortable building ML models on various deep learning and machine learning libraries using tensorflow,keras,scikit learn,Numpy,etc",
+    "ner_labels": [
+      {
+        "text": "Deep learning",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "cloud",
+        "label": "Cloud_platforms"
+      },
+      {
+        "text": "edge",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "Convolutional Neural Networks",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "Object detection",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "Semantic segmentation",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "Instance segmentation",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "Faster RCNN",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "Single shot multibox detector SSD",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "Mask RCNN",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "Mobile net",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "Classic Image processing techniques",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "OpenCV",
+        "label": "Framework_and_Libraries"
+      },
+      {
+        "text": "Python",
+        "label": "Programming_Scripting_and_Markup_languages"
+      },
+      {
+        "text": "ML models",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "tensorflow",
+        "label": "Framework_and_Libraries"
+      },
+      {
+        "text": "keras",
+        "label": "Framework_and_Libraries"
+      },
+      {
+        "text": "scikit learn",
+        "label": "Framework_and_Libraries"
+      },
+      {
+        "text": "Numpy",
+        "label": "Framework_and_Libraries"
+      }
+    ]
+  },
+  {
+    "original_text": "6 Familiarity with Amazon Web service Elastic Cloud Compute EC2 ,Amazon Sagemaker and deployment 7 Must have work experience in image processing, computer vision areas exposure to other machine learning / deep learning areas a bonus 8 Experience in working with Pytorch preferred 9 Strong basics in machine learning, computer vision 10",
+    "ner_labels": [
+      {
+        "text": "Amazon Web service Elastic Cloud Compute EC2",
+        "label": "Cloud_platforms"
+      },
+      {
+        "text": "Amazon Sagemaker",
+        "label": "Cloud_platforms"
+      },
+      {
+        "text": "image processing",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "computer vision",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "machine learning",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "deep learning",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "Pytorch",
+        "label": "Framework_and_Libraries"
+      }
+    ]
+  },
+  {
+    "original_text": "We work on applying predictive technology to a wide spectrum of problems in areas such as Amazon Retail, Seller Services, Customer Service, Alexa, Chatbots and so on.",
+    "ner_labels": []
+  },
+  {
+    "original_text": "We are looking for talented and experienced Machine Learning Scientists Masters/Ph.D. in a related area preferred who can apply innovative Machine Learning techniques to real world e Commerce problems.",
+    "ner_labels": [
+      {
+        "text": "Machine Learning",
+        "label": "Technique_and_Skill"
+      }
+    ]
+  },
+  {
+    "original_text": "You will get to work in a team dedicated to advancing Machine Learning technology at Amazon and converting it to business impacting solutions.",
+    "ner_labels": [
+      {
+        "text": "Machine Learning",
+        "label": "Technique_and_Skill"
+      }
+    ]
+  },
+  {
+    "original_text": "Major responsibilities Use machine learning, data mining and statistical techniques to create new, scalable solutions for business problems Analyze and extract relevant information from large amounts of Amazons historical business data to help automate and optimize key processes Design, develop and evaluate highly innovative models for predictive learning Establish scalable, efficient, automated processes for large scale data analyses model development, model validation and model implementation Research and implement novel machine learning and statistical approaches Basic Qualifications A Masters and/or PhD in Computer Science, Machine Learning, Operational research, Statistics or in a highly quantitative field Experience in predictive modelling and analysis, predictive software development Strong problem solving ability Good skills with Java/Scala or C++, Perl/Python or similar scripting language Experience in using R, Matlab, or any other statistical software Strong communication and data presentation skills Preferred Qualifications Experience handling gigabyte and terabyte size datasets Experience working with distributed systems and grid computing Knowledge of the latest and state of the art ML technology Publications or presentation in recognized Machine Learning and Data Mining journals/conferences",
+    "ner_labels": [
+      {
+        "text": "machine learning",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "data mining",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "predictive modelling",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "predictive software development",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "problem solving ability",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "Java",
+        "label": "Programming_Scripting_and_Markup_languages"
+      },
+      {
+        "text": "Scala",
+        "label": "Programming_Scripting_and_Markup_languages"
+      },
+      {
+        "text": "C++",
+        "label": "Programming_Scripting_and_Markup_languages"
+      },
+      {
+        "text": "Perl",
+        "label": "Programming_Scripting_and_Markup_languages"
+      },
+      {
+        "text": "Python",
+        "label": "Programming_Scripting_and_Markup_languages"
+      },
+      {
+        "text": "R",
+        "label": "Programming_Scripting_and_Markup_languages"
+      },
+      {
+        "text": "Matlab",
+        "label": "Programming_Scripting_and_Markup_languages"
+      },
+      {
+        "text": "distributed systems",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "grid computing",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "ML technology",
+        "label": "Technique_and_Skill"
+      }
+    ]
+  },
+  {
+    "original_text": "Coming in with an understanding of the importance of end to end software development such as Agile frameworks is key.",
+    "ner_labels": [
+      {
+        "text": "Agile",
+        "label": "Technique_and_Skill"
+      }
+    ]
+  },
+  {
+    "original_text": "Teams focus is on Responding to the evolving regulatory environment and helping to meet the firm's regulatory commitments by addressing internal and external commitments Advancing the firm's Roadmap programs Single Sourcing of data, Architecture Convergence, and Rationalization of Application Portfolio and Platforms Adopting industry leading technologies to support best in class business capabilities for high performance computing and data storage solutions Driving innovation across the firm's corporate technology portfolio, increasing efficiencies through process automation and Agile application development, with an emphasis on user experience and shorter development cycles Investing in security & controls for cyber, access/entitlements uplift, data protection and application resiliency Controls & Operational Risk Technology supports identification, assessment, and prioritization of risks followed by coordinated application of resources to minimize, monitor, and control the probability and/or impact of events.",
+    "ner_labels": [
+      {
+        "text": "process automation",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "Agile",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "user experience",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "application resiliency",
+        "label": "Technique_and_Skill"
+      }
+    ]
+  },
+  {
+    "original_text": "Qualifications Internal Competencies Essential HTML5, CSS 3.0, Bootstrap, Angular 8.x+, JavaScript, JQuery and comparable languages Proficient with Angular framework and hands on Angular 8+ version.",
+    "ner_labels": [
+      {
+        "text": "HTML5",
+        "label": "Programming_Scripting_and_Markup_languages"
+      },
+      {
+        "text": "CSS 3.0",
+        "label": "Programming_Scripting_and_Markup_languages"
+      },
+      {
+        "text": "Bootstrap",
+        "label": "Framework_and_Libraries"
+      },
+      {
+        "text": "Angular 8.x+",
+        "label": "Framework_and_Libraries"
+      },
+      {
+        "text": "JavaScript",
+        "label": "Programming_Scripting_and_Markup_languages"
+      },
+      {
+        "text": "JQuery",
+        "label": "Framework_and_Libraries"
+      },
+      {
+        "text": "Angular 8+",
+        "label": "Framework_and_Libraries"
+      }
+    ]
+  },
+  {
+    "original_text": "Proficient with Unit testing with Jasmine or protractor.",
+    "ner_labels": [
+      {
+        "text": "Unit testing",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "Jasmine",
+        "label": "Framework_and_Libraries"
+      },
+      {
+        "text": "protractor",
+        "label": "Framework_and_Libraries"
+      }
+    ]
+  },
+  {
+    "original_text": "Knowledge and of using and building Restful services Proficient with Java and hands on Java 8+ version.",
+    "ner_labels": [
+      {
+        "text": "Restful services",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "Java",
+        "label": "Programming_Scripting_and_Markup_languages"
+      }
+    ]
+  },
+  {
+    "original_text": "Agile experience is a must.",
+    "ner_labels": [
+      {
+        "text": "Agile",
+        "label": "Technique_and_Skill"
+      }
+    ]
+  },
+  {
+    "original_text": "Conduct testing of completed applications, websites and software to Assess user experience Automated, Manual, Progression/Regression and Exploratory testing experience and deployment validation support.",
+    "ner_labels": [
+      {
+        "text": "testing",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "user experience",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "Automated testing",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "Manual testing",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "Progression/Regression testing",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "Exploratory testing",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "deployment validation",
+        "label": "Technique_and_Skill"
+      }
+    ]
+  },
+  {
+    "original_text": "The Software Engineer I is responsible to design, code, and/or configure solutions for moderate complexity Agile stories, as well as writing automated unit and integration level tests.",
+    "ner_labels": [
+      {
+        "text": "Agile",
+        "label": "Technique_and_Skill"
+      }
+    ]
+  },
+  {
+    "original_text": "ESSENTIAL JOB FUNCTIONS/RESPONSIBILITIES Designs, codes, and/or configures solutions for moderate complexity Agile stories with some guidance from more a senior software engineer.",
+    "ner_labels": [
+      {
+        "text": "Agile",
+        "label": "Technique_and_Skill"
+      }
+    ]
+  },
+  {
+    "original_text": "Experience developing in cloud environments like Azure, Google, AWS a plus.",
+    "ner_labels": [
+      {
+        "text": "Azure",
+        "label": "Cloud_platforms"
+      },
+      {
+        "text": "Google",
+        "label": "Cloud_platforms"
+      },
+      {
+        "text": "AWS",
+        "label": "Cloud_platforms"
+      }
+    ]
+  },
+  {
+    "original_text": "QUALIFICATIONS/REQUIREMENTS Education and Work Experience Bachelor s degree or higher education level, or its foreign equivalent, in Computer Science, Computer Information Sciences, and/or related field Total Work Experience 6+ years software development , 4 years minimum, Product Experience 2 years minimum, 4+ years preferred Domain Experience 2 years minimum, 4+ years preferred Specialized Knowledge, Skills, and/or Abilities Expert in Object oriented design, Java or .NET development, Relational OLTP queries and Relational database design Capable of XML/XSLT document design, JavaScript development, HTML5 & CSS Ability to manage to deadlines, communicate in a team, and operate independently with guidance Understands how to estimate, analyze, and the Software Product Development Lifecycle with Agile methodology Other Requirements Work Authorization Legally authorized to work in the country of the job location.",
+    "ner_labels": [
+      {
+        "text": "Object oriented design",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "Java",
+        "label": "Programming_Scripting_and_Markup_languages"
+      },
+      {
+        "text": ".NET",
+        "label": "Framework_and_Libraries"
+      },
+      {
+        "text": "Relational OLTP queries",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "Relational database design",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "XML/XSLT",
+        "label": "Programming_Scripting_and_Markup_languages"
+      },
+      {
+        "text": "JavaScript",
+        "label": "Programming_Scripting_and_Markup_languages"
+      },
+      {
+        "text": "HTML5",
+        "label": "Programming_Scripting_and_Markup_languages"
+      },
+      {
+        "text": "CSS",
+        "label": "Programming_Scripting_and_Markup_languages"
+      },
+      {
+        "text": "Agile",
+        "label": "Technique_and_Skill"
+      }
+    ]
+  },
+  {
+    "original_text": "The ideal candidate has 5+ years of Software Development experience with strong experience in modern Javascript ES6+ and Node.",
+    "ner_labels": [
+      {
+        "text": "Javascript ES6+",
+        "label": "Programming_Scripting_and_Markup_languages"
+      },
+      {
+        "text": "Node",
+        "label": "Framework_and_Libraries"
+      }
+    ]
+  },
+  {
+    "original_text": "The candidate would ideally have experience with Vue or similar web frameworks, and there is a high preference for Java experience.",
+    "ner_labels": [
+      {
+        "text": "Vue",
+        "label": "Framework_and_Libraries"
+      },
+      {
+        "text": "Java",
+        "label": "Programming_Scripting_and_Markup_languages"
+      }
+    ]
+  },
+  {
+    "original_text": "Proficient in modern Javascript ES6+ and Node.",
+    "ner_labels": "API Error"
+  },
+  {
+    "original_text": "Strong experience with HTML5 / CSS3 / SCSS.",
+    "ner_labels": "API Error"
+  },
+  {
+    "original_text": "Moderate to strong experience with Vue or similar web frameworks React, Angular .",
+    "ner_labels": "API Error"
+  },
+  {
+    "original_text": "Moderate to strong experience developing or consuming REST web services.",
+    "ner_labels": [
+      {
+        "text": "REST web services",
+        "label": "Technique_and_Skill"
+      }
+    ]
+  },
+  {
+    "original_text": "Moderate to strong experience developing with Java is helpful.",
+    "ner_labels": [
+      {
+        "text": "Java",
+        "label": "Programming_Scripting_and_Markup_languages"
+      }
+    ]
+  },
+  {
+    "original_text": "Experience with Javascript testing frameworks Jest, Mocha, etc. .",
+    "ner_labels": "API Error"
+  },
+  {
+    "original_text": "Experience with version control SVN or Git .",
+    "ner_labels": [
+      {
+        "text": "version control",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "SVN",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "Git",
+        "label": "Technique_and_Skill"
+      }
+    ]
+  },
+  {
+    "original_text": "Experience with Dev Ops and/or continuous integration CI tools Jenkins is useful.",
+    "ner_labels": [
+      {
+        "text": "Dev Ops",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "continuous integration CI",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "Jenkins",
+        "label": "Framework_and_Libraries"
+      }
+    ]
+  },
+  {
+    "original_text": "B.S. Degree in Computer Science or equivalent experience.",
+    "ner_labels": []
+  },
+  {
+    "original_text": "Western National Insurance is a growing, A+ rated A.M. Best group of property and casualty insurance companies serving individuals, families, and businesses in 20 states across the Midwestern and Western U.S. plus Alaska.",
+    "ner_labels": []
+  },
+  {
+    "original_text": "Currently ranked as the 57th largest private company by revenue in Minnesota Minneapolis St. Paul Business Journal , Western National has consistently earned accolades as an employer of choice, including as a Star Tribune Top Workplace 2011 2016 , and previously as a recipient of the Minnesota Business Ethics Award, as a Minnesota Business Magazine Top 100 Workplace, as a Principal Financial 10 Best Company, and as a finalist for the Alfred P. Sloan When Work Works Award.",
+    "ner_labels": []
+  },
+  {
+    "original_text": "These attributes are just some of the reasons why nearly half of our employees choose to stay on the Western National team for 10 years or more.",
+    "ner_labels": []
+  },
+  {
+    "original_text": "Our benefits package includes 401 k company match Medical insurance We offer affordable thanks to a strong employer subsidy , above average coverage and the choice of either a traditional Preferred Provider Organization PPO option OR a High Deductible Health Plan HDHP option Western Wellbeing program Including on site massage, yoga classes, salad and healthy snack days, sit/stand workstations, nutrition seminars, and more 100 company paid tuition reimbursement for approved, job relevant coursework Discounts on automobile and homeowner's insurance Other standard employee benefits Including dental insurance, vision benefits, life insurance, disability insurance, and more We could continue to list the things that we think make Western National a great place to work, but why not hear it instead from actual current and former employees Here are some quotes that Western National employees have posted to the Glassdoor public review site Excellent company which prioritizes customer service and community service.",
+    "ner_labels": []
+  },
+  {
+    "original_text": "Basic Requirements Having prior working experience on WordPress Should be proficient verbally and written communication skills.",
+    "ner_labels": [
+      {
+        "text": "WordPress",
+        "label": "Framework_and_Libraries"
+      }
+    ]
+  },
+  {
+    "original_text": "Able to integrate with external application ERP/CRM Should be capable of working on Payment gateway integration on multiple platforms Should have adequate knowledge of relational database systems and Object Oriented Programming.",
+    "ner_labels": [
+      {
+        "text": "Object Oriented Programming",
+        "label": "Technique_and_Skill"
+      }
+    ]
+  },
+  {
+    "original_text": "Able to work on multiple Frameworks such as Zend etc. would be an added advantage Responsibilities and Duties Should be able to manage on handling Multiple Projects Manage project independently Manage clients Able to handle the team Deliver projects before deadlines.",
+    "ner_labels": [
+      {
+        "text": "Zend",
+        "label": "Framework_and_Libraries"
+      }
+    ]
+  },
+  {
+    "original_text": "Required Experience, Skills and Qualifications WordPress Plugin in development PHP HTML/HTML5 Javascript/jQuery Bootstrap MySQL Qualification UG B.Sc CS/CSC/IT , BCA, BCS, BE, B.Tech CS/CSE/IT M.Sc CS/CSC/IT , MCA, MCS, ME, M.Tech CS/CSE/IT",
+    "ner_labels": "API Error"
+  },
+  {
+    "original_text": "Job Code ID190704 Job Description Experience 1 to 2 years in iOS Development Native iOS development Hybrid app development with PhoneGap, Ionic, Titanium will be an advantage Database knowledge is",
+    "ner_labels": "API Error"
+  },
+  {
+    "original_text": "job description summary highly skilled technical role ultimate responsibility support hpe oracle database environment providing technical expertise designing building tuning installing configuring troubleshooting database middleware technology provide technical leadership large complex database build migration effort work closely engineer architect project program manager define design strategy better data management infrastructure process role responsible developing documenting maintaining logical physical database model ensuring design comply standard guideline procedure research analyze impact proposed change ensure corporate data effectively implemented managed secured provide consulting support application development team",
+    "ner_labels": "API Error"
+  },
+  {
+    "original_text": "well dba 's complex integrated system including distributed solution provide analysis guidance migration consolidation effort job description position provide support architecture planning installation monitoring configuration administration testing evaluating troubleshooting oracle database instance collaborate application infrastructure team adherence best practice process standardization key responsibility position monitor ensure high availability environment quickly respond diagnose problem utilize leverage new feature underlying technology work closely enterprise database manager.. another area responsibility position provide leadership role create awareness guidance application development business team migrate consolidate re platform various application oracle no sql technology work minimal supervision receives general direction enterprise database manager responsibility design backup/recovery procedure ensure validity develop archival strategy conforms hpe security audit guideline develop execute appropriate delivery team model e.g resource skill process management meet current projected needs/constraints support implementation new release dbms software plan implement new feature appropriate mentor le experienced dba 's application developer ensure adequate 24x7 support develop procedure deal incident perform database migration merging consolidation needed participate change incident management procedure problem resolution analyze database implementation method ensure line company policy proactively monitor operation log optimize system performance using available monitoring db optimization tool additional job description experience oracle data guard standby/failover administration highly skilled oracle 10g/11g/12c database administration hand experience query tuning performance optimization db ops automation alert monitoring backup restore hand experience data modeling design knowledgeable oracle rac & asm administration knowledgeable pl/sql procedure package development experience managing high performing team database ability prioritize workload work effectively pressure high degree independence must versatile flexible proactive resolving technical issue ability handle diverse situation rapidly changing priority deadline experience setting database disaster recovery site plus excellent interpersonal communication skill exposure sql server no sql database technology plus education professional experience bachelor degree computer science information technology related field least 10+ year hand work lead support production database previous leadership team management experience strong organizational time management skill communicate/work effectively team environment effective meeting deadline li mf1 hewlett packard enterprise eeo f/m/protected veteran/ individual disability hpe comply applicable law related use arrest conviction record including san francisco fair chance ordinance similar law consider employment qualified applicant criminal history",
+    "ner_labels": "API Error"
+  },
+  {
+    "original_text": "AWS & GCP Build, release, and configuration management of production systems System troubleshooting and problem solving across platform and application domains.",
+    "ner_labels": [
+      {
+        "text": "AWS",
+        "label": "Cloud_platforms"
+      },
+      {
+        "text": "GCP",
+        "label": "Cloud_platforms"
+      },
+      {
+        "text": "configuration management",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "System troubleshooting",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "problem solving",
+        "label": "Technique_and_Skill"
+      }
+    ]
+  },
+  {
+    "original_text": "Design, operation, and maintenance of robust, large scale distributed systems Experience in Linux Environment.",
+    "ner_labels": [
+      {
+        "text": "distributed systems",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "Linux Environment",
+        "label": "Technique_and_Skill"
+      }
+    ]
+  },
+  {
+    "original_text": "Good understanding and practical experience with configuration management e.g. Ansible, Chef, and Puppet and Infrastructure as Code such as Terraform.",
+    "ner_labels": "API Error"
+  },
+  {
+    "original_text": "Experience with automation from simple shell/python scripting to more complex software engineering solutions.",
+    "ner_labels": "API Error"
+  },
+  {
+    "original_text": "Strong background in either AWS or GCP is a must.",
+    "ner_labels": "API Error"
+  },
+  {
+    "original_text": "Problem solving ability to analyze and resolve complex infrastructure issues by using Monitoring tools Datadog, Prometheus, Grafana .",
+    "ner_labels": [
+      {
+        "text": "Problem solving ability",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "Datadog",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "Prometheus",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "Grafana",
+        "label": "Technique_and_Skill"
+      }
+    ]
+  },
+  {
+    "original_text": "Kubernetes experience is a must .",
+    "ner_labels": [
+      {
+        "text": "Kubernetes",
+        "label": "Cloud_platforms"
+      }
+    ]
+  },
+  {
+    "original_text": "EKS, GKE, Openshift Strong experience using CI/CD tools such as Jenkins, GitLab CI, etc., or Java based integration tools such as Groovy.",
+    "ner_labels": [
+      {
+        "text": "EKS",
+        "label": "Cloud_platforms"
+      },
+      {
+        "text": "GKE",
+        "label": "Cloud_platforms"
+      },
+      {
+        "text": "Openshift",
+        "label": "Cloud_platforms"
+      },
+      {
+        "text": "CI/CD",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "Jenkins",
+        "label": "Framework_and_Libraries"
+      },
+      {
+        "text": "GitLab CI",
+        "label": "Framework_and_Libraries"
+      },
+      {
+        "text": "Java",
+        "label": "Programming_Scripting_and_Markup_languages"
+      },
+      {
+        "text": "Groovy",
+        "label": "Programming_Scripting_and_Markup_languages"
+      }
+    ]
+  },
+  {
+    "original_text": "It would be great to know how to implement Jenkins configuration, CI pipelines via code, etc.",
+    "ner_labels": [
+      {
+        "text": "Jenkins",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "CI",
+        "label": "Technique_and_Skill"
+      }
+    ]
+  },
+  {
+    "original_text": "Experience in on or more of Bash, Go, Python, JS.",
+    "ner_labels": [
+      {
+        "text": "Bash",
+        "label": "Programming_Scripting_and_Markup_languages"
+      },
+      {
+        "text": "Go",
+        "label": "Programming_Scripting_and_Markup_languages"
+      },
+      {
+        "text": "Python",
+        "label": "Programming_Scripting_and_Markup_languages"
+      },
+      {
+        "text": "JS",
+        "label": "Programming_Scripting_and_Markup_languages"
+      }
+    ]
+  },
+  {
+    "original_text": "Outstanding work ethic, high integrity, team player, and a lifelong learner Nice to have Experienced with Data Engineering services like Lake Formation, Glue, Athena, Redshift, Sagemaker, Kineses, Kafka, BigQuery etc.",
+    "ner_labels": [
+      {
+        "text": "Lake Formation",
+        "label": "Cloud_platforms"
+      },
+      {
+        "text": "Glue",
+        "label": "Cloud_platforms"
+      },
+      {
+        "text": "Athena",
+        "label": "Cloud_platforms"
+      },
+      {
+        "text": "Redshift",
+        "label": "Database"
+      },
+      {
+        "text": "Sagemaker",
+        "label": "Cloud_platforms"
+      },
+      {
+        "text": "Kineses",
+        "label": "Cloud_platforms"
+      },
+      {
+        "text": "Kafka",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "BigQuery",
+        "label": "Database"
+      }
+    ]
+  },
+  {
+    "original_text": "Experienced with SQL and NoSQL Databases like DynamoDB, RDS, PostgreSQL, ElasticSearch, MongoDB, etc.",
+    "ner_labels": [
+      {
+        "text": "SQL",
+        "label": "Programming_Scripting_and_Markup_languages"
+      },
+      {
+        "text": "DynamoDB",
+        "label": "Database"
+      },
+      {
+        "text": "RDS",
+        "label": "Database"
+      },
+      {
+        "text": "PostgreSQL",
+        "label": "Database"
+      },
+      {
+        "text": "ElasticSearch",
+        "label": "Database"
+      },
+      {
+        "text": "MongoDB",
+        "label": "Database"
+      }
+    ]
+  },
+  {
+    "original_text": "country place mortgage founded 1995 subsidiary cavco industry inc. national lender providing wide variety financing option purchaser manufactured home cavco industry inc. wa founded 1965 fast growing publicly traded company disrupting manufactured home industry headquartered phoenix arizona cavco leading designer builder manufactured home modular home commercial building park model rv vacation cabin company insurance group standard casualty offer wide range insurance product manufactured home owner country place mortgage seller servicer mortgage fannie mae freddie mac fha authorized lender ginnie mae mortgage backed security issuer employee biggest asset play integral role meeting need customer come part team offering many opportunity utilize talent atmosphere support encourages realize full potential come share helping people realize dream opportunity home",
+    "ner_labels": []
+  },
+  {
+    "original_text": "come share story part building something amazing country place mortgage currently looking database administrator work office located addison tx responsible designing building administering maintaining oracle database must able perform daily administration database system prevent outage plan optimized system resource utilization position contribute architectural direction provide expertise design performance database structure assist database performance tuning database capacity issue replication distributed data issue strong understanding sql standard diagnostics performance tuning must responsibility build support oracle database linux based system perform evaluation modification integration function associated vendor supplied database software ensure business continuity developing implementing highly available database system database recovery plan procedure serve resource le experienced team member escalated issue routine nature support oracle database weblogic qualification bachelor degree comparable industry experience 2+ year oracle database experience experience database support iaa paas preferred in depth understanding database tool utility well highly developed sql database performance tuning skill knowledge computer hardware san/nas networking verbal written communication skill problem solving skill customer service interpersonal skill ability work independently manage one time loan origination/servicing support experience helpful mandatory _cavco industry committed providing equal employment opportunity without regard race color religion sex sexual orientation gender identity national origin age disability protected status respect recruitment hiring promotion term condition employment disclaimer statement intended describe general nature level work performed associate assigned classification construed exhaustive list responsibility duty skill required personnel classified personnel may required perform duty outside normal responsibility time time needed._",
+    "ner_labels": [
+      {
+        "text": "oracle database",
+        "label": "Database"
+      },
+      {
+        "text": "SQL",
+        "label": "Programming_Scripting_and_Markup_languages"
+      },
+      {
+        "text": "database performance tuning",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "replication",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "database recovery plan",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "IaaS",
+        "label": "Cloud_platforms"
+      },
+      {
+        "text": "PaaS",
+        "label": "Cloud_platforms"
+      },
+      {
+        "text": "Problem Solving",
+        "label": "Technique_and_Skill"
+      }
+    ]
+  },
+  {
+    "original_text": "Position WordPress Developer Location Prahladnagar, Ahmedabad Experience 4 to 8 Years Working Timings 10 00 AM to 7 00 PM",
+    "ner_labels": [
+      {
+        "text": "WordPress",
+        "label": "Framework_and_Libraries"
+      }
+    ]
+  },
+  {
+    "original_text": "Working Days Alt Sat Off WordPress Developer Responsibilities Meeting with clients to discuss website design and function.",
+    "ner_labels": [
+      {
+        "text": "WordPress",
+        "label": "Framework_and_Libraries"
+      }
+    ]
+  },
+  {
+    "original_text": "Generating WordPress themes and plugins.",
+    "ner_labels": [
+      {
+        "text": "WordPress",
+        "label": "Framework_and_Libraries"
+      }
+    ]
+  },
+  {
+    "original_text": "Conducting WordPress training with the client.",
+    "ner_labels": []
+  },
+  {
+    "original_text": "WordPress Developer Requirements Bachelor s degree in Computer Science or a similar field.",
+    "ner_labels": []
+  },
+  {
+    "original_text": "Proven work experience as a WordPress Developer.",
+    "ner_labels": [
+      {
+        "text": "WordPress",
+        "label": "Framework_and_Libraries"
+      }
+    ]
+  },
+  {
+    "original_text": "Knowledge of front end technologies including CSS3, JavaScript, HTML5, and jQuery.",
+    "ner_labels": [
+      {
+        "text": "CSS3",
+        "label": "Programming_Scripting_and_Markup_languages"
+      },
+      {
+        "text": "JavaScript",
+        "label": "Programming_Scripting_and_Markup_languages"
+      },
+      {
+        "text": "HTML5",
+        "label": "Programming_Scripting_and_Markup_languages"
+      },
+      {
+        "text": "jQuery",
+        "label": "Framework_and_Libraries"
+      }
+    ]
+  },
+  {
+    "original_text": "Knowledge of code versioning tools including Git, Mercurial, and SVN. Experience working with debugging tools such as Chrome Inspector and Firebug.",
+    "ner_labels": [
+      {
+        "text": "Git",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "Mercurial",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "SVN",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "Chrome Inspector",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "Firebug",
+        "label": "Technique_and_Skill"
+      }
+    ]
+  },
+  {
+    "original_text": "Job Type Full time Salary 25,000.00 70,000.00 per month Schedule Day shift Experience WordPress 1 year Preferred work 1 year Preferred total work 1 year Preferred Education Bachelor's Preferred Work Remotely No",
+    "ner_labels": [
+      {
+        "text": "WordPress",
+        "label": "Framework_and_Libraries"
+      }
+    ]
+  },
+  {
+    "original_text": "Take your skillset to the next level with some of the best minds in the ad technology industry to make a real difference with MonetizeMore.",
+    "ner_labels": []
+  },
+  {
+    "original_text": "Responsibilities The day to day work of a MonetizeMore web developer includes Developing features or product using JavaScript, Python/Flask, PostgreSQL, Linux, Docker, Git, Cloud Services and any other new technologies.",
+    "ner_labels": [
+      {
+        "text": "JavaScript",
+        "label": "Programming_Scripting_and_Markup_languages"
+      },
+      {
+        "text": "Python",
+        "label": "Programming_Scripting_and_Markup_languages"
+      },
+      {
+        "text": "Flask",
+        "label": "Framework_and_Libraries"
+      },
+      {
+        "text": "PostgreSQL",
+        "label": "Database"
+      },
+      {
+        "text": "Linux",
+        "label": "Technique_and_Skill"
+      },
+      {
+        "text": "Docker",
+        "label": "Cloud_platforms"
+      },
+      {
+        "text": "Git",
+        "label": "Technique_and_Skill"
+      }
+    ]
+  },
+  {
+    "original_text": "Building JavaScript applications capable of tracking and responding to billions of requests per month.",
+    "ner_labels": [
+      {
+        "text": "JavaScript",
+        "label": "Programming_Scripting_and_Markup_languages"
+      }
+    ]
+  },
+  {
+    "original_text": "Attending daily stand up meetings 15 mins and other Scrum meetings Every 3 weeks .",
+    "ner_labels": [
+      {
+        "text": "Scrum",
+        "label": "Technique_and_Skill"
+      }
+    ]
+  }
+]

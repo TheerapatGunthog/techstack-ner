@@ -108,7 +108,7 @@ PROJECT_PATH = Path("/home/whilebell/Code/techstack-ner/")
 JSON_DATA_COLUMN = "label"
 CSV_FILE_NAME = (
     PROJECT_PATH
-    / "data/interim/bootstrapping/002/dictionary/project-24-at-2025-07-08-09-19-71020547.csv"
+    / "data/interim/bootstrapping/002/dictionary/project-35-at-2025-07-16-05-59-61deef20.csv"
 )
 
 # Output file names

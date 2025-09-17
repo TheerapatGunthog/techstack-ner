@@ -1,11 +1,36 @@
-# Ignore a data directory
-/data/raw
-/data/processed
-/data/interim
-/data/gemini_api_reports
+# Ignore a data interim
+data/interim/bootstrapping/*
+data/interim/preprocessed-data/*
+data/interim/splited-scraping-data/*
+data/interim/summarize_text/*
+!data/interim/bootstrapping/.gitkeep
+!data/interim/preprocessed-data/.gitkeep
+!data/interim/splited-scraping-data/.gitkeep
+!data/interim/summarize_text/.gitkeep
+
+# Ignore a keywords data
+data/keywords/*
+!data/keywords/.gitkeep
+
+# Ignore a post_processed data
+data/post_processed/*
+!data/post_processed/.gitkeep
+
+# Ignore a processed data
+data/processed/bootstrapping/*
+!data/processed/bootstrapping/.gitkeep
+
+# Ignore a raw data
+data/raw/scraping-data/*
+data/raw/kaggle-data/*
+data/raw/classified/*
+!data/raw/scraping-data/.gitkeep
+!data/raw/kaggle-data/.gitkeep
+!data/raw/classified/.gitkeep
 
 # Ignore a models directory
-/models
+models/*
+!models/.gitkeep
 
 # Ignore .env files
 .env
