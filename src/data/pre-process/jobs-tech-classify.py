@@ -92,17 +92,19 @@ print(f"Job title: {top_tech_job['Topic']}")
 print(f"Tech score: {top_tech_job['tech_score']:.3f}")
 print(f"Qualification: {top_tech_job['Qualification']}")
 
-# Save results
-# Save all data with classification results
-df.to_csv(
-    OUTPUT_NONTECH_PATH,
-    index=False,
-    encoding="utf-8-sig",
-)
+tech_jobs = df[df["is_tech"]].copy()
+non_tech_jobs = df[~df["is_tech"]].copy()
 
 # Save only tech jobs
 tech_jobs.to_csv(
     OUTPUT_TECH_PATH,
+    index=False,
+    encoding="utf-8-sig",
+)
+
+# Save only non-tech jobs
+non_tech_jobs.to_csv(
+    OUTPUT_NONTECH_PATH,
     index=False,
     encoding="utf-8-sig",
 )
