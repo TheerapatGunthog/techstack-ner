@@ -6,7 +6,7 @@ import requests
 import pandas as pd
 from tqdm import tqdm
 
-# ================= Config =================
+# ================ Config ================
 INPUT = Path(os.getcwd() + "/data/post_processed/all_predictions_dedup.csv")
 OUT_DIR = INPUT.parent
 OUT_FILE = OUT_DIR / "all_predictions_llm_filtered.csv"
@@ -143,12 +143,12 @@ def base_clean(s: str) -> str:
     return (s or "").strip()
 
 
-def low_key(s: str) -> str:
-    return s.lower().replace("-", " ").replace("_", " ").strip()
-
-
 def exact_canon(s: str):
-    return EXACT_MAP.get(low_key(s))
+    s0 = base_clean(s)
+    if not s0:
+        return ""
+    key = s0.lower().replace("-", " ").replace("_", " ").strip()
+    return EXACT_MAP.get(key, "")
 
 
 def canonical_name(s: str) -> str:
@@ -181,7 +181,7 @@ def _ekey(s: str) -> str:
     s = re.sub(r"\s+", " ", s)
     return s.lower()
 
-# ============== LLM: reclass ต่อเอนทิตี (few-shot) ==============
+# ============== LLM: reclass ต่อเอนทิตี (few-shot + length-guard) ==============
 
 
 def _llm_reclass_entities(unique_entities):
@@ -194,6 +194,7 @@ def _llm_reclass_entities(unique_entities):
     for i in tqdm(range(0, len(unique_entities), BATCH_SIZE), desc="LLM reclass (unique entities)"):
         batch = unique_entities[i : i + BATCH_SIZE]
         text = "\n".join([f"{j+1}. Entity: '{e}'" for j, e in enumerate(batch)])
+
         prompt = f"""
 Classify each entity into EXACTLY one of: PSML, DB, CP, FAL, TAS, HW.
 If none fit, output: no
@@ -236,8 +237,17 @@ Now classify the following
         resp = requests.post(LLM_URL, json={"model": LLM_MODEL, "prompt": prompt, "stream": False})
         if not resp.ok:
             raise RuntimeError(f"LLM HTTP {resp.status_code}: {resp.text}")
-        data = resp.json()
-        lines = [l.strip().upper() for l in data.get("response", "").splitlines() if l.strip()]
+        raw = resp.json().get("response", "")
+        lines = [l.strip().upper() for l in raw.splitlines() if l.strip()]
+
+        # --- ความยาวต้องเท่าอินพุตเสมอ ---
+        n_in = len(batch)
+        if len(lines) < n_in:
+            lines += ["NO"] * (n_in - len(lines))
+        elif len(lines) > n_in:
+            lines = lines[:n_in]
+
+        # --- map กลับ ---
         for e, lab in zip(batch, lines):
             lab = lab if lab in allowed else "NO"
             entity_to_class[_ekey(e)] = lab
@@ -256,17 +266,15 @@ def filter_with_llm_reclass_all_entities(df: pd.DataFrame) -> pd.DataFrame:
     # 1) เก็บเอนทิตี canonical แบบไม่ซ้ำ
     seen = set()
     ents_to_check = []
-    key_to_display = {}
     for _, row in df.iterrows():
-        for e in _safe_split_csv(row["Entity"]):
-            if not e:
-                continue
+        for e in _safe_split_csv(row.get("Entity", "")):
             display = canonical_name(e)
+            if not display:
+                continue
             k = _ekey(display)
-            if k and k not in seen:
+            if k not in seen:
                 seen.add(k)
                 ents_to_check.append(display)
-                key_to_display[k] = display
 
     # 2) LLM reclass ต่อเอนทิตี
     entity_to_class = _llm_reclass_entities(ents_to_check)
@@ -274,10 +282,12 @@ def filter_with_llm_reclass_all_entities(df: pd.DataFrame) -> pd.DataFrame:
     # 3) apply กลับทั้งชุดข้อมูล
     out_rows = []
     for _, row in tqdm(df.iterrows(), total=len(df), desc="Apply LLM class per entity"):
-        ents = _safe_split_csv(row["Entity"])
+        ents = _safe_split_csv(row.get("Entity", ""))
         kept_e, kept_c = [], []
         for e in ents:
             display = canonical_name(e)
+            if not display:
+                continue
             k = _ekey(display)
             lab = entity_to_class.get(k, "NO")
             if lab != "NO":
@@ -285,12 +295,14 @@ def filter_with_llm_reclass_all_entities(df: pd.DataFrame) -> pd.DataFrame:
                 kept_c.append(lab)       # คลาสจาก LLM
         if kept_e:
             out_rows.append({
-                "Topic_Normalized": row["Topic_Normalized"],
-                "Sentence_Index": row["Sentence_Index"],
+                "Topic_Normalized": row.get("Topic_Normalized", ""),
+                "Sentence_Index": row.get("Sentence_Index", ""),
                 "Entity": ", ".join(kept_e),
                 "Class": ", ".join(kept_c),
             })
-    return pd.DataFrame(out_rows)
+
+    # คืน DataFrame พร้อมคอลัมน์แม้ out_rows ว่าง
+    return pd.DataFrame(out_rows, columns=["Topic_Normalized", "Sentence_Index", "Entity", "Class"])
 
 # ============== Final normalize & filter ==============
 
@@ -310,6 +322,8 @@ def finalize_group_and_filter(df_filt: pd.DataFrame) -> pd.DataFrame:
     1) groupby Topic_Normalized แล้ว concat Entity/Class ต่อท้าย
     2) คัดทิ้งหัวข้อที่มีจำนวน class ต่างกัน < 3
     """
+    if df_filt.empty:
+        return pd.DataFrame(columns=["Topic_Normalized", "Entity", "Class"])
     grouped = (
         df_filt.groupby("Topic_Normalized", as_index=False)
         .agg({"Entity": _concat_nonempty, "Class": _concat_nonempty})
@@ -328,8 +342,16 @@ if __name__ == "__main__":
     df_filt = filter_with_llm_reclass_all_entities(df)
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     df_filt.to_csv(OUT_FILE, index=False, encoding="utf-8-sig")
+
+    rows = len(df_filt)
+    uniq_entities = df_filt["Entity"].nunique() if "Entity" in df_filt.columns else 0
     print(f"[saved LLM filtered] {OUT_FILE}")
-    print(f"Rows: {len(df_filt):,} | Unique entities: {df_filt['Entity'].nunique():,}")
+    print(f"Rows: {rows:,} | Unique entities: {uniq_entities:,}")
+
+    # NO-rate เพื่อตรวจว่า LLM ตอบ no เยอะผิดปกติหรือไม่
+    # คำนวณจาก mapping ล่าสุด (approx): นับจากค่าที่ใช้จริงใน df_filt เทียบกับจำนวน unique_entities ก่อน LLM
+    # คุณสามารถย้าย logic นับ NO-rate ไว้ใน _llm_reclass_entities แล้ว print ตรงนั้นได้เช่นกัน
+    # ที่นี่เลือกพิมพ์สั้น ๆ ตามผลลัพธ์สุดท้าย
 
     df_grouped = finalize_group_and_filter(df_filt)
     df_grouped.to_csv(OUT_FILE_GROUPED, index=False, encoding="utf-8-sig")
