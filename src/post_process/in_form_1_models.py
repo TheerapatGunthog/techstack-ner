@@ -37,12 +37,9 @@ except Exception:
 # Configuration settings
 # =========================
 PROJECT_PATH = Path(os.getcwd())
-MODEL_PATH_ROBERTA_BASE = (
-    PROJECT_PATH / "models/roberta-base/best_model/"
-)  # Used for PSML, DB, CP, FAL, HW
-MODEL_PATH_ROBERTA_LARGE = PROJECT_PATH / "models/bootstrapping03/best_model/"  # Used for TAS
-# Single model mode
-SINGLE_MODEL_PATH = MODEL_PATH_ROBERTA_LARGE
+MODEL_PATH_ROBERTA_BASE = PROJECT_PATH / "models/roberta-base/best_model/"
+MODEL_PATH_ROBERTA_LARGE = PROJECT_PATH / "models/bootstrapping03/best_model/"
+SINGLE_MODEL_PATH = MODEL_PATH_ROBERTA_BASE
 SINGLE_CLASSES = {"PSML", "DB", "CP", "FAL", "HW", "TAS"}
 DATA_PATH = PROJECT_PATH / "data/interim/preprocessed-data/scraping_data.csv"
 
@@ -64,26 +61,22 @@ OLLAMA_URL = "http://localhost:11434"
 LLM_MODEL = "llama3.1:latest"
 SESSION = requests.Session()
 
+# =========================
+# Helper functions for Span
+# =========================
 
-# =========================
-# Helper functions for Span (like a reference file)
-# =========================
+
 def overlaps(a_start, a_end, b_start, b_end) -> bool:
     return not (a_end <= b_start or b_end <= a_start)
 
 
 def pick_longest_highest(spans):
-    spans = sorted(
-        spans, key=lambda x: (x["start"], -(x["end"] - x["start"]), -x["score"])
-    )
+    spans = sorted(spans, key=lambda x: (x["start"], -(x["end"] - x["start"]), -x["score"]))
     kept = []
     for s in spans:
         conflict = False
         for k in kept:
-            if (
-                overlaps(k["start"], k["end"], s["start"], s["end"])
-                and k["label"] == s["label"]
-            ):
+            if overlaps(k["start"], k["end"], s["start"], s["end"]) and k["label"] == s["label"]:
                 k_len = k["end"] - k["start"]
                 s_len = s["end"] - s["start"]
                 if s_len > k_len or (s_len == k_len and s["score"] > k["score"]):
@@ -182,9 +175,7 @@ def group_ner_entities(ner_results):
 def _postprocess_entities(text: str, entities):
     out = []
     for e in entities:
-        s, epos, clean_txt = _clean_entity_span(
-            text, e["start"], e["end"], e["label"], e["word"]
-        )
+        s, epos, clean_txt = _clean_entity_span(text, e["start"], e["end"], e["label"], e["word"])
         out.append(
             {
                 "text": clean_txt,
@@ -206,16 +197,15 @@ def _merge_per_label_with_policy(entities):
         merged.extend(pick_longest_highest(spans))
     return sorted(merged, key=lambda x: x["start"])
 
-
 # =========================
 # Create a fast HF pipeline on 8GB RAM
 # =========================
+
+
 def _build_fast_pipeline(model_dir, device, dtype, max_length=256):
     tok = AutoTokenizer.from_pretrained(model_dir, local_files_only=True)
     tok.model_max_length = max_length
-    mod = AutoModelForTokenClassification.from_pretrained(
-        model_dir, local_files_only=True
-    )
+    mod = AutoModelForTokenClassification.from_pretrained(model_dir, local_files_only=True)
     mod.eval()
     if device and hasattr(device, "type") and device.type == "cuda":
         mod.to(device)
@@ -235,19 +225,16 @@ def _predict_batch(pipe, texts, allowed_labels, thresholds, batch_size=32):
         return out_per_text
     ctx = torch.inference_mode() if torch else contextlib.nullcontext()
     with ctx:
-        for i in tqdm(
-            range(0, len(texts), batch_size),
-            desc=f"Inference {','.join(sorted(allowed_labels))}",
-            unit="batch",
-        ):
+        for i in tqdm(range(0, len(texts), batch_size),
+                      desc=f"Inference {','.join(sorted(allowed_labels))}",
+                      unit="batch"):
             chunk = texts[i : i + batch_size]
-            toks_list = pipe(chunk)  # list[list[token dict]]
+            toks_list = pipe(chunk)
             for text, toks in zip(chunk, toks_list):
                 ents = group_ner_entities(toks)
                 ents = _postprocess_entities(text, ents)
                 kept = [
-                    e
-                    for e in ents
+                    e for e in ents
                     if e["label"] in allowed_labels
                     and e["score"] >= float(thresholds.get(e["label"], 0.0))
                 ]
@@ -257,17 +244,16 @@ def _predict_batch(pipe, texts, allowed_labels, thresholds, batch_size=32):
                 )
     return out_per_text
 
-
 # =========================
 # Ollama helper: Used for topic normalization only
 # =========================
+
+
 def _ollama_generate(model: str, prompt: str, max_retries: int = 2, timeout: int = 60):
     payload = {"model": model, "prompt": prompt, "stream": False}
     for attempt in range(max_retries):
         try:
-            r = SESSION.post(
-                f"{OLLAMA_URL}/api/generate", json=payload, timeout=timeout
-            )
+            r = SESSION.post(f"{OLLAMA_URL}/api/generate", json=payload, timeout=timeout)
             r.raise_for_status()
             data = r.json()
             return data.get("response", "").strip()
@@ -280,7 +266,7 @@ def _ollama_generate(model: str, prompt: str, max_retries: int = 2, timeout: int
 TOPIC_PROMPT_TMPL = (
     "You are a strict assistant for normalizing job titles.\n"
     "Return only the standardized job title, without company or department names.\n"
-    'JSON format: {{"title": "..."}}\n'
+    'JSON format: {"title": "..."}\n'
     "Input data: {topic}\n"
     "JSON:"
 )
@@ -301,8 +287,40 @@ def normalize_topic_with_llm(topic: str, model: str = LLM_MODEL):
 
 
 # =========================
+# Position-aware normalization helpers
+# =========================
+_POS_PAT_BRACKETS = re.compile(r"<\s*([^>]+?)\s*>")
+_POS_PAT_PHRASE = re.compile(r"what can i earn as a[n]?\s*(.*)", re.IGNORECASE)
+
+
+def extract_position_name(pos: str) -> str:
+    if not isinstance(pos, str):
+        return ""
+    pos = pos.strip()
+    if not pos:
+        return ""
+    m = _POS_PAT_BRACKETS.search(pos)
+    if m:
+        return m.group(1).strip()
+    m = _POS_PAT_PHRASE.search(pos)
+    if m:
+        return m.group(1).strip()
+    return pos
+
+
+def normalize_with_position(topic: str, position: str, cache: dict) -> str:
+    if position is None or (isinstance(position, float) and pd.isna(position)) or str(position).strip() == "":
+        if topic not in cache:
+            cache[topic] = normalize_topic_with_llm(topic)
+        return cache[topic]
+    name = extract_position_name(position)
+    return name if name else (cache.get(topic) or normalize_topic_with_llm(topic))
+
+# =========================
 # Main process
 # =========================
+
+
 def run():
     # Load data
     ds = pd.read_csv(DATA_PATH)
@@ -311,16 +329,14 @@ def run():
     if missing:
         raise ValueError(f"Missing required columns: {sorted(missing)}")
 
+    has_position = "Position" in ds.columns
+
     # Create pipeline
     if torch is not None:
-        device = (
-            torch.device("cuda:0") if torch.cuda.is_available() else torch.device("cpu")
-        )
+        device = torch.device("cuda:0") if torch.cuda.is_available() else torch.device("cpu")
         dtype = torch.float16 if (torch and device.type == "cuda") else torch.float32
         try:
-            pipe = _build_fast_pipeline(
-                SINGLE_MODEL_PATH, device, dtype, max_length=256
-            )
+            pipe = _build_fast_pipeline(SINGLE_MODEL_PATH, device, dtype, max_length=256)
         except Exception:
             pipe = None
     else:
@@ -329,62 +345,43 @@ def run():
     # Batch NER prediction -> Convert to row per entity
     rows = []
     texts = [str(x) for x in ds["Segmented_Qualification"].tolist()]
-    if torch is not None:
-        device = (
-            torch.device("cuda:0") if torch.cuda.is_available() else torch.device("cpu")
-        )
-        dtype = torch.float16 if (torch and device.type == "cuda") else torch.float32
-        try:
-            pipe = _build_fast_pipeline(
-                SINGLE_MODEL_PATH, device, dtype, max_length=256
-            )
-        except Exception:
-            pipe = None
-    else:
-        pipe = None
 
     if pipe is not None:
-        single_preds = _predict_batch(
-            pipe, texts, SINGLE_CLASSES, CLASS_THRESHOLDS, batch_size=32
-        )
-        for (topic, si, text), p_main in tqdm(
-            zip(
-                ds[["Topic", "Sentence_Index", "Segmented_Qualification"]].itertuples(
-                    index=False, name=None
-                ),
-                single_preds,
-            ),
-            total=len(ds),
-            desc="Collecting NER results",
-            unit="row",
-        ):
-            merged = p_main or []
-            if merged:
-                for p in merged:
+        single_preds = _predict_batch(pipe, texts, SINGLE_CLASSES, CLASS_THRESHOLDS, batch_size=32)
+        for i, tpl in enumerate(tqdm(ds.itertuples(index=False),
+                                     total=len(ds),
+                                     desc="Collecting NER results",
+                                     unit="row")):
+            topic = tpl.Topic
+            si = tpl.Sentence_Index
+            pos = getattr(tpl, "Position", None) if has_position else None
+            preds = single_preds[i] if i < len(single_preds) else []
+            if preds:
+                for p in preds:
                     rows.append(
                         {
                             "Topic": topic,
                             "Sentence_Index": si,
+                            "Position": pos,
                             "Entity": p["entity"],
                             "Class": p["class"],
                         }
                     )
             else:
                 rows.append(
-                    {"Topic": topic, "Sentence_Index": si, "Entity": "", "Class": ""}
+                    {"Topic": topic, "Sentence_Index": si, "Position": pos, "Entity": "", "Class": ""}
                 )
     else:
-        # Dev path: Use optional Predictions JSON column
         pred_exists = "Predictions" in ds.columns
-        for tpl in tqdm(
-            ds.itertuples(index=False),
-            total=len(ds),
-            desc="Collecting DEV predictions",
-            unit="row",
-        ):
-            topic, si, text = tpl.Topic, tpl.Sentence_Index, tpl.Segmented_Qualification
+        for tpl in tqdm(ds.itertuples(index=False),
+                        total=len(ds),
+                        desc="Collecting DEV predictions",
+                        unit="row"):
+            topic = tpl.Topic
+            si = tpl.Sentence_Index
+            pos = getattr(tpl, "Position", None) if has_position else None
             merged = []
-            if pred_exists and isinstance(getattr(tpl, "Predictions"), str):
+            if pred_exists and isinstance(getattr(tpl, "Predictions", None), str):
                 try:
                     merged = json.loads(getattr(tpl, "Predictions"))
                 except Exception:
@@ -395,13 +392,14 @@ def run():
                         {
                             "Topic": topic,
                             "Sentence_Index": si,
+                            "Position": pos,
                             "Entity": p.get("entity", ""),
                             "Class": p.get("class", ""),
                         }
                     )
             else:
                 rows.append(
-                    {"Topic": topic, "Sentence_Index": si, "Entity": "", "Class": ""}
+                    {"Topic": topic, "Sentence_Index": si, "Position": pos, "Entity": "", "Class": ""}
                 )
 
     df = pd.DataFrame(rows)
@@ -409,12 +407,13 @@ def run():
     # ===== Aggregate data by Topic =====
     agg_raw = df.groupby(["Topic", "Sentence_Index"], as_index=False, sort=False).agg(
         {
+            "Position": "first",
             "Entity": lambda s: ", ".join([x for x in s if isinstance(x, str) and x]),
             "Class": lambda s: ", ".join([x for x in s if isinstance(x, str) and x]),
         }
     )
 
-    # Remove duplicate rows: Keep only the first occurrence
+    # Remove duplicate rows
     def _dedup_row_entities(entity_str: str, class_str: str):
         ents = [e.strip() for e in (entity_str or "").split(",") if e.strip()]
         clss = [c.strip() for c in (class_str or "").split(",") if c.strip()]
@@ -435,29 +434,20 @@ def run():
     agg_dedup = agg_raw.copy()
     agg_dedup[["Entity", "Class"]] = dedup_pairs
 
-    # ===== Normalize unique Topics only =====
+    # ===== Normalize Topic per row with Position-aware policy =====
     topic_norm_cache = {}
-
-    def _norm_topic_cached(t):
-        if t not in topic_norm_cache:
-            topic_norm_cache[t] = normalize_topic_with_llm(t)
-        return topic_norm_cache[t]
-
-    uniq_topics = agg_raw["Topic"].unique().tolist()
-    _ = [
-        _norm_topic_cached(str(t))
-        for t in tqdm(uniq_topics, desc="Normalize unique topics", unit="topic")
-    ]
-
-    # Map to both raw and dedup
-    agg_raw["Topic_Normalized"] = agg_raw["Topic"].map(topic_norm_cache)
-    agg_dedup["Topic_Normalized"] = agg_dedup["Topic"].map(topic_norm_cache)
+    agg_raw["Topic_Normalized"] = agg_raw.apply(
+        lambda r: normalize_with_position(str(r["Topic"]), r.get("Position", None), topic_norm_cache),
+        axis=1,
+    )
+    agg_dedup["Topic_Normalized"] = agg_dedup.apply(
+        lambda r: normalize_with_position(str(r["Topic"]), r.get("Position", None), topic_norm_cache),
+        axis=1,
+    )
 
     # Select result columns
     out_raw = agg_raw[["Topic_Normalized", "Sentence_Index", "Entity", "Class"]].copy()
-    out_dedup = agg_dedup[
-        ["Topic_Normalized", "Sentence_Index", "Entity", "Class"]
-    ].copy()
+    out_dedup = agg_dedup[["Topic_Normalized", "Sentence_Index", "Entity", "Class"]].copy()
 
     # Save results
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
