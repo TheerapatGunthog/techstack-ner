@@ -1,12 +1,10 @@
-# normalize_and_filter_entities_llm.py
+# normalize_entity_with_LLM_single.py
 from pathlib import Path
-import os
-import re
-import requests
+import os, re, time, requests
 import pandas as pd
 from tqdm import tqdm
 
-# ================ Config ================
+# ================= Config =================
 INPUT = Path(os.getcwd() + "/data/post_processed/all_predictions_dedup.csv")
 OUT_DIR = INPUT.parent
 OUT_FILE = OUT_DIR / "all_predictions_llm_filtered.csv"
@@ -14,7 +12,9 @@ OUT_FILE_GROUPED = OUT_DIR / "all_predictions_llm_filtered_grouped.csv"
 
 LLM_URL = "http://localhost:11434/api/generate"
 LLM_MODEL = "llama3.1:latest"
-BATCH_SIZE = 20
+TIMEOUT = 90
+MAX_RETRIES = 2
+RETRY_SLEEP = 1.0
 
 # ============== Lexicon: canonicalize ชื่อ (ไม่ตัดสินคลาส) ==============
 TOOLS_PATTERNS = {
@@ -44,7 +44,10 @@ TOOLS_PATTERNS = {
     "Docker": [r"\bdocker\b"],
     "Kubernetes": [r"\bkubernetes\b", r"\bk8s\b"],
     "Jenkins": [r"\bjenkins\b"],
-    "Git": [r"\bgit\b", r"\bgithub\b", r"\bgitlab\b", r"\bbitbucket\b"],
+    "Git": [r"\bgit\b"],
+    "GitHub": [r"\bgithub\b"],
+    "GitLab": [r"\bgitlab\b"],
+    "Bitbucket": [r"\bbitbucket\b"],
     "Linux": [r"\blinux\b"],
     "Bash": [r"\bbash\b", r"\bshell\b"],
     "PowerShell": [r"\bpowershell\b"],
@@ -92,8 +95,16 @@ TOOLS_PATTERNS = {
     "Azure": [r"\bazure\b"],
 }
 SOFT_PATTERNS = {
-    "Communication": [r"\bcommunication(s)?\b", r"\bcommunicate\b", r"\bpresentation(s)?\b"],
-    "Teamwork": [r"\bteam\s*work\b", r"\bteam\s*player\b", r"\bcollaborat(e|ion|ive)\b"],
+    "Communication": [
+        r"\bcommunication(s)?\b",
+        r"\bcommunicate\b",
+        r"\bpresentation(s)?\b",
+    ],
+    "Teamwork": [
+        r"\bteam\s*work\b",
+        r"\bteam\s*player\b",
+        r"\bcollaborat(e|ion|ive)\b",
+    ],
     "Leadership": [r"\blead(ership)?\b", r"\bmentor(ing)?\b"],
     "Problem Solving": [r"\bproblem[- ]?solv(ing|er)\b"],
     "Critical Thinking": [r"\bcritical\s*thinking\b"],
@@ -136,9 +147,8 @@ def compile_dict(patterns: dict):
 TOOLS_RX = compile_dict(TOOLS_PATTERNS)
 SOFT_RX = compile_dict(SOFT_PATTERNS)
 
+
 # ============== Helpers ==============
-
-
 def base_clean(s: str) -> str:
     return (s or "").strip()
 
@@ -152,7 +162,6 @@ def exact_canon(s: str):
 
 
 def canonical_name(s: str) -> str:
-    """แปลงชื่อให้เป็น canonical ด้วย EXACT_MAP และ regex lexicon"""
     s0 = base_clean(s)
     if not s0:
         return ""
@@ -175,97 +184,124 @@ def _safe_split_csv(x):
 
 
 def _ekey(s: str) -> str:
-    """คีย์ dedup ต่อเอนทิตี: ตัดวงเล็บ/อัญประกาศ เว้นวรรคซ้ำ เคสไม่แคร์"""
     s = (s or "").strip()
     s = re.sub(r'[\(\)\[\]\{\}"“”]', "", s)
+    s = re.sub(r"\b[vV]?\d+(\.\d+){0,3}\b", "", s)  # ตัดเวอร์ชัน
     s = re.sub(r"\s+", " ", s)
-    return s.lower()
-
-# ============== LLM: reclass ต่อเอนทิตี (few-shot + length-guard) ==============
+    return s.lower().strip()
 
 
-def _llm_reclass_entities(unique_entities):
-    """
-    unique_entities: list[str] (canonical แล้ว)
-    return: dict[key(entity)-> label in {PSML,DB,CP,FAL,TAS,HW} or 'NO']
-    """
+# ============== LLM: classify ทีละเอนทิตี ==============
+_ALLOWED = {"PSML", "DB", "CP", "FAL", "TAS", "HW"}
+
+
+def _prompt_one(entity: str) -> str:
+    return f"""
+You are a strict classifier for ONE entity.
+Output EXACTLY ONE uppercase token from: PSML DB CP FAL TAS HW NO
+No explanations. No extra words. No punctuation.
+
+Preprocess for understanding: trim; ignore quotes/brackets; ignore versions/suffixes.
+
+CLASS DEFINITIONS + EXAMPLES
+- PSML = programming/scripting languages.
+  e.g., Python, Java, C, C++, C#, JavaScript, TypeScript, R, Go, Rust, SQL, Bash, PowerShell, MATLAB.
+- DB   = database engines / data warehouses / query engines / key-value or document stores.
+  e.g., PostgreSQL, MySQL, SQLite, Oracle, SQL Server, MongoDB, Redis, Cassandra, BigQuery, Snowflake, Redshift, DynamoDB, Hive, Trino, Presto, Elasticsearch.
+- CP   = cloud platforms/providers ONLY (provider-level names).
+  e.g., AWS, Google Cloud, Microsoft Azure, Alibaba Cloud, Firebase (platform).
+- FAL  = software frameworks, libraries, tools, runtimes, operating systems, CI/CD, VCS, orchestration, BI/office tools.
+  e.g., React, Angular, Vue, Django, Flask, FastAPI, Spring, TensorFlow, PyTorch, scikit-learn, pandas, NumPy, Docker, Kubernetes, Git, GitHub, GitLab, Jenkins, Jira, Confluence, Linux, Windows, macOS, Excel, Word, PowerPoint, Power BI, Tableau, Looker, OpenCV, Ansible, Terraform.
+- TAS  = soft skills and techniques/methodologies.
+  e.g., Agile, Scrum, Kanban, Communication, Teamwork, Leadership, Problem Solving, Time Management, Stakeholder Management, Project Management, Negotiation.
+- HW   = physical hardware devices/components.
+  e.g., Raspberry Pi, Arduino, NVIDIA GPU, Intel CPU, FPGA, microcontroller.
+
+HARD RULES
+- Managed database services (BigQuery, Redshift, DynamoDB, Firestore) -> DB.
+- CP ONLY for provider/platform names; individual cloud services that are NOT databases -> NO.
+- If the entity is NOT a tool/technology name or a technique/skill (e.g., job titles, companies, locations, salaries, benefits, years of experience, responsibilities, sentences/questions, generic nouns, file formats) -> NO.
+- If uncertain -> NO.
+
+Example
+Input:  Entity: 'Python'                -> Output: PSML
+Input:  Entity: 'Bash'                  -> Output: PSML
+
+Input:  Entity: 'PostgreSQL (v14)'      -> Output: DB
+Input:  Entity: 'BigQuery'              -> Output: DB
+
+Input:  Entity: 'AWS'                   -> Output: CP
+Input:  Entity: 'Google Cloud'          -> Output: CP
+
+Input:  Entity: 'Docker'                -> Output: FAL
+Input:  Entity: 'Kubernetes'            -> Output: FAL
+Input:  Entity: 'Linux'                 -> Output: FAL
+Input:  Entity: 'GitHub'                -> Output: FAL
+Input:  Entity: 'Excel'                 -> Output: FAL
+
+Input:  Entity: 'Agile'                 -> Output: TAS
+Input:  Entity: 'Problem Solving'       -> Output: TAS
+
+Input:  Entity: 'Raspberry Pi'          -> Output: HW
+Input:  Entity: 'NVIDIA GPU'            -> Output: HW
+
+Input:  Entity: 'AWS Lambda'            -> Output: FAL
+Input:  Entity: 'Azure DevOps'          -> Output: FAL
+
+Input:  Entity: 'Data Scientist'        -> Output: NO
+Input:  Entity: 'Google'                -> Output: NO
+Input:  Entity: 'Bangkok'               -> Output: NO
+Input:  Entity: 'What can I earn as a Systems Engineer' -> Output: NO
+Input:  Entity: '100k salary'           -> Output: NO
+Input:  Entity: 'PDF'                   -> Output: NO
+
+Now classify
+Entity: '{entity}'
+""".strip()
+
+
+def _llm_classify_one(entity: str, session: requests.Session) -> str:
+    """เรียก LLM สำหรับเอนทิตีเดียว พร้อม retry และพาร์สผลแบบเข้ม"""
+    payload = {"model": LLM_MODEL, "prompt": _prompt_one(entity), "stream": False}
+    for attempt in range(MAX_RETRIES + 1):
+        try:
+            r = session.post(LLM_URL, json=payload, timeout=TIMEOUT)
+            if not r.ok:
+                raise RuntimeError(f"HTTP {r.status_code}")
+            resp = r.json().get("response", "").strip()
+            # ดึงโทเคนที่อนุญาตจากข้อความบรรทัดแรกที่พบ
+            m = re.search(r"\b(PSML|DB|CP|FAL|TAS|HW|NO)\b", resp, flags=re.I)
+            lab = m.group(1).upper() if m else "NO"
+            return lab if lab in _ALLOWED or lab == "NO" else "NO"
+        except Exception:
+            if attempt < MAX_RETRIES:
+                time.sleep(RETRY_SLEEP * (attempt + 1))
+                continue
+            return "NO"
+
+
+def _llm_reclass_entities_one_by_one(unique_entities):
     entity_to_class = {}
-    allowed = {"PSML", "DB", "CP", "FAL", "TAS", "HW"}
-    for i in tqdm(range(0, len(unique_entities), BATCH_SIZE), desc="LLM reclass (unique entities)"):
-        batch = unique_entities[i : i + BATCH_SIZE]
-        text = "\n".join([f"{j+1}. Entity: '{e}'" for j, e in enumerate(batch)])
-
-        prompt = f"""
-Classify each entity into EXACTLY one of: PSML, DB, CP, FAL, TAS, HW.
-If none fit, output: no
-One token per line. No explanations. Output lines must equal input lines.
-
-Disambiguation rules:
-- Languages → PSML; frameworks/libraries/tools → FAL.
-- Cloud providers/platforms → CP; database services (BigQuery, DynamoDB, Redshift, Firestore) → DB.
-- Software/tools → FAL; skills/methodologies → TAS.
-- Hardware are physical devices/components → HW.
-
-Examples
-Input:
-1. Entity: 'Python'
-2. Entity: 'BigQuery'
-3. Entity: 'Docker'
-4. Entity: 'Kubernetes'
-5. Entity: 'Scrum'
-6. Entity: 'Raspberry Pi'
-7. Entity: 'SQL'
-8. Entity: 'Firebase'
-9. Entity: 'DynamoDB'
-10. Entity: 'UnknownTool123'
-
-Output:
-PSML
-DB
-FAL
-FAL
-TAS
-HW
-PSML
-CP
-DB
-no
-
-Now classify the following
-{text}
-"""
-        resp = requests.post(LLM_URL, json={"model": LLM_MODEL, "prompt": prompt, "stream": False})
-        if not resp.ok:
-            raise RuntimeError(f"LLM HTTP {resp.status_code}: {resp.text}")
-        raw = resp.json().get("response", "")
-        lines = [l.strip().upper() for l in raw.splitlines() if l.strip()]
-
-        # --- ความยาวต้องเท่าอินพุตเสมอ ---
-        n_in = len(batch)
-        if len(lines) < n_in:
-            lines += ["NO"] * (n_in - len(lines))
-        elif len(lines) > n_in:
-            lines = lines[:n_in]
-
-        # --- map กลับ ---
-        for e, lab in zip(batch, lines):
-            lab = lab if lab in allowed else "NO"
-            entity_to_class[_ekey(e)] = lab
+    sess = requests.Session()
+    for e in tqdm(unique_entities, desc="LLM reclass (1-by-1)"):
+        lab = _llm_classify_one(e, sess)
+        entity_to_class[_ekey(e)] = lab
+    total = len(entity_to_class)
+    no_cnt = sum(1 for v in entity_to_class.values() if v == "NO")
+    print(f"[LLM map] entities: {total} | NO: {no_cnt} ({no_cnt/max(1,total):.2%})")
     return entity_to_class
 
+
 # ============== ขั้นตอน LLM + apply ทั้ง dataset ==============
-
-
 def filter_with_llm_reclass_all_entities(df: pd.DataFrame) -> pd.DataFrame:
     """
-    - canonicalize entity ชื่อด้วย lexicon
-    - รวมเอนทิตีทั้งหมดแบบไม่ซ้ำ (ใช้ ekey)
-    - ให้ LLM ชี้คลาสครั้งเดียวต่อเอนทิตี
-    - ใช้คลาสจาก LLM แทนคลาสเดิมทุกกรณี; ถ้า 'NO' → ทิ้ง
+    - canonicalize entity
+    - รวมเอนทิตีไม่ซ้ำ
+    - เรียก LLM ทีละเอนทิตี
+    - ใช้คลาสจาก LLM แทน; 'NO' → ทิ้ง
     """
-    # 1) เก็บเอนทิตี canonical แบบไม่ซ้ำ
-    seen = set()
-    ents_to_check = []
+    # 1) unique canonical entities
+    seen, ents_to_check = set(), []
     for _, row in df.iterrows():
         for e in _safe_split_csv(row.get("Entity", "")):
             display = canonical_name(e)
@@ -276,10 +312,10 @@ def filter_with_llm_reclass_all_entities(df: pd.DataFrame) -> pd.DataFrame:
                 seen.add(k)
                 ents_to_check.append(display)
 
-    # 2) LLM reclass ต่อเอนทิตี
-    entity_to_class = _llm_reclass_entities(ents_to_check)
+    # 2) classify one-by-one
+    entity_to_class = _llm_reclass_entities_one_by_one(ents_to_check)
 
-    # 3) apply กลับทั้งชุดข้อมูล
+    # 3) apply back
     out_rows = []
     for _, row in tqdm(df.iterrows(), total=len(df), desc="Apply LLM class per entity"):
         ents = _safe_split_csv(row.get("Entity", ""))
@@ -291,22 +327,23 @@ def filter_with_llm_reclass_all_entities(df: pd.DataFrame) -> pd.DataFrame:
             k = _ekey(display)
             lab = entity_to_class.get(k, "NO")
             if lab != "NO":
-                kept_e.append(display)   # ชื่อ canonical
-                kept_c.append(lab)       # คลาสจาก LLM
+                kept_e.append(display)
+                kept_c.append(lab)
         if kept_e:
-            out_rows.append({
-                "Topic_Normalized": row.get("Topic_Normalized", ""),
-                "Sentence_Index": row.get("Sentence_Index", ""),
-                "Entity": ", ".join(kept_e),
-                "Class": ", ".join(kept_c),
-            })
+            out_rows.append(
+                {
+                    "Topic_Normalized": row.get("Topic_Normalized", ""),
+                    "Sentence_Index": row.get("Sentence_Index", ""),
+                    "Entity": ", ".join(kept_e),
+                    "Class": ", ".join(kept_c),
+                }
+            )
+    return pd.DataFrame(
+        out_rows, columns=["Topic_Normalized", "Sentence_Index", "Entity", "Class"]
+    )
 
-    # คืน DataFrame พร้อมคอลัมน์แม้ out_rows ว่าง
-    return pd.DataFrame(out_rows, columns=["Topic_Normalized", "Sentence_Index", "Entity", "Class"])
 
 # ============== Final normalize & filter ==============
-
-
 def _concat_nonempty(series: pd.Series) -> str:
     return ", ".join([s for s in series if isinstance(s, str) and s.strip()])
 
@@ -318,23 +355,18 @@ def _count_distinct_classes(cls_str: str) -> int:
 
 
 def finalize_group_and_filter(df_filt: pd.DataFrame) -> pd.DataFrame:
-    """
-    1) groupby Topic_Normalized แล้ว concat Entity/Class ต่อท้าย
-    2) คัดทิ้งหัวข้อที่มีจำนวน class ต่างกัน < 3
-    """
     if df_filt.empty:
         return pd.DataFrame(columns=["Topic_Normalized", "Entity", "Class"])
-    grouped = (
-        df_filt.groupby("Topic_Normalized", as_index=False)
-        .agg({"Entity": _concat_nonempty, "Class": _concat_nonempty})
+    grouped = df_filt.groupby("Topic_Normalized", as_index=False).agg(
+        {"Entity": _concat_nonempty, "Class": _concat_nonempty}
     )
-    mask = grouped["Class"].apply(_count_distinct_classes) >= 3
+    mask = grouped["Class"].apply(_count_distinct_classes) >= 1
     return grouped.loc[mask].reset_index(drop=True)
 
 
 # ============== Main ==============
 if __name__ == "__main__":
-    df = pd.read_csv(INPUT)
+    df = pd.read_csv(INPUT).head(100)
     for col in ["Entity", "Class", "Topic_Normalized"]:
         if col in df.columns:
             df[col] = df[col].fillna("")
@@ -342,16 +374,10 @@ if __name__ == "__main__":
     df_filt = filter_with_llm_reclass_all_entities(df)
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     df_filt.to_csv(OUT_FILE, index=False, encoding="utf-8-sig")
-
     rows = len(df_filt)
     uniq_entities = df_filt["Entity"].nunique() if "Entity" in df_filt.columns else 0
     print(f"[saved LLM filtered] {OUT_FILE}")
     print(f"Rows: {rows:,} | Unique entities: {uniq_entities:,}")
-
-    # NO-rate เพื่อตรวจว่า LLM ตอบ no เยอะผิดปกติหรือไม่
-    # คำนวณจาก mapping ล่าสุด (approx): นับจากค่าที่ใช้จริงใน df_filt เทียบกับจำนวน unique_entities ก่อน LLM
-    # คุณสามารถย้าย logic นับ NO-rate ไว้ใน _llm_reclass_entities แล้ว print ตรงนั้นได้เช่นกัน
-    # ที่นี่เลือกพิมพ์สั้น ๆ ตามผลลัพธ์สุดท้าย
 
     df_grouped = finalize_group_and_filter(df_filt)
     df_grouped.to_csv(OUT_FILE_GROUPED, index=False, encoding="utf-8-sig")
