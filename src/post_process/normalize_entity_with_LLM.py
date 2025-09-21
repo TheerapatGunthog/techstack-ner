@@ -1,10 +1,10 @@
 # normalize_and_filter_entities_llm.py
 from pathlib import Path
+import os
 import re
 import requests
 import pandas as pd
 from tqdm import tqdm
-import os
 
 # ================= Config =================
 INPUT = Path(os.getcwd() + "/data/post_processed/all_predictions_dedup.csv")
@@ -16,7 +16,7 @@ LLM_URL = "http://localhost:11434/api/generate"
 LLM_MODEL = "llama3.1:latest"
 BATCH_SIZE = 20
 
-# ============== Lexicon ==============
+# ============== Lexicon: canonicalize ชื่อ (ไม่ตัดสินคลาส) ==============
 TOOLS_PATTERNS = {
     "Python": [r"\bpy(?:thon)?\b", r"\bphyton\b"],
     "C++": [r"\bc\+\+\b", r"\bc\s*plus\s*plus\b"],
@@ -109,12 +109,6 @@ SOFT_PATTERNS = {
     "Presentation": [r"\bpresentation(s)?\b"],
 }
 EXACT_MAP = {
-    "ms excel": "Excel",
-    "microsoft excel": "Excel",
-    "excel": "Excel",
-    "ms word": "Word",
-    "microsoft word": "Word",
-    "word": "Word",
     "powerbi": "Power BI",
     "power bi": "Power BI",
     "google sheets": "Google Sheets",
@@ -126,17 +120,23 @@ EXACT_MAP = {
     "nodejs": "Node.js",
     "node js": "Node.js",
     "js": "JavaScript",
+    "ms excel": "Excel",
+    "microsoft excel": "Excel",
+    "excel": "Excel",
+    "ms word": "Word",
+    "microsoft word": "Word",
+    "word": "Word",
 }
 
 
 def compile_dict(patterns: dict):
-    return {canon: [re.compile(p, re.I) for p in plist] for canon, plist in patterns.items()}
+    return {k: [re.compile(p, re.I) for p in v] for k, v in patterns.items()}
 
 
 TOOLS_RX = compile_dict(TOOLS_PATTERNS)
 SOFT_RX = compile_dict(SOFT_PATTERNS)
 
-# ============== Normalize helpers ==============
+# ============== Helpers ==============
 
 
 def base_clean(s: str) -> str:
@@ -151,20 +151,21 @@ def exact_canon(s: str):
     return EXACT_MAP.get(low_key(s))
 
 
-def normalize_token_lexicon(ent: str):
-    s = base_clean(ent)
-    if not s:
-        return None
-    c = exact_canon(s)
+def canonical_name(s: str) -> str:
+    """แปลงชื่อให้เป็น canonical ด้วย EXACT_MAP และ regex lexicon"""
+    s0 = base_clean(s)
+    if not s0:
+        return ""
+    c = exact_canon(s0)
     if c:
         return c
     for canon, plist in TOOLS_RX.items():
-        if any(p.search(s) for p in plist):
+        if any(p.search(s0) for p in plist):
             return canon
     for canon, plist in SOFT_RX.items():
-        if any(p.search(s) for p in plist):
+        if any(p.search(s0) for p in plist):
             return canon
-    return None
+    return s0
 
 
 def _safe_split_csv(x):
@@ -172,19 +173,20 @@ def _safe_split_csv(x):
         return []
     return [t.strip() for t in str(x).split(",") if t and str(t).strip()]
 
-# ============== LLM reclass (per-entity, skip duplicates) ==============
-
 
 def _ekey(s: str) -> str:
+    """คีย์ dedup ต่อเอนทิตี: ตัดวงเล็บ/อัญประกาศ เว้นวรรคซ้ำ เคสไม่แคร์"""
     s = (s or "").strip()
     s = re.sub(r'[\(\)\[\]\{\}"“”]', "", s)
     s = re.sub(r"\s+", " ", s)
     return s.lower()
 
+# ============== LLM: reclass ต่อเอนทิตี (few-shot) ==============
+
 
 def _llm_reclass_entities(unique_entities):
     """
-    unique_entities: list[str]
+    unique_entities: list[str] (canonical แล้ว)
     return: dict[key(entity)-> label in {PSML,DB,CP,FAL,TAS,HW} or 'NO']
     """
     entity_to_class = {}
@@ -194,24 +196,14 @@ def _llm_reclass_entities(unique_entities):
         text = "\n".join([f"{j+1}. Entity: '{e}'" for j, e in enumerate(batch)])
         prompt = f"""
 Classify each entity into EXACTLY one of: PSML, DB, CP, FAL, TAS, HW.
-If none fit, return: no
-One token per line. No explanations. Output length must equal input length.
+If none fit, output: no
+One token per line. No explanations. Output lines must equal input lines.
 
-Preprocess entity for understanding: ignore quotes, versions, brackets.
-
-Definitions:
-- PSML = Programming and scripting language (Python, JavaScript, C++, R, Java, SQL, etc.)
-- DB   = Database systems (MySQL, PostgreSQL, MongoDB, Oracle, BigQuery, DynamoDB, etc.)
-- CP   = Cloud platform providers (AWS, Google Cloud, Microsoft Azure, Alibaba Cloud, etc.)
-- FAL  = Frameworks/libraries/tools (React, Angular, Django, Flask, TensorFlow, PyTorch, Docker, Kubernetes, etc.)
-- TAS  = Soft skills & techniques/methodologies (Communication, Teamwork, Leadership, Problem Solving, Agile, Scrum, etc.)
-- HW   = Hardware devices/components (NVIDIA GPU, Raspberry Pi, Arduino, Intel CPU, etc.)
-
-Disambiguation:
-- Languages → PSML; packages/frameworks/tools → FAL.
-- Cloud provider/platform → CP; database services (BigQuery, DynamoDB) → DB.
-- Software/tools → FAL; skills/methods → TAS.
-- Hardware = physical devices/components.
+Disambiguation rules:
+- Languages → PSML; frameworks/libraries/tools → FAL.
+- Cloud providers/platforms → CP; database services (BigQuery, DynamoDB, Redshift, Firestore) → DB.
+- Software/tools → FAL; skills/methodologies → TAS.
+- Hardware are physical devices/components → HW.
 
 Examples
 Input:
@@ -238,10 +230,12 @@ CP
 DB
 no
 
-### Entities
+Now classify the following
 {text}
 """
         resp = requests.post(LLM_URL, json={"model": LLM_MODEL, "prompt": prompt, "stream": False})
+        if not resp.ok:
+            raise RuntimeError(f"LLM HTTP {resp.status_code}: {resp.text}")
         data = resp.json()
         lines = [l.strip().upper() for l in data.get("response", "").splitlines() if l.strip()]
         for e, lab in zip(batch, lines):
@@ -249,45 +243,46 @@ no
             entity_to_class[_ekey(e)] = lab
     return entity_to_class
 
+# ============== ขั้นตอน LLM + apply ทั้ง dataset ==============
 
-def filter_with_llm_reclass(df: pd.DataFrame) -> pd.DataFrame:
+
+def filter_with_llm_reclass_all_entities(df: pd.DataFrame) -> pd.DataFrame:
     """
-    - ใช้ lexicon ก่อน
-    - เอนทิตีที่ไม่เข้า lexicon → เรียก LLM ครั้งเดียวต่อเอนทิตีทั้งชุดข้อมูล
-    - ผล LLM ถูกใช้ทั้งชุดข้อมูล (เอนทิตีเดียวกัน = คลาสเดียวกัน)
+    - canonicalize entity ชื่อด้วย lexicon
+    - รวมเอนทิตีทั้งหมดแบบไม่ซ้ำ (ใช้ ekey)
+    - ให้ LLM ชี้คลาสครั้งเดียวต่อเอนทิตี
+    - ใช้คลาสจาก LLM แทนคลาสเดิมทุกกรณี; ถ้า 'NO' → ทิ้ง
     """
-    # 1) สร้างรายการเอนทิตีที่ต้องถาม LLM แบบ "ไม่ซ้ำ"
+    # 1) เก็บเอนทิตี canonical แบบไม่ซ้ำ
     seen = set()
     ents_to_check = []
+    key_to_display = {}
     for _, row in df.iterrows():
         for e in _safe_split_csv(row["Entity"]):
-            if normalize_token_lexicon(e):
+            if not e:
                 continue
-            k = _ekey(e)
+            display = canonical_name(e)
+            k = _ekey(display)
             if k and k not in seen:
                 seen.add(k)
-                ents_to_check.append(e)
+                ents_to_check.append(display)
+                key_to_display[k] = display
 
-    # 2) เรียก LLM เพื่อรีคลาสครั้งเดียวต่อเอนทิตี
+    # 2) LLM reclass ต่อเอนทิตี
     entity_to_class = _llm_reclass_entities(ents_to_check)
 
-    # 3) apply กลับทั้ง dataset
+    # 3) apply กลับทั้งชุดข้อมูล
     out_rows = []
-    for _, row in tqdm(df.iterrows(), total=len(df), desc="Apply reclass per entity"):
+    for _, row in tqdm(df.iterrows(), total=len(df), desc="Apply LLM class per entity"):
         ents = _safe_split_csv(row["Entity"])
-        clss = _safe_split_csv(row["Class"])
         kept_e, kept_c = [], []
-        for e, c in zip(ents, clss):
-            canon = normalize_token_lexicon(e)
-            if canon:
-                kept_e.append(canon)
-                kept_c.append(c)  # คงคลาสเดิมเมื่อผ่าน lexicon
-            else:
-                lab = entity_to_class.get(_ekey(e), "NO")
-                if lab != "NO":
-                    kept_e.append(e)   # เก็บชื่อเดิม (ไม่ canonical)
-                    kept_c.append(lab)  # ใช้คลาสใหม่จาก LLM
-                # else ทิ้ง
+        for e in ents:
+            display = canonical_name(e)
+            k = _ekey(display)
+            lab = entity_to_class.get(k, "NO")
+            if lab != "NO":
+                kept_e.append(display)   # ชื่อ canonical
+                kept_c.append(lab)       # คลาสจาก LLM
         if kept_e:
             out_rows.append({
                 "Topic_Normalized": row["Topic_Normalized"],
@@ -312,14 +307,14 @@ def _count_distinct_classes(cls_str: str) -> int:
 
 def finalize_group_and_filter(df_filt: pd.DataFrame) -> pd.DataFrame:
     """
-    1) รวมทุกแถวที่มี Topic_Normalized เดียวกัน (concat Entity และ Class ต่อท้าย)
-    2) เก็บเฉพาะหัวข้อที่มีจำนวน class ต่างกัน >= 3
+    1) groupby Topic_Normalized แล้ว concat Entity/Class ต่อท้าย
+    2) คัดทิ้งหัวข้อที่มีจำนวน class ต่างกัน < 3
     """
     grouped = (
         df_filt.groupby("Topic_Normalized", as_index=False)
         .agg({"Entity": _concat_nonempty, "Class": _concat_nonempty})
     )
-    mask = grouped["Class"].apply(_count_distinct_classes) >= 2
+    mask = grouped["Class"].apply(_count_distinct_classes) >= 3
     return grouped.loc[mask].reset_index(drop=True)
 
 
@@ -330,15 +325,12 @@ if __name__ == "__main__":
         if col in df.columns:
             df[col] = df[col].fillna("")
 
-    # ใช้เวอร์ชัน reclass ต่อเอนทิตี แทน yes/no แบบคู่ (Entity, Proposed Class)
-    df_filt = filter_with_llm_reclass(df)
-
+    df_filt = filter_with_llm_reclass_all_entities(df)
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     df_filt.to_csv(OUT_FILE, index=False, encoding="utf-8-sig")
     print(f"[saved LLM filtered] {OUT_FILE}")
     print(f"Rows: {len(df_filt):,} | Unique entities: {df_filt['Entity'].nunique():,}")
 
-    # ขั้นตอนสุดท้าย: รวมตาม Topic_Normalized แล้วคัดทิ้งอาชีพที่มี class < 2
     df_grouped = finalize_group_and_filter(df_filt)
     df_grouped.to_csv(OUT_FILE_GROUPED, index=False, encoding="utf-8-sig")
     print(f"[saved grouped+filtered] {OUT_FILE_GROUPED}")
