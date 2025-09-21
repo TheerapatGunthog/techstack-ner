@@ -1,6 +1,9 @@
 # normalize_entity_with_LLM_single.py
 from pathlib import Path
-import os, re, time, requests
+import os
+import re
+import time
+import requests
 import pandas as pd
 from tqdm import tqdm
 
@@ -333,10 +336,23 @@ def _count_distinct_classes(cls_str: str) -> int:
 
 def finalize_group_and_filter(df_filt: pd.DataFrame) -> pd.DataFrame:
     if df_filt.empty:
-        return pd.DataFrame(columns=["Topic_Normalized", "Entity", "Class"])
-    grouped = df_filt.groupby("Topic_Normalized", as_index=False).agg(
-        {"Entity": _concat_nonempty, "Class": _concat_nonempty}
+        return pd.DataFrame(columns=["Topic_Normalized", "Quantity", "Entity", "Class"])
+
+    # นับจำนวนแถวที่ถูกรวม
+    counts = (
+        df_filt.groupby("Topic_Normalized")
+        .size()
+        .rename("Quantity")
     )
+
+    # รวม Entity/Class แบบต่อท้าย
+    agg = (
+        df_filt.groupby("Topic_Normalized")
+        .agg(Entity=_concat_nonempty, Class=_concat_nonempty)
+    )
+
+    grouped = pd.concat([counts, agg], axis=1).reset_index()
+
     mask = grouped["Class"].apply(_count_distinct_classes) >= 2
     return grouped.loc[mask].reset_index(drop=True)
 
