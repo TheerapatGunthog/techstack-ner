@@ -21,7 +21,7 @@ print(f"Total number of entries: {len(df)}")
 print(df.head())
 
 # Define candidate labels for classification
-candidate_labels = ["Technology job", "Non-technology job"]
+candidate_labels = ["TechJob", "Non-TechJob"]
 
 
 def classify_job(topic, Qualification, threshold=0.6):
@@ -31,15 +31,15 @@ def classify_job(topic, Qualification, threshold=0.6):
     result = classifier(text_to_classify, candidate_labels)
 
     # Check if it is a tech job
-    is_tech = (
-        result["labels"][0] == "Technology job" and result["scores"][0] >= threshold
-    )
+    is_tech = result["labels"][0] == "TechJob" and result["scores"][0] >= threshold
 
     return {
         "is_tech": is_tech,
-        "tech_score": result["scores"][0]
-        if result["labels"][0] == "Technology job"
-        else result["scores"][1],
+        "tech_score": (
+            result["scores"][0]
+            if result["labels"][0] == "TechJob"
+            else result["scores"][1]
+        ),
         "confidence": result["scores"][0],
         "predicted_label": result["labels"][0],
     }

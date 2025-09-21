@@ -334,9 +334,9 @@ class JobDataProcessor:
 
 if __name__ == "__main__":
     config = {
-        "input_file": "data/raw/scraping-data/merged_product.csv",
+        "input_file": "data/raw/classified/tech_jobs.csv",
         "output_file": "data/interim/preprocessed-data/product_data.csv",
-        "segment_sentences": False,
+        "segment_sentences": True,
         "min_sentence_length": 10,
         "use_gpu": True,
     }
