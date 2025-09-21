@@ -197,66 +197,43 @@ _ALLOWED = {"PSML", "DB", "CP", "FAL", "TAS", "HW"}
 
 def _prompt_one(entity: str) -> str:
     return f"""
-You are a strict classifier for ONE entity.
-Output EXACTLY ONE uppercase token from: PSML DB CP FAL TAS HW NO
-No explanations. No extra words. No punctuation.
+You are a STRICT validator for ONE entity.
+Return EXACTLY ONE token from: PSML DB CP FAL TAS HW NO
+UPPERCASE only. No prose. No punctuation.
 
-Preprocess for understanding: trim; ignore quotes/brackets; ignore versions/suffixes.
-
-CLASS DEFINITIONS + EXAMPLES
-- PSML = programming/scripting languages.
-  e.g., Python, Java, C, C++, C#, JavaScript, TypeScript, R, Go, Rust, SQL, Bash, PowerShell, MATLAB.
-- DB   = database engines / data warehouses / query engines / key-value or document stores.
-  e.g., PostgreSQL, MySQL, SQLite, Oracle, SQL Server, MongoDB, Redis, Cassandra, BigQuery, Snowflake, Redshift, DynamoDB, Hive, Trino, Presto, Elasticsearch.
-- CP   = cloud platforms/providers ONLY (provider-level names).
-  e.g., AWS, Google Cloud, Microsoft Azure, Alibaba Cloud, Firebase (platform).
-- FAL  = software frameworks, libraries, tools, runtimes, operating systems, CI/CD, VCS, orchestration, BI/office tools.
-  e.g., React, Angular, Vue, Django, Flask, FastAPI, Spring, TensorFlow, PyTorch, scikit-learn, pandas, NumPy, Docker, Kubernetes, Git, GitHub, GitLab, Jenkins, Jira, Confluence, Linux, Windows, macOS, Excel, Word, PowerPoint, Power BI, Tableau, Looker, OpenCV, Ansible, Terraform.
-- TAS  = soft skills and techniques/methodologies.
-  e.g., Agile, Scrum, Kanban, Communication, Teamwork, Leadership, Problem Solving, Time Management, Stakeholder Management, Project Management, Negotiation.
-- HW   = physical hardware devices/components.
-  e.g., Raspberry Pi, Arduino, NVIDIA GPU, Intel CPU, FPGA, microcontroller.
+DEFINITIONS
+- PSML: programming/scripting languages only (Python, Java, Kotlin, C/C++, C#, JavaScript, TypeScript, R, Go, Rust, SQL, Bash, PowerShell, MATLAB).
+- DB: database engines/warehouses/services/key-value/document/search (PostgreSQL, MySQL, SQLite, Oracle, SQL Server, MongoDB, Redis, Cassandra, BigQuery, Snowflake, Redshift, DynamoDB, Hive, Trino, Presto, Elasticsearch).
+- CP: cloud PROVIDER/PLATFORM names only (AWS, Google Cloud, Microsoft Azure, Alibaba Cloud, Firebase platform).
+- FAL: software frameworks/libraries/tools/runtimes/OS/SDK/CI-CD/VCS/BI/office (React, Vue.js, Angular, Django, Flask, FastAPI, Spring, Android SDK, TensorFlow, PyTorch, scikit-learn, pandas, NumPy, Node.js, .NET, Docker, Kubernetes, Git, GitHub, GitLab, Jenkins, Jira, Confluence, Linux, Windows, macOS, Excel, Word, PowerPoint, Power BI, Tableau, Looker, OpenCV, Ansible, Terraform).
+- TAS: soft skills, techniques, methodologies, patterns (Agile, Scrum, Kanban, Communication, Teamwork, Leadership, Problem Solving, Time Management, Stakeholder Management, Project Management, Negotiation, MVC, MVVM, MVP, Clean Architecture).
+- HW: physical devices/components (Raspberry Pi, Arduino, NVIDIA GPU, Intel CPU, FPGA, microcontroller).
 
 HARD RULES
-- Managed database services (BigQuery, Redshift, DynamoDB, Firestore) -> DB.
-- CP ONLY for provider/platform names; individual cloud services that are NOT databases -> NO.
-- If the entity is NOT a tool/technology name or a technique/skill (e.g., job titles, companies, locations, salaries, benefits, years of experience, responsibilities, sentences/questions, generic nouns, file formats) -> NO.
+- Managed DB services (BigQuery, Redshift, DynamoDB, Firestore) -> DB.
+- CP only for provider names; non-database cloud services that are not tools -> NO.
+- Adjectives/marketing terms/generic words (e.g., scalable, robust, enterprise) -> NO.
+- Job titles, companies, locations, salaries, sentences, questions, responsibilities -> NO.
+- Unknown brands or proper nouns that are NOT tools/techniques -> NO.
+- If the token looks like two distinct tools glued together (e.g., 'KubernetesPython', 'FrameworkNode') and is NOT a known single tool name -> NO.
 - If uncertain -> NO.
 
-Example
-Input:  Entity: 'Python'                -> Output: PSML
-Input:  Entity: 'Bash'                  -> Output: PSML
+QUICK EXAMPLES
+- 'Android SDK' -> FAL
+- 'MVVM' -> TAS
+- 'Java' -> PSML
+- 'Kotlin' -> PSML
+- 'Django' -> FAL
+- 'Vue.js' -> FAL
+- 'Docker' -> FAL
+- 'scalable' -> NO
+- 'Conicle' -> NO
+- 'KubernetesPython' -> NO
+- 'FrameworkNode' -> NO
 
-Input:  Entity: 'PostgreSQL (v14)'      -> Output: DB
-Input:  Entity: 'BigQuery'              -> Output: DB
-
-Input:  Entity: 'AWS'                   -> Output: CP
-Input:  Entity: 'Google Cloud'          -> Output: CP
-
-Input:  Entity: 'Docker'                -> Output: FAL
-Input:  Entity: 'Kubernetes'            -> Output: FAL
-Input:  Entity: 'Linux'                 -> Output: FAL
-Input:  Entity: 'GitHub'                -> Output: FAL
-Input:  Entity: 'Excel'                 -> Output: FAL
-
-Input:  Entity: 'Agile'                 -> Output: TAS
-Input:  Entity: 'Problem Solving'       -> Output: TAS
-
-Input:  Entity: 'Raspberry Pi'          -> Output: HW
-Input:  Entity: 'NVIDIA GPU'            -> Output: HW
-
-Input:  Entity: 'AWS Lambda'            -> Output: FAL
-Input:  Entity: 'Azure DevOps'          -> Output: FAL
-
-Input:  Entity: 'Data Scientist'        -> Output: NO
-Input:  Entity: 'Google'                -> Output: NO
-Input:  Entity: 'Bangkok'               -> Output: NO
-Input:  Entity: 'What can I earn as a Systems Engineer' -> Output: NO
-Input:  Entity: '100k salary'           -> Output: NO
-Input:  Entity: 'PDF'                   -> Output: NO
-
-Now classify
+Now classify exactly one token for:
 Entity: '{entity}'
+Output:
 """.strip()
 
 
@@ -360,13 +337,13 @@ def finalize_group_and_filter(df_filt: pd.DataFrame) -> pd.DataFrame:
     grouped = df_filt.groupby("Topic_Normalized", as_index=False).agg(
         {"Entity": _concat_nonempty, "Class": _concat_nonempty}
     )
-    mask = grouped["Class"].apply(_count_distinct_classes) >= 1
+    mask = grouped["Class"].apply(_count_distinct_classes) >= 2
     return grouped.loc[mask].reset_index(drop=True)
 
 
 # ============== Main ==============
 if __name__ == "__main__":
-    df = pd.read_csv(INPUT).head(100)
+    df = pd.read_csv(INPUT)
     for col in ["Entity", "Class", "Topic_Normalized"]:
         if col in df.columns:
             df[col] = df[col].fillna("")
