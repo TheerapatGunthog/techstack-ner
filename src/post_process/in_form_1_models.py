@@ -1,12 +1,16 @@
 from pathlib import Path
-import os, json, re, time, contextlib
+import os
+import json
+import re
+import time
+import contextlib
 import numpy as np
 import pandas as pd
 import requests
 from collections import defaultdict
 from tqdm import tqdm
 
-# ===== runtime hints =====
+# ===== Runtime recommendations =====
 os.environ.setdefault("OMP_NUM_THREADS", "4")
 os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
 
@@ -30,14 +34,14 @@ except Exception:
     TokenClassificationPipeline = None
 
 # =========================
-# Config
+# Configuration settings
 # =========================
-PROJECT_PATH = Path("/home/whilebell/Code/techstack-ner/")
+PROJECT_PATH = Path(os.getcwd())
 MODEL_PATH_ROBERTA_BASE = (
     PROJECT_PATH / "models/roberta-base/best_model/"
-)  # PSML, DB, CP, FAL, HW
-MODEL_PATH_ROBERTA_LARGE = PROJECT_PATH / "models/bootstrapping03/best_model/"  # TAS
-# Single-model mode
+)  # Used for PSML, DB, CP, FAL, HW
+MODEL_PATH_ROBERTA_LARGE = PROJECT_PATH / "models/bootstrapping03/best_model/"  # Used for TAS
+# Single model mode
 SINGLE_MODEL_PATH = MODEL_PATH_ROBERTA_LARGE
 SINGLE_CLASSES = {"PSML", "DB", "CP", "FAL", "HW", "TAS"}
 DATA_PATH = PROJECT_PATH / "data/interim/preprocessed-data/scraping_data.csv"
@@ -62,7 +66,7 @@ SESSION = requests.Session()
 
 
 # =========================
-# Span utilities (เหมือนไฟล์อ้างอิง)
+# Helper functions for Span (like a reference file)
 # =========================
 def overlaps(a_start, a_end, b_start, b_end) -> bool:
     return not (a_end <= b_start or b_end <= a_start)
@@ -204,7 +208,7 @@ def _merge_per_label_with_policy(entities):
 
 
 # =========================
-# Fast HF pipelines on 8GB
+# Create a fast HF pipeline on 8GB RAM
 # =========================
 def _build_fast_pipeline(model_dir, device, dtype, max_length=256):
     tok = AutoTokenizer.from_pretrained(model_dir, local_files_only=True)
@@ -255,7 +259,7 @@ def _predict_batch(pipe, texts, allowed_labels, thresholds, batch_size=32):
 
 
 # =========================
-# Ollama helper: normalize topic only
+# Ollama helper: Used for topic normalization only
 # =========================
 def _ollama_generate(model: str, prompt: str, max_retries: int = 2, timeout: int = 60):
     payload = {"model": model, "prompt": prompt, "stream": False}
@@ -274,10 +278,10 @@ def _ollama_generate(model: str, prompt: str, max_retries: int = 2, timeout: int
 
 
 TOPIC_PROMPT_TMPL = (
-    "You are a strict normalizer for job titles.\n"
-    "Return ONLY the canonical job title string with no company or department.\n"
-    'Output JSON: {{"title": "..."}}\n'
-    "Input: {topic}\n"
+    "You are a strict assistant for normalizing job titles.\n"
+    "Return only the standardized job title, without company or department names.\n"
+    'JSON format: {{"title": "..."}}\n'
+    "Input data: {topic}\n"
     "JSON:"
 )
 
@@ -297,7 +301,7 @@ def normalize_topic_with_llm(topic: str, model: str = LLM_MODEL):
 
 
 # =========================
-# Pipeline
+# Main process
 # =========================
 def run():
     # Load data
@@ -307,7 +311,7 @@ def run():
     if missing:
         raise ValueError(f"Missing required columns: {sorted(missing)}")
 
-    # Build pipelines
+    # Create pipeline
     if torch is not None:
         device = (
             torch.device("cuda:0") if torch.cuda.is_available() else torch.device("cpu")
@@ -322,7 +326,7 @@ def run():
     else:
         pipe = None
 
-    # NER batch inference -> per-entity rows
+    # Batch NER prediction -> Convert to row per entity
     rows = []
     texts = [str(x) for x in ds["Segmented_Qualification"].tolist()]
     if torch is not None:
@@ -351,7 +355,7 @@ def run():
                 single_preds,
             ),
             total=len(ds),
-            desc="Collect NER results",
+            desc="Collecting NER results",
             unit="row",
         ):
             merged = p_main or []
@@ -370,12 +374,12 @@ def run():
                     {"Topic": topic, "Sentence_Index": si, "Entity": "", "Class": ""}
                 )
     else:
-        # dev path: use optional Predictions JSON column
+        # Dev path: Use optional Predictions JSON column
         pred_exists = "Predictions" in ds.columns
         for tpl in tqdm(
             ds.itertuples(index=False),
             total=len(ds),
-            desc="Collect DEV predictions",
+            desc="Collecting DEV predictions",
             unit="row",
         ):
             topic, si, text = tpl.Topic, tpl.Sentence_Index, tpl.Segmented_Qualification
@@ -402,7 +406,7 @@ def run():
 
     df = pd.DataFrame(rows)
 
-    # ===== รวมก่อนด้วย Topic เดิม =====
+    # ===== Aggregate data by Topic =====
     agg_raw = df.groupby(["Topic", "Sentence_Index"], as_index=False, sort=False).agg(
         {
             "Entity": lambda s: ", ".join([x for x in s if isinstance(x, str) and x]),
@@ -410,7 +414,7 @@ def run():
         }
     )
 
-    # Dedup ต่อแถว: เก็บการพบครั้งแรก
+    # Remove duplicate rows: Keep only the first occurrence
     def _dedup_row_entities(entity_str: str, class_str: str):
         ents = [e.strip() for e in (entity_str or "").split(",") if e.strip()]
         clss = [c.strip() for c in (class_str or "").split(",") if c.strip()]
@@ -422,7 +426,7 @@ def run():
                 seen.add(e)
         return ", ".join(kept_e), ", ".join(kept_c)
 
-    tqdm.pandas(desc="Dedup rows")
+    tqdm.pandas(desc="Removing duplicates in rows")
     dedup_pairs = agg_raw[["Entity", "Class"]].progress_apply(
         lambda r: _dedup_row_entities(r["Entity"], r["Class"]),
         axis=1,
@@ -431,7 +435,7 @@ def run():
     agg_dedup = agg_raw.copy()
     agg_dedup[["Entity", "Class"]] = dedup_pairs
 
-    # ===== ค่อย normalize เฉพาะ Topic ที่ไม่ซ้ำ =====
+    # ===== Normalize unique Topics only =====
     topic_norm_cache = {}
 
     def _norm_topic_cached(t):
@@ -445,17 +449,17 @@ def run():
         for t in tqdm(uniq_topics, desc="Normalize unique topics", unit="topic")
     ]
 
-    # map ลงทั้ง raw และ dedup
+    # Map to both raw and dedup
     agg_raw["Topic_Normalized"] = agg_raw["Topic"].map(topic_norm_cache)
     agg_dedup["Topic_Normalized"] = agg_dedup["Topic"].map(topic_norm_cache)
 
-    # เลือกคอลัมน์ผลลัพธ์
+    # Select result columns
     out_raw = agg_raw[["Topic_Normalized", "Sentence_Index", "Entity", "Class"]].copy()
     out_dedup = agg_dedup[
         ["Topic_Normalized", "Sentence_Index", "Entity", "Class"]
     ].copy()
 
-    # Save
+    # Save results
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     out_raw.to_csv(OUTPUT_CSV_RAW, index=False, encoding="utf-8-sig")
     out_dedup.to_csv(OUTPUT_CSV_DEDUP, index=False, encoding="utf-8-sig")

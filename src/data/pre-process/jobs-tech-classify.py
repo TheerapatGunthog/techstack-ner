@@ -1,12 +1,20 @@
 import pandas as pd
 from transformers import pipeline
 from tqdm import tqdm
+from pathlib import Path
+import os
+
+PROJECT_ROOT = Path(os.getcwd())
 
 # Load zero-shot classification model
 classifier = pipeline("zero-shot-classification", model="facebook/bart-large-mnli")
 
+INPUT_DS_PATH = PROJECT_ROOT / "data/raw/scraping-data/merged_product.csv"
+OUTPUT_NONTECH_PATH = PROJECT_ROOT / "data/raw/classified/non_tech_jobs.csv"
+OUTPUT_TECH_PATH = PROJECT_ROOT / "data/raw/classified/tech_jobs.csv"
+
 # Read CSV file
-df = pd.read_csv("/home/whilebell/Code/Project/TechStack-NER/data/raw/merged.csv")
+df = pd.read_csv(INPUT_DS_PATH)
 
 # Check the DataFrame structure
 print(f"Total number of entries: {len(df)}")
@@ -87,14 +95,14 @@ print(f"Qualification: {top_tech_job['Qualification']}")
 # Save results
 # Save all data with classification results
 df.to_csv(
-    "/home/whilebell/Code/Project/TechStack-NER/data/raw/classified/classified_jobs.csv",
+    OUTPUT_NONTECH_PATH,
     index=False,
     encoding="utf-8-sig",
 )
 
 # Save only tech jobs
 tech_jobs.to_csv(
-    "/home/whilebell/Code/Project/TechStack-NER/data/raw/classified/tech_jobs_only.csv",
+    OUTPUT_TECH_PATH,
     index=False,
     encoding="utf-8-sig",
 )

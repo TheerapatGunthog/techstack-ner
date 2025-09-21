@@ -2,15 +2,13 @@
 Module for merging multiple CSV files into a single dataset.
 """
 
-import sys
 from pathlib import Path
 from typing import Optional
 import pandas as pd
+import os
 
-# Add parent directory to sys.path
-sys.path.append(str(Path(__file__).resolve().parent.parent.parent))
 
-from data.raw import RAW_DATA_PATH
+PROJECT_ROOT = Path(os.getcwd())
 
 
 def read_csv_files_from_folder(folder_path: Path) -> Optional[pd.DataFrame]:
@@ -41,9 +39,9 @@ def main():
     """Main function to process and merge CSV files."""
     # Define the folder paths
     fd_paths = [
-        RAW_DATA_PATH / "first-data/csv1/",
-        RAW_DATA_PATH / "first-data/csv2/",
-        RAW_DATA_PATH / "first-data/csv3/",
+        PROJECT_ROOT / "data/raw/scraping-data/APRL_MAY/",
+        PROJECT_ROOT / "data/raw/scraping-data/FEB_MAR/",
+        PROJECT_ROOT / "data/raw/scraping-data/JUN_JULY_AUG/",
     ]
 
     # Process all folders and combine into one DataFrame
@@ -62,7 +60,7 @@ def main():
     print(f"Merged data shape: {merged_df.shape}")
 
     # Save the merged DataFrame to a CSV file
-    output_path = RAW_DATA_PATH / "merged.csv"
+    output_path = PROJECT_ROOT / "data/raw/scraping-data/merged_product.csv"
     merged_df.to_csv(output_path, index=False)
     print(f"Successfully saved merged data to {output_path}")
 

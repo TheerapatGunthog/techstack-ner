@@ -3,9 +3,10 @@ from pathlib import Path
 import pandas as pd
 import logging
 from typing import Optional, List, Dict, Union
+import os
 
 # ---- Paths ----
-PROJECT_PATH = Path("/home/whilebell/Code/techstack-ner/")
+PROJECT_PATH = Path(os.getcwd())
 
 # ---- Logging ----
 logging.basicConfig(
@@ -288,9 +289,9 @@ class JobDataProcessor:
         df = self.load_data()
 
         # drop duplicates by Qualification
-        before = len(df)
-        df = df.drop_duplicates(subset=["Qualification"]).reset_index(drop=True)
-        logger.info(f"Removed {before - len(df)} duplicate qualifications")
+        # before = len(df)
+        # df = df.drop_duplicates(subset=["Qualification"]).reset_index(drop=True)
+        # logger.info(f"Removed {before - len(df)} duplicate qualifications")
 
         # filter out Thai text
         df["Topic"] = df["Topic"].apply(self.cleaner.filter_non_thai)
@@ -315,13 +316,13 @@ class JobDataProcessor:
             df = df.rename(columns={"Qualification": "Segmented_Qualification"})
 
         # drop duplicates again
-        before = len(df)
-        df = df.drop_duplicates(subset=["Segmented_Qualification"]).reset_index(
-            drop=True
-        )
-        logger.info(f"Removed {before - len(df)} duplicate segmented qualifications")
+        # before = len(df)
+        # df = df.drop_duplicates(subset=["Segmented_Qualification"]).reset_index(
+        #     drop=True
+        # )
+        # logger.info(f"Removed {before - len(df)} duplicate segmented qualifications")
 
-        df = df[["Topic", "Sentence_Index", "Segmented_Qualification"]]
+        df = df[["Topic", "Position", "Sentence_Index", "Segmented_Qualification"]]
 
         # save output
         out = self.interim_data_path / self.config["output_file"]
@@ -333,15 +334,11 @@ class JobDataProcessor:
 
 if __name__ == "__main__":
     config = {
-        "input_file": "data/raw/kaggle-data/job_title_des.csv",
-        "output_file": "data/interim/preprocessed-data/kaggle_data.csv",
-        "segment_sentences": True,
+        "input_file": "data/raw/scraping-data/merged_product.csv",
+        "output_file": "data/interim/preprocessed-data/product_data.csv",
+        "segment_sentences": False,
         "min_sentence_length": 10,
         "use_gpu": True,
-        # overrides if needed:
-        # "comma_handling": "normalize",
-        # "remove_versions": True,
-        # "remove_standalone_numbers": True,
     }
     processor = JobDataProcessor(PROJECT_PATH, PROJECT_PATH, config)
     _ = processor.process()
