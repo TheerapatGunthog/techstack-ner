@@ -1,6 +1,7 @@
 # normalize_and_filter_entities_llm.py
 from pathlib import Path
-import re, requests
+import re
+import requests
 import pandas as pd
 from tqdm import tqdm
 
@@ -194,24 +195,44 @@ def query_llm_batch(pairs):
 
     prompt = f"""
 You are an assistant that validates whether an entity truly belongs to the proposed class.
+Output strictly "yes" or "no" only. One answer per line, same order as input. No explanations.
 
-There are exactly 6 possible classes:
-- PSML = Programming and scripting language
-- DB   = Database
-- CP   = Cloud platform
-- FAL  = Framework and library
-- TAS  = Softskill and technique
-- HW   = Hardware
+Preprocess input entity: lowercase for matching; strip quotes, versions, brackets (e.g., "React 18", "PostgreSQL (v14)").
 
-Answer strictly "yes" or "no". One answer per line, in the same order as the input.
+Classes:
+- PSML = Programming and scripting language (Python, JavaScript, C++, R, Java, SQL, etc.)
+- DB   = Database systems (MySQL, PostgreSQL, MongoDB, Oracle, BigQuery, DynamoDB, etc.)
+- CP   = Cloud platform providers (AWS, Google Cloud, Microsoft Azure, Alibaba Cloud, etc.)
+- FAL  = Frameworks/libraries/tools (React, Angular, Django, Flask, TensorFlow, PyTorch, Docker, Kubernetes, etc.)
+- TAS  = Soft skills & techniques/methodologies (Communication, Teamwork, Leadership, Problem Solving, Agile, Scrum, etc.)
+- HW   = Hardware devices/components (NVIDIA GPU, Raspberry Pi, Arduino, Intel CPU, etc.)
+
+Disambiguation rules:
+- Language vs library: languages → PSML; packages/frameworks → FAL.
+- Cloud provider vs service: provider/platform → CP; database services (e.g., BigQuery, DynamoDB) → DB.
+- Tools vs soft skills: software/tools → FAL; skills/methods → TAS.
+- Hardware = physical device/component only.
+If uncertain, answer "no".
 
 ### Examples
+# PSML
 Entity: 'Python' | Proposed class: 'PSML' -> yes
-Entity: 'MongoDB' | Proposed class: 'DB' -> yes
-Entity: 'Excel' | Proposed class: 'TAS' -> yes
-Entity: 'Excel' | Proposed class: 'DB' -> no
-Entity: 'AWS' | Proposed class: 'HW' -> no
-Entity: 'Docker' | Proposed class: 'FAL' -> yes
+Entity: 'JavaScript' | Proposed class: 'DB' -> no
+# DB
+Entity: 'PostgreSQL' | Proposed class: 'DB' -> yes
+Entity: 'BigQuery' | Proposed class: 'CP' -> no
+# CP
+Entity: 'AWS' | Proposed class: 'CP' -> yes
+Entity: 'Azure' | Proposed class: 'PSML' -> no
+# FAL
+Entity: 'React' | Proposed class: 'FAL' -> yes
+Entity: 'Docker' | Proposed class: 'CP' -> no
+# TAS
+Entity: 'Agile' | Proposed class: 'TAS' -> yes
+Entity: 'Scrum' | Proposed class: 'FAL' -> no
+# HW
+Entity: 'Raspberry Pi' | Proposed class: 'HW' -> yes
+Entity: 'NVIDIA GPU' | Proposed class: 'PSML' -> no
 
 ### Now validate the following
 {text}
