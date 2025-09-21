@@ -4,13 +4,15 @@ import re
 import requests
 import pandas as pd
 from tqdm import tqdm
+import os
 
 # ================= Config =================
 INPUT = Path(
-    "/home/whilebell/Code/techstack-ner/data/post_processed/all_predictions_dedup.csv"
+    os.getcwd() + "/data/post_processed/all_predictions_dedup.csv"
 )
 OUT_DIR = INPUT.parent
 OUT_FILE = OUT_DIR / "all_predictions_llm_filtered.csv"
+OUT_FILE_GROUPED = OUT_DIR / "all_predictions_llm_filtered_grouped.csv"
 
 LLM_URL = "http://localhost:11434/api/generate"
 LLM_MODEL = "llama3.1:latest"
@@ -138,7 +140,6 @@ EXACT_MAP = {
 
 
 def compile_dict(patterns: dict):
-
     return {
         canon: [re.compile(p, re.I) for p in plist] for canon, plist in patterns.items()
     }
@@ -147,8 +148,9 @@ def compile_dict(patterns: dict):
 TOOLS_RX = compile_dict(TOOLS_PATTERNS)
 SOFT_RX = compile_dict(SOFT_PATTERNS)
 
-
 # ============== Normalize helpers ==============
+
+
 def base_clean(s: str) -> str:
     return (s or "").strip()
 
@@ -183,8 +185,9 @@ def _safe_split_csv(x):
         return []
     return [t.strip() for t in str(x).split(",") if t and str(t).strip()]
 
-
 # ============== LLM helpers ==============
+
+
 def query_llm_batch(pairs):
     text = "\n".join(
         [
@@ -192,7 +195,6 @@ def query_llm_batch(pairs):
             for i, (e, c) in enumerate(pairs)
         ]
     )
-
     prompt = f"""
 You are an assistant that validates whether an entity truly belongs to the proposed class.
 Output strictly "yes" or "no" only. One answer per line, same order as input. No explanations.
@@ -237,19 +239,15 @@ Entity: 'NVIDIA GPU' | Proposed class: 'PSML' -> no
 ### Now validate the following
 {text}
 """
-
     resp = requests.post(
         LLM_URL,
         json={"model": LLM_MODEL, "prompt": prompt, "stream": False},
     )
-
     data = resp.json()
     if "response" not in data:
         raise RuntimeError(f"LLM error: {data}")
-
     raw = data["response"]
     lines = [l.strip().lower() for l in raw.splitlines() if l.strip()]
-
     result = []
     for i in range(len(pairs)):
         if i < len(lines) and lines[i].startswith("y"):
@@ -306,6 +304,35 @@ def filter_with_llm(df):
             )
     return pd.DataFrame(out_rows)
 
+# ============== Final normalize & filter ==============
+
+
+def _concat_nonempty(series: pd.Series) -> str:
+    return ", ".join([s for s in series if isinstance(s, str) and s.strip()])
+
+
+def _count_distinct_classes(cls_str: str) -> int:
+    if not isinstance(cls_str, str) or not cls_str.strip():
+        return 0
+    return len({c.strip() for c in cls_str.split(",") if c.strip()})
+
+
+def finalize_group_and_filter(df_filt: pd.DataFrame) -> pd.DataFrame:
+    """
+    1) รวมทุกแถวที่มี Topic_Normalized เดียวกันให้เหลือแถวเดียว
+       โดยต่อ 'Entity' และ 'Class' เข้าด้วยกันแบบสะสม
+    2) คัดทิ้งอาชีพที่มีจำนวน class ที่แตกต่างกัน < 3
+    """
+    grouped = (
+        df_filt.groupby("Topic_Normalized", as_index=False)
+        .agg({
+            "Entity": _concat_nonempty,
+            "Class": _concat_nonempty,
+        })
+    )
+    mask = grouped["Class"].apply(_count_distinct_classes) >= 3
+    return grouped.loc[mask].reset_index(drop=True)
+
 
 # ============== Main ==============
 if __name__ == "__main__":
@@ -319,3 +346,9 @@ if __name__ == "__main__":
     df_filt.to_csv(OUT_FILE, index=False, encoding="utf-8-sig")
     print(f"[saved LLM filtered] {OUT_FILE}")
     print(f"Rows: {len(df_filt):,} | Unique entities: {df_filt['Entity'].nunique():,}")
+
+    # ขั้นตอนสุดท้าย: รวมตาม Topic_Normalized แล้วคัดทิ้งอาชีพที่มี class < 3 แบบไม่ซ้ำ
+    df_grouped = finalize_group_and_filter(df_filt)
+    df_grouped.to_csv(OUT_FILE_GROUPED, index=False, encoding="utf-8-sig")
+    print(f"[saved grouped+filtered] {OUT_FILE_GROUPED}")
+    print(f"Topics kept: {len(df_grouped):,}")
