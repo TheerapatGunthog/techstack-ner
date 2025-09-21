@@ -338,21 +338,16 @@ def finalize_group_and_filter(df_filt: pd.DataFrame) -> pd.DataFrame:
     if df_filt.empty:
         return pd.DataFrame(columns=["Topic_Normalized", "Quantity", "Entity", "Class"])
 
-    # นับจำนวนแถวที่ถูกรวม
-    counts = (
-        df_filt.groupby("Topic_Normalized")
-        .size()
-        .rename("Quantity")
-    )
+    counts = df_filt.groupby("Topic_Normalized").size().rename("Quantity")
 
-    # รวม Entity/Class แบบต่อท้าย
-    agg = (
-        df_filt.groupby("Topic_Normalized")
-        .agg(Entity=_concat_nonempty, Class=_concat_nonempty)
+    agg = df_filt.groupby("Topic_Normalized").agg(
+        Entity=("Entity", _concat_nonempty),
+        Class=("Class", _concat_nonempty),
     )
 
     grouped = pd.concat([counts, agg], axis=1).reset_index()
 
+    # กรอง: ต้องมีคลาสที่แตกต่างกันอย่างน้อย 2
     mask = grouped["Class"].apply(_count_distinct_classes) >= 2
     return grouped.loc[mask].reset_index(drop=True)
 

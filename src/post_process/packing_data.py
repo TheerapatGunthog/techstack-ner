@@ -4,7 +4,9 @@ import pandas as pd
 import os
 
 # ===== Input/Output =====
-INPUT = Path(os.getcwd() + "/data/post_processed/all_predictions_llm_filtered_grouped.csv")
+INPUT = Path(
+    os.getcwd() + "/data/post_processed/all_predictions_llm_filtered_grouped.csv"
+)
 OUT_DIR = INPUT.parent
 OUT_JOBS = OUT_DIR / "jobs.json"
 OUT_SKILLS = OUT_DIR / "skills.json"
@@ -47,13 +49,21 @@ def build_jobs_json(df_grouped: pd.DataFrame):
         .copy()
     )
     dfj["Topic_Normalized"] = dfj["Topic_Normalized"].astype(str).str.strip()
-    dfj = dfj.loc[dfj["Topic_Normalized"] != ""].drop_duplicates(subset=["Topic_Normalized"])
+    dfj = dfj.loc[dfj["Topic_Normalized"] != ""].drop_duplicates(
+        subset=["Topic_Normalized"]
+    )
 
-    # สร้าง id ตามลำดับชื่อ
+    # บังคับ Quantity เป็น int
+    dfj["Quantity"] = (
+        pd.to_numeric(dfj["Quantity"], errors="coerce").fillna(0).astype(int)
+    )
+
     dfj = dfj.sort_values("Topic_Normalized").reset_index(drop=True)
+
+    # ใช้ enumerate ที่ถูกต้อง
     items = [
-        {"id": idx + 1, "name": row.Topic_Normalized, "quantity": int(row.Quantity)}
-        for idx, row in dfj.itertuples(index=False, name="Row")
+        {"id": idx, "name": row.Topic_Normalized, "quantity": int(row.Quantity)}
+        for idx, row in enumerate(dfj.itertuples(index=False), start=1)
     ]
     return {"items": items}
 
@@ -85,7 +95,9 @@ def build_skills_json(per_rows: pd.DataFrame):
         group = r.Class
         if group == "HW":
             group = "ET"  # mapping เดิม
-        items.append({"id": idx, "name": r.Entity, "group": group, "quantity": int(r.quantity)})
+        items.append(
+            {"id": idx, "name": r.Entity, "group": group, "quantity": int(r.quantity)}
+        )
     return {"items": items}
 
 
@@ -109,7 +121,9 @@ def build_job_skill_scores(per_rows: pd.DataFrame, job2id: dict, skill2id: dict)
             "score": int(score),
         }
         for idx, (job, ent, score) in enumerate(
-            agg[["Topic_Normalized", "Entity", "score"]].itertuples(index=False, name=None)
+            agg[["Topic_Normalized", "Entity", "score"]].itertuples(
+                index=False, name=None
+            )
         )
         if job in job2id  # กันกรณี job ไม่อยู่ใน mapping
     ]
@@ -138,7 +152,9 @@ def build_trending_json(df_grouped: pd.DataFrame, job2id: dict):
     q2 = dfq["frac"].quantile(2 / 3)
 
     items = []
-    for job, frac in dfq[["Topic_Normalized", "frac"]].itertuples(index=False, name=None):
+    for job, frac in dfq[["Topic_Normalized", "frac"]].itertuples(
+        index=False, name=None
+    ):
         if job not in job2id:
             continue
         trending = 1 if frac <= q1 else (2 if frac <= q2 else 3)
@@ -151,7 +167,9 @@ def validate_links(links, jobs, skills):
     job_ids = {j["id"] for j in jobs["items"]}
     skill_ids = {s["id"] for s in skills["items"]}
     invalid = [
-        l for l in links["items"] if l["job_id"] not in job_ids or l["skill_id"] not in skill_ids
+        l
+        for l in links["items"]
+        if l["job_id"] not in job_ids or l["skill_id"] not in skill_ids
     ]
     print(f"Unmapped job-skill links: {len(invalid)}")
     if invalid:
@@ -161,10 +179,17 @@ def validate_links(links, jobs, skills):
 # ===== main =====
 if __name__ == "__main__":
     df = pd.read_csv(INPUT)
-    # columns: Topic_Normalized, Quantity, Entity, Class
-    for col in ["Topic_Normalized", "Entity", "Class", "Quantity"]:
+
+    # string cols
+    for col in ["Topic_Normalized", "Entity", "Class"]:
         if col in df.columns:
             df[col] = df[col].fillna("")
+
+    # numeric col
+    if "Quantity" in df.columns:
+        df["Quantity"] = (
+            pd.to_numeric(df["Quantity"], errors="coerce").fillna(0).astype(int)
+        )
 
     # explode เป็น per-entity-row (ไม่มี Sentence_Index ในไฟล์ grouped)
     per = _explode_pairs_grouped(df)
@@ -172,18 +197,26 @@ if __name__ == "__main__":
     # jobs (มี quantity)
     jobs_json = build_jobs_json(df)
     job2id = {x["name"]: x["id"] for x in jobs_json["items"]}
-    OUT_JOBS.write_text(json.dumps(jobs_json, ensure_ascii=False, indent=2), encoding="utf-8")
+    OUT_JOBS.write_text(
+        json.dumps(jobs_json, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
 
     # skills (มี quantity ของสกิล)
     skills_json = build_skills_json(per)
     skill2id = {x["name"]: x["id"] for x in skills_json["items"]}
-    OUT_SKILLS.write_text(json.dumps(skills_json, ensure_ascii=False, indent=2), encoding="utf-8")
+    OUT_SKILLS.write_text(
+        json.dumps(skills_json, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
 
     # job-skill scores
     links_json = build_job_skill_scores(per, job2id, skill2id)
     validate_links(links_json, jobs_json, skills_json)
-    OUT_LINKS.write_text(json.dumps(links_json, ensure_ascii=False, indent=2), encoding="utf-8")
+    OUT_LINKS.write_text(
+        json.dumps(links_json, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
 
     # trending จากสัดส่วน Quantity
     trending_json = build_trending_json(df, job2id)
-    OUT_TRADING.write_text(json.dumps(trending_json, ensure_ascii=False, indent=2), encoding="utf-8")
+    OUT_TRADING.write_text(
+        json.dumps(trending_json, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
