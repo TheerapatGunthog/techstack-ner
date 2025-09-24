@@ -6,6 +6,7 @@ import time
 import requests
 import pandas as pd
 from tqdm import tqdm
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # ================= Config =================
 INPUT = Path(os.getcwd() + "/data/post_processed/all_predictions_dedup.csv")
@@ -18,6 +19,12 @@ LLM_MODEL = "qwen3:8b"
 TIMEOUT = 90
 MAX_RETRIES = 2
 RETRY_SLEEP = 1.0
+
+# Speed knobs
+BATCH_SIZE = 16            # รวมหลายเอนทิตีต่อคำขอ
+MAX_WORKERS = 3            # ขนานแบบจำกัด
+LLM_OPTIONS = {"temperature": 0, "num_predict": 3}  # ลดโทเคนที่เดา
+LLM_STOP = ["\n", "\r"]    # หยุดเมื่อจบบรรทัด
 
 # Expanded patterns for current Computer Engineering job postings.
 # Regex are case-insensitive friendly. Aim: maximize root-term normalization coverage.
@@ -484,30 +491,22 @@ def compile_dict(patterns: dict):
     return {k: [re.compile(p, re.I) for p in v] for k, v in patterns.items()}
 
 
+# ใช้ dict เดิมที่ประกาศไว้นอกไฟล์นี้
 TOOLS_RX = compile_dict(TOOLS_PATTERNS)
 SOFT_RX = compile_dict(SOFT_PATTERNS)
 
-
 # ============== Helpers ==============
 _SLASH_EDGE_RX = re.compile(r"^\s*/\s*$")  # "/" ล้วนๆ
-_SLASH_LEAD_RX = re.compile(r"^\s*/\s*")  # ขึ้นต้นด้วย "/"
-_SLASH_TAIL_RX = re.compile(r"\s*/\s*$")  # ลงท้ายด้วย "/"
+_SLASH_LEAD_RX = re.compile(r"^\s*/\s*")   # ขึ้นต้นด้วย "/"
+_SLASH_TAIL_RX = re.compile(r"\s*/\s*$")   # ลงท้ายด้วย "/"
 
 
 def _pre_normalize_entity(s: str) -> str:
-    """ตัด / ที่โดดๆ หรือติดหัว/ท้าย token:
-    - 'JEDEC /' -> 'JEDEC'
-    - '/' -> ''
-    - '/ IP' -> 'IP'
-    - 'IP /' -> 'IP'
-    """
     if not s:
         return ""
     s = str(s)
-    # เคส "/" ล้วนๆ
     if _SLASH_EDGE_RX.match(s):
         return ""
-    # ตัด slash ต้น/ท้าย แล้ว trim ช่องว่าง
     s = _SLASH_LEAD_RX.sub("", s)
     s = _SLASH_TAIL_RX.sub("", s)
     return s.strip()
@@ -551,7 +550,7 @@ def _ekey(s: str) -> str:
     return s.lower().strip()
 
 
-# ============== LLM: classify ทีละเอนทิตี ==============
+# ============== LLM classify ==============
 _ALLOWED = {"PSML", "DB", "CP", "FAL", "TAS", "HW"}
 
 
@@ -570,38 +569,47 @@ HW: physical devices/components (Raspberry Pi, Arduino, NVIDIA GPU, Intel CPU, F
 HARD RULES
 Managed DB services (BigQuery, Redshift, DynamoDB, Firestore) → DB.
 CP only for provider names; non-database cloud services that are not tools → NO.
-Adjectives/marketing terms/generic words (e.g., scalable, robust, enterprise) → NO.
+Adjectives/marketing terms/generic words → NO.
 Job titles, company names, locations, salaries, sentences, responsibilities → NO.
-Unknown brands or proper nouns not in definitions → NO.
-Glued-together fake names (e.g., KubernetesPython, FrameworkNode) → NO.
+Unknown brands/proper nouns not in definitions → NO.
+Glued-together fake names → NO.
 If uncertain → NO.
-QUICK EXAMPLES
-'Android SDK' → FAL
-'MVVM' → TAS
-'Java' → PSML
-'Django' → FAL
-'Docker' → FAL
-'scalable' → NO
-'Data Scientist' → NO
-'Google Cloud' → CP
-'BigQuery' → DB
-'KubernetesPython' → NO
 Now classify exactly one token for:
 Entity: {entity}
 Output:
 """.strip()
 
 
+def _prompt_batch(entities: list[str]) -> str:
+    lines = "\n".join(f"{i+1}. {e}" for i, e in enumerate(entities))
+    return (
+        "Classify EACH line with EXACTLY ONE token from: PSML DB CP FAL TAS HW NO\n"
+        "Rules: provider-only=CP; managed-DB=DB; tools/libs/OS/CI/VCS/BI/office=FAL; "
+        "soft-skills/methods=TAS; languages=PSML; hardware=HW; else NO.\n"
+        "Output: N lines, one token per line, no extra text.\n"
+        f"{lines}\n"
+        "Output:\n"
+    )
+
+
+def _post_ollama(session: requests.Session, payload: dict) -> str:
+    r = session.post(LLM_URL, json=payload, timeout=TIMEOUT)
+    if not r.ok:
+        raise RuntimeError(f"HTTP {r.status_code}")
+    return r.json().get("response", "").strip()
+
+
 def _llm_classify_one(entity: str, session: requests.Session) -> str:
-    """เรียก LLM สำหรับเอนทิตีเดียว พร้อม retry และพาร์สผลแบบเข้ม"""
-    payload = {"model": LLM_MODEL, "prompt": _prompt_one(entity), "stream": False}
+    payload = {
+        "model": LLM_MODEL,
+        "prompt": _prompt_one(entity),
+        "stream": False,
+        "options": LLM_OPTIONS,
+        "stop": LLM_STOP,
+    }
     for attempt in range(MAX_RETRIES + 1):
         try:
-            r = session.post(LLM_URL, json=payload, timeout=TIMEOUT)
-            if not r.ok:
-                raise RuntimeError(f"HTTP {r.status_code}")
-            resp = r.json().get("response", "").strip()
-            # ดึงโทเคนที่อนุญาตจากข้อความบรรทัดแรกที่พบ
+            resp = _post_ollama(session, payload)
             m = re.search(r"\b(PSML|DB|CP|FAL|TAS|HW|NO)\b", resp, flags=re.I)
             lab = m.group(1).upper() if m else "NO"
             return lab if lab in _ALLOWED or lab == "NO" else "NO"
@@ -612,24 +620,65 @@ def _llm_classify_one(entity: str, session: requests.Session) -> str:
             return "NO"
 
 
-def _llm_reclass_entities_one_by_one(unique_entities):
-    entity_to_class = {}
+def _llm_classify_batch(entities: list[str]) -> list[str]:
     sess = requests.Session()
-    for e in tqdm(unique_entities, desc="LLM reclass (1-by-1)"):
-        lab = _llm_classify_one(e, sess)
-        entity_to_class[_ekey(e)] = lab
+    payload = {
+        "model": LLM_MODEL,
+        "prompt": _prompt_batch(entities),
+        "stream": False,
+        "options": LLM_OPTIONS,
+        "stop": LLM_STOP,
+    }
+    for attempt in range(MAX_RETRIES + 1):
+        try:
+            resp = _post_ollama(sess, payload)
+            lines = [l.strip().upper() for l in resp.splitlines() if l.strip()]
+            out = []
+            for l in lines[:len(entities)]:
+                m = re.search(r"\b(PSML|DB|CP|FAL|TAS|HW|NO)\b", l)
+                out.append(m.group(1) if m else "NO")
+            while len(out) < len(entities):
+                out.append("NO")
+            return out
+        except Exception:
+            if attempt < MAX_RETRIES:
+                time.sleep(RETRY_SLEEP * (attempt + 1))
+                continue
+            return ["NO"] * len(entities)
+
+
+def _chunk(seq, n):
+    for i in range(0, len(seq), n):
+        yield seq[i:i + n]
+
+
+def _llm_reclass_entities_parallel_batched(unique_entities: list[str]) -> dict[str, str]:
+    batches = list(_chunk(unique_entities, BATCH_SIZE))
+    entity_to_class: dict[str, str] = {}
+
+    def _work(batch):
+        labels = _llm_classify_batch(batch)
+        return [(e, lab) for e, lab in zip(batch, labels)]
+
+    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as ex:
+        futures = [ex.submit(_work, b) for b in batches]
+        for f in tqdm(as_completed(futures), total=len(futures), desc="LLM reclass (batched+parallel)"):
+            for e, lab in f.result():
+                entity_to_class[_ekey(e)] = lab
+
     total = len(entity_to_class)
     no_cnt = sum(1 for v in entity_to_class.values() if v == "NO")
     print(f"[LLM map] entities: {total} | NO: {no_cnt} ({no_cnt/max(1,total):.2%})")
     return entity_to_class
 
-
 # ============== ขั้นตอน LLM + apply ทั้ง dataset ==============
+
+
 def filter_with_llm_reclass_all_entities(df: pd.DataFrame) -> pd.DataFrame:
     """
     - canonicalize entity
     - รวมเอนทิตีไม่ซ้ำ
-    - เรียก LLM ทีละเอนทิตี
+    - เรียก LLM แบบ batch + ขนานจำกัด
     - ใช้คลาสจาก LLM แทน; 'NO' → ทิ้ง
     """
     # 1) unique canonical entities
@@ -644,8 +693,8 @@ def filter_with_llm_reclass_all_entities(df: pd.DataFrame) -> pd.DataFrame:
                 seen.add(k)
                 ents_to_check.append(display)
 
-    # 2) classify one-by-one
-    entity_to_class = _llm_reclass_entities_one_by_one(ents_to_check)
+    # 2) classify batched + parallel
+    entity_to_class = _llm_reclass_entities_parallel_batched(ents_to_check)
 
     # 3) apply back
     out_rows = []
@@ -674,8 +723,9 @@ def filter_with_llm_reclass_all_entities(df: pd.DataFrame) -> pd.DataFrame:
         out_rows, columns=["Topic_Normalized", "Sentence_Index", "Entity", "Class"]
     )
 
-
 # ============== Final normalize & filter ==============
+
+
 def _concat_nonempty(series: pd.Series) -> str:
     return ", ".join([s for s in series if isinstance(s, str) and s.strip()])
 
@@ -691,12 +741,10 @@ def finalize_group_and_filter(df_filt: pd.DataFrame) -> pd.DataFrame:
         return pd.DataFrame(columns=["Topic_Normalized", "Quantity", "Entity", "Class"])
 
     counts = df_filt.groupby("Topic_Normalized").size().rename("Quantity")
-
     agg = df_filt.groupby("Topic_Normalized").agg(
         Entity=("Entity", _concat_nonempty),
         Class=("Class", _concat_nonempty),
     )
-
     grouped = pd.concat([counts, agg], axis=1).reset_index()
 
     # กรอง: ต้องมีคลาสที่แตกต่างกันอย่างน้อย 2
