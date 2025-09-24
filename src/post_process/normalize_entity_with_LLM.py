@@ -203,39 +203,34 @@ def _prompt_one(entity: str) -> str:
 You are a STRICT validator for ONE entity.
 Return EXACTLY ONE token from: PSML DB CP FAL TAS HW NO
 UPPERCASE only. No prose. No punctuation.
-
 DEFINITIONS
-- PSML: programming/scripting languages only (Python, Java, Kotlin, C/C++, C#, JavaScript, TypeScript, R, Go, Rust, SQL, Bash, PowerShell, MATLAB).
-- DB: database engines/warehouses/services/key-value/document/search (PostgreSQL, MySQL, SQLite, Oracle, SQL Server, MongoDB, Redis, Cassandra, BigQuery, Snowflake, Redshift, DynamoDB, Hive, Trino, Presto, Elasticsearch).
-- CP: cloud PROVIDER/PLATFORM names only (AWS, Google Cloud, Microsoft Azure, Alibaba Cloud, Firebase platform).
-- FAL: software frameworks/libraries/tools/runtimes/OS/SDK/CI-CD/VCS/BI/office (React, Vue.js, Angular, Django, Flask, FastAPI, Spring, Android SDK, TensorFlow, PyTorch, scikit-learn, pandas, NumPy, Node.js, .NET, Docker, Kubernetes, Git, GitHub, GitLab, Jenkins, Jira, Confluence, Linux, Windows, macOS, Excel, Word, PowerPoint, Power BI, Tableau, Looker, OpenCV, Ansible, Terraform).
-- TAS: soft skills, techniques, methodologies, patterns (Agile, Scrum, Kanban, Communication, Teamwork, Leadership, Problem Solving, Time Management, Stakeholder Management, Project Management, Negotiation, MVC, MVVM, MVP, Clean Architecture).
-- HW: physical devices/components (Raspberry Pi, Arduino, NVIDIA GPU, Intel CPU, FPGA, microcontroller).
-
+PSML: programming/scripting languages only (Python, Java, Kotlin, C/C++, C#, JavaScript, TypeScript, R, Go, Rust, SQL, Bash, PowerShell, MATLAB).
+DB: database engines/warehouses/services/key-value/document/search (PostgreSQL, MySQL, SQLite, Oracle, SQL Server, MongoDB, Redis, Cassandra, BigQuery, Snowflake, Redshift, DynamoDB, Hive, Trino, Presto, Elasticsearch).
+CP: cloud PROVIDER/PLATFORM names only (AWS, Google Cloud, Microsoft Azure, Alibaba Cloud, Firebase platform).
+FAL: frameworks/libraries/tools/runtimes/OS/SDK/CI-CD/VCS/BI/office (React, Vue.js, Angular, Django, Flask, FastAPI, Spring, Android SDK, TensorFlow, PyTorch, scikit-learn, pandas, NumPy, Node.js, .NET, Docker, Kubernetes, Git, GitHub, GitLab, Jenkins, Jira, Confluence, Linux, Windows, macOS, Excel, Word, PowerPoint, Power BI, Tableau, Looker, OpenCV, Ansible, Terraform).
+TAS: soft skills, techniques, methodologies, patterns (Agile, Scrum, Kanban, Communication, Teamwork, Leadership, Problem Solving, Time Management, Stakeholder Management, Project Management, Negotiation, MVC, MVVM, MVP, Clean Architecture).
+HW: physical devices/components (Raspberry Pi, Arduino, NVIDIA GPU, Intel CPU, FPGA, microcontroller).
 HARD RULES
-- Managed DB services (BigQuery, Redshift, DynamoDB, Firestore) -> DB.
-- CP only for provider names; non-database cloud services that are not tools -> NO.
-- Adjectives/marketing terms/generic words (e.g., scalable, robust, enterprise) -> NO.
-- Job titles, companies, locations, salaries, sentences, questions, responsibilities -> NO.
-- Unknown brands or proper nouns that are NOT tools/techniques -> NO.
-- If the token looks like two distinct tools glued together (e.g., 'KubernetesPython', 'FrameworkNode') and is NOT a known single tool name -> NO.
-- If uncertain -> NO.
-
+Managed DB services (BigQuery, Redshift, DynamoDB, Firestore) → DB.
+CP only for provider names; non-database cloud services that are not tools → NO.
+Adjectives/marketing terms/generic words (e.g., scalable, robust, enterprise) → NO.
+Job titles, company names, locations, salaries, sentences, responsibilities → NO.
+Unknown brands or proper nouns not in definitions → NO.
+Glued-together fake names (e.g., KubernetesPython, FrameworkNode) → NO.
+If uncertain → NO.
 QUICK EXAMPLES
-- 'Android SDK' -> FAL
-- 'MVVM' -> TAS
-- 'Java' -> PSML
-- 'Kotlin' -> PSML
-- 'Django' -> FAL
-- 'Vue.js' -> FAL
-- 'Docker' -> FAL
-- 'scalable' -> NO
-- 'Conicle' -> NO
-- 'KubernetesPython' -> NO
-- 'FrameworkNode' -> NO
-
+'Android SDK' → FAL
+'MVVM' → TAS
+'Java' → PSML
+'Django' → FAL
+'Docker' → FAL
+'scalable' → NO
+'Data Scientist' → NO
+'Google Cloud' → CP
+'BigQuery' → DB
+'KubernetesPython' → NO
 Now classify exactly one token for:
-Entity: '{entity}'
+Entity: {entity}
 Output:
 """.strip()
 
