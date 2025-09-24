@@ -1,4 +1,5 @@
 # normalize_entity_with_LLM_single.py
+import re as _re
 from pathlib import Path
 import os
 import re
@@ -24,7 +25,6 @@ RETRY_SLEEP = 1.0
 BATCH_SIZE = 16            # รวมหลายเอนทิตีต่อคำขอ
 MAX_WORKERS = 3            # ขนานแบบจำกัด
 LLM_OPTIONS = {"temperature": 0, "num_predict": 4}
-LLM_STOP = ["\n", "\r"]
 
 # Expanded patterns for current Computer Engineering job postings.
 # Regex are case-insensitive friendly. Aim: maximize root-term normalization coverage.
@@ -488,17 +488,17 @@ def base_clean(s: str) -> str:
 
 
 def compile_dict(patterns: dict):
-    return {k: [re.compile(p, re.I) for p in v] for k, v in patterns.items()}
+    import re as _re
+    return {k: [_re.compile(p, _re.I) for p in v] for k, v in patterns.items()}
 
 
-# ใช้ dict เดิมที่ประกาศไว้นอกไฟล์นี้
 TOOLS_RX = compile_dict(TOOLS_PATTERNS)
 SOFT_RX = compile_dict(SOFT_PATTERNS)
 
 # ============== Helpers ==============
-_SLASH_EDGE_RX = re.compile(r"^\s*/\s*$")  # "/" ล้วนๆ
-_SLASH_LEAD_RX = re.compile(r"^\s*/\s*")   # ขึ้นต้นด้วย "/"
-_SLASH_TAIL_RX = re.compile(r"\s*/\s*$")   # ลงท้ายด้วย "/"
+_SLASH_EDGE_RX = _re.compile(r"^\s*/\s*$")   # "/" ล้วนๆ
+_SLASH_LEAD_RX = _re.compile(r"^\s*/\s*")    # ขึ้นต้นด้วย "/"
+_SLASH_TAIL_RX = _re.compile(r"\s*/\s*$")    # ลงท้ายด้วย "/"
 
 
 def _pre_normalize_entity(s: str) -> str:
@@ -537,53 +537,45 @@ def canonical_name(s: str) -> str:
 
 
 def _safe_split_csv(x):
+    # อินพุตของคุณคั่นหลักด้วย comma มีบางเคสใช้ ; หรือ | ด้วย
     if x is None or (isinstance(x, float) and pd.isna(x)):
         return []
-    return [t.strip() for t in str(x).split(",") if t and str(t).strip()]
+    parts = _re.split(r"\s*[,;|]\s*", str(x))
+    return [t.strip() for t in parts if t and t.strip()]
 
 
 def _ekey(s: str) -> str:
     s = _pre_normalize_entity((s or "").strip())
-    s = re.sub(r'[\(\)\[\]\{\}"“”]', "", s)
-    s = re.sub(r"\b[vV]?\d+(\.\d+){0,3}\b", "", s)
-    s = re.sub(r"\s+", " ", s)
+    s = _re.sub(r'[\(\)\[\]\{\}"“”]', "", s)
+    s = _re.sub(r"\b[vV]?\d+(\.\d+){0,3}\b", "", s)  # ตัดเวอร์ชัน
+    s = _re.sub(r"\s+", " ", s)
     return s.lower().strip()
 
 
+# ตัด noise ออกจากอินพุตก่อนส่ง LLM: ยาวเกินไปหรือเป็นประโยค
+_WORD_RE = _re.compile(r"[A-Za-z][A-Za-z0-9\.\+#\-_/]*")
+
+
+def _is_reasonable_token(s: str) -> bool:
+    # กรองสิ่งที่เป็นประโยคยาวๆ หรือไม่มี token ตัวอักษร
+    if not s or len(s) > 40:
+        return False
+    # ตัดเคสที่เป็นวลี 4 คำขึ้นไป เช่น "BTS Asoke" "technical solutions"
+    if len(s.split()) >= 4:
+        return False
+    # ต้องมีอักษรละตินอย่างน้อยหนึ่ง "คำ"
+    return bool(_WORD_RE.search(s))
+
+
 # ============== LLM classify ==============
-_ALLOWED = {"PSML", "DB", "CP", "FAL", "TAS", "HW"}
-
-
-def _prompt_one(entity: str) -> str:
-    return f"""
-You are a STRICT validator for ONE entity.
-Return EXACTLY ONE token from: PSML DB CP FAL TAS HW NO
-UPPERCASE only. No prose. No punctuation.
-DEFINITIONS
-PSML: programming/scripting languages only (Python, Java, Kotlin, C/C++, C#, JavaScript, TypeScript, R, Go, Rust, SQL, Bash, PowerShell, MATLAB).
-DB: database engines/warehouses/services/key-value/document/search (PostgreSQL, MySQL, SQLite, Oracle, SQL Server, MongoDB, Redis, Cassandra, BigQuery, Snowflake, Redshift, DynamoDB, Hive, Trino, Presto, Elasticsearch).
-CP: cloud PROVIDER/PLATFORM names only (AWS, Google Cloud, Microsoft Azure, Alibaba Cloud, Firebase platform).
-FAL: frameworks/libraries/tools/runtimes/OS/SDK/CI-CD/VCS/BI/office (React, Vue.js, Angular, Django, Flask, FastAPI, Spring, Android SDK, TensorFlow, PyTorch, scikit-learn, pandas, NumPy, Node.js, .NET, Docker, Kubernetes, Git, GitHub, GitLab, Jenkins, Jira, Confluence, Linux, Windows, macOS, Excel, Word, PowerPoint, Power BI, Tableau, Looker, OpenCV, Ansible, Terraform).
-TAS: soft skills, techniques, methodologies, patterns (Agile, Scrum, Kanban, Communication, Teamwork, Leadership, Problem Solving, Time Management, Stakeholder Management, Project Management, Negotiation, MVC, MVVM, MVP, Clean Architecture).
-HW: physical devices/components (Raspberry Pi, Arduino, NVIDIA GPU, Intel CPU, FPGA, microcontroller).
-HARD RULES
-Managed DB services (BigQuery, Redshift, DynamoDB, Firestore) → DB.
-CP only for provider names; non-database cloud services that are not tools → NO.
-Adjectives/marketing terms/generic words → NO.
-Job titles, company names, locations, salaries, sentences, responsibilities → NO.
-Unknown brands/proper nouns not in definitions → NO.
-Glued-together fake names → NO.
-If uncertain → NO.
-Now classify exactly one token for:
-Entity: {entity}
-Output:
-""".strip()
+_ALLOWED = {"PSML", "DB", "CP", "FAL", "TAS", "HW", "NO"}
 
 
 def _prompt_batch(entities: list[str]) -> str:
+    # ให้ตอบ 1 บรรทัดเดียว มี N โทเคนคั่นด้วยช่องว่าง
     items = "\n".join(f"{i+1}. {e}" for i, e in enumerate(entities))
     return (
-        "Classify EACH line with EXACTLY ONE token from: PSML DB CP FAL TAS HW NO.\n"
+        "Classify EACH line with EXACTLY ONE of: PSML DB CP FAL TAS HW NO.\n"
         "Rules: provider-only=CP; managed-DB=DB; tools/libs/OS/CI/VCS/BI/office=FAL; "
         "soft-skills/methods=TAS; languages=PSML; hardware=HW; else NO.\n"
         "Return ONE LINE ONLY with N tokens separated by single spaces, in order.\n"
@@ -599,51 +591,37 @@ def _post_ollama(session: requests.Session, payload: dict) -> str:
     return r.json().get("response", "").strip()
 
 
-def _llm_classify_one(entity: str, session: requests.Session) -> str:
-    payload = {
-        "model": LLM_MODEL,
-        "prompt": _prompt_one(entity),
-        "stream": False,                 # <-- แก้จากเดิมที่ใส่ list ผิด
-        "options": LLM_OPTIONS,
-        "stop": LLM_STOP,                # single entity เท่านั้นที่ใช้ stop ขึ้นบรรทัด
-    }
-    for attempt in range(MAX_RETRIES + 1):
-        try:
-            r = session.post(LLM_URL, json=payload, timeout=TIMEOUT)
-            r.raise_for_status()
-            resp = r.json().get("response", "").strip()
-            m = re.search(r"\b(PSML|DB|CP|FAL|TAS|HW|NO)\b", resp, flags=re.I)
-            lab = m.group(1).upper() if m else "NO"
-            return lab if lab in _ALLOWED or lab == "NO" else "NO"
-        except Exception:
-            if attempt < MAX_RETRIES:
-                time.sleep(RETRY_SLEEP * (attempt + 1))
-                continue
-            return "NO"
-
-
 def _llm_classify_batch(entities: list[str]) -> list[str]:
     sess = requests.Session()
     payload = {
         "model": LLM_MODEL,
         "prompt": _prompt_batch(entities),
-        "stream": False,
-        "options": LLM_OPTIONS,
-        # ไม่มี "stop" ที่เป็น newline ในโหมด batch
+        "stream": False,           # สำคัญ: ต้องเป็น boolean
+        "options": LLM_OPTIONS,    # ไม่ใช้ stop กับ batch
     }
     for attempt in range(MAX_RETRIES + 1):
         try:
-            r = sess.post(LLM_URL, json=payload, timeout=TIMEOUT)
-            r.raise_for_status()
-            resp = r.json().get("response", "").strip()
-            # คาดหวัง "FAL PSML DB ..." 1 บรรทัด
+            resp = _post_ollama(sess, payload)
+            resp = resp.strip()
+            if not resp:
+                return ["NO"] * len(entities)
+
+            # primary format: single line "FAL PSML DB ..."
             toks = [t.strip().upper() for t in resp.split() if t.strip()]
+            if len(toks) >= len(entities):
+                out = [t if t in _ALLOWED else "NO" for t in toks[:len(entities)]]
+                return out
+
+            # fallback: บางรุ่นอาจคืนหลายบรรทัด บรรทัดละหนึ่ง token
+            lines = [l.strip().upper() for l in resp.splitlines() if l.strip()]
             out = []
-            for t in toks[:len(entities)]:
-                out.append(t if t in _ALLOWED or t == "NO" else "NO")
+            for l in lines[:len(entities)]:
+                m = _re.search(r"\b(PSML|DB|CP|FAL|TAS|HW|NO)\b", l)
+                out.append(m.group(1) if m else "NO")
             while len(out) < len(entities):
                 out.append("NO")
             return out
+
         except Exception:
             if attempt < MAX_RETRIES:
                 time.sleep(RETRY_SLEEP * (attempt + 1))
@@ -682,20 +660,29 @@ def filter_with_llm_reclass_all_entities(df: pd.DataFrame) -> pd.DataFrame:
     """
     - canonicalize entity
     - รวมเอนทิตีไม่ซ้ำ
+    - กรอง noise ให้เข้ากับอินพุตจริง (ยาว/เป็นวลี/ขยะ) ก่อนถาม LLM
     - เรียก LLM แบบ batch + ขนานจำกัด
     - ใช้คลาสจาก LLM แทน; 'NO' → ทิ้ง
     """
-    # 1) unique canonical entities
-    seen, ents_to_check = set(), []
+    # 1) unique canonical entities จากคอลัมน์ 'Entity' ที่คั่นด้วย , ; |
+    seen = set()
+    ents_to_check = []
     for _, row in df.iterrows():
         for e in _safe_split_csv(row.get("Entity", "")):
             display = canonical_name(e)
             if not display:
                 continue
+            # กรอง noise เชิงรูปแบบ เพื่อกันคำอย่าง "BTS Asoke", "technical solutions", "Festival" ฯลฯ
+            if not _is_reasonable_token(display):
+                continue
             k = _ekey(display)
             if k not in seen:
                 seen.add(k)
                 ents_to_check.append(display)
+
+    if not ents_to_check:
+        # ไม่มีเอนทิตีที่สมเหตุสมผลหลังกรอง
+        return pd.DataFrame(columns=["Topic_Normalized", "Sentence_Index", "Entity", "Class"])
 
     # 2) classify batched + parallel
     entity_to_class = _llm_reclass_entities_parallel_batched(ents_to_check)
@@ -707,7 +694,7 @@ def filter_with_llm_reclass_all_entities(df: pd.DataFrame) -> pd.DataFrame:
         kept_e, kept_c = [], []
         for e in ents:
             display = canonical_name(e)
-            if not display:
+            if not display or not _is_reasonable_token(display):
                 continue
             k = _ekey(display)
             lab = entity_to_class.get(k, "NO")
@@ -723,9 +710,7 @@ def filter_with_llm_reclass_all_entities(df: pd.DataFrame) -> pd.DataFrame:
                     "Class": ", ".join(kept_c),
                 }
             )
-    return pd.DataFrame(
-        out_rows, columns=["Topic_Normalized", "Sentence_Index", "Entity", "Class"]
-    )
+    return pd.DataFrame(out_rows, columns=["Topic_Normalized", "Sentence_Index", "Entity", "Class"])
 
 # ============== Final normalize & filter ==============
 
