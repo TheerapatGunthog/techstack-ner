@@ -14,7 +14,7 @@ OUT_FILE = OUT_DIR / "all_predictions_llm_filtered.csv"
 OUT_FILE_GROUPED = OUT_DIR / "all_predictions_llm_filtered_grouped.csv"
 
 LLM_URL = "http://localhost:11434/api/generate"
-LLM_MODEL = "llama3.1:latest"
+LLM_MODEL = "qwen3:8b"
 TIMEOUT = 90
 MAX_RETRIES = 2
 RETRY_SLEEP = 1.0
@@ -476,6 +476,10 @@ EXACT_MAP = {
 }
 
 
+def base_clean(s: str) -> str:
+    return (s or "").strip()
+
+
 def compile_dict(patterns: dict):
     return {k: [re.compile(p, re.I) for p in v] for k, v in patterns.items()}
 
@@ -485,12 +489,32 @@ SOFT_RX = compile_dict(SOFT_PATTERNS)
 
 
 # ============== Helpers ==============
-def base_clean(s: str) -> str:
-    return (s or "").strip()
+_SLASH_EDGE_RX = re.compile(r"^\s*/\s*$")  # "/" ล้วนๆ
+_SLASH_LEAD_RX = re.compile(r"^\s*/\s*")  # ขึ้นต้นด้วย "/"
+_SLASH_TAIL_RX = re.compile(r"\s*/\s*$")  # ลงท้ายด้วย "/"
+
+
+def _pre_normalize_entity(s: str) -> str:
+    """ตัด / ที่โดดๆ หรือติดหัว/ท้าย token:
+    - 'JEDEC /' -> 'JEDEC'
+    - '/' -> ''
+    - '/ IP' -> 'IP'
+    - 'IP /' -> 'IP'
+    """
+    if not s:
+        return ""
+    s = str(s)
+    # เคส "/" ล้วนๆ
+    if _SLASH_EDGE_RX.match(s):
+        return ""
+    # ตัด slash ต้น/ท้าย แล้ว trim ช่องว่าง
+    s = _SLASH_LEAD_RX.sub("", s)
+    s = _SLASH_TAIL_RX.sub("", s)
+    return s.strip()
 
 
 def exact_canon(s: str):
-    s0 = base_clean(s)
+    s0 = _pre_normalize_entity(base_clean(s))
     if not s0:
         return ""
     key = s0.lower().replace("-", " ").replace("_", " ").strip()
@@ -498,7 +522,7 @@ def exact_canon(s: str):
 
 
 def canonical_name(s: str) -> str:
-    s0 = base_clean(s)
+    s0 = _pre_normalize_entity(base_clean(s))
     if not s0:
         return ""
     c = exact_canon(s0)
@@ -520,9 +544,9 @@ def _safe_split_csv(x):
 
 
 def _ekey(s: str) -> str:
-    s = (s or "").strip()
+    s = _pre_normalize_entity((s or "").strip())
     s = re.sub(r'[\(\)\[\]\{\}"“”]', "", s)
-    s = re.sub(r"\b[vV]?\d+(\.\d+){0,3}\b", "", s)  # ตัดเวอร์ชัน
+    s = re.sub(r"\b[vV]?\d+(\.\d+){0,3}\b", "", s)
     s = re.sub(r"\s+", " ", s)
     return s.lower().strip()
 
