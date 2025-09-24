@@ -18,21 +18,24 @@ OUT_TRADING = OUT_DIR / "trending.json"
 def _safe_split_csv(x):
     if x is None or (isinstance(x, float) and pd.isna(x)):
         return []
-    return [t.strip() for t in str(x).split(",") if t and str(t).strip()]
+    import re
+
+    return [t.strip() for t in re.split(r"\s*[,;|]\s*", str(x)) if t and str(t).strip()]
 
 
 def _explode_pairs_grouped(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    รับไฟล์ grouped: มีคอลัมน์ Topic_Normalized, Quantity, Entity, Class
-    แตก Entity,Class ต่อแถวเป็นคู่ ๆ เพื่อใช้ทำสถิติและ scoring
-    """
     rows = []
     for topic, e_str, c_str in df[["Topic_Normalized", "Entity", "Class"]].itertuples(
         index=False, name=None
     ):
         e_list = _safe_split_csv(e_str)
         c_list = _safe_split_csv(c_str)
-        n = min(len(e_list), len(c_list))
+        if len(e_list) != len(c_list):
+            # log แล้วตัดให้เท่ากันแบบปลอดภัย
+            n = min(len(e_list), len(c_list))
+            # print(f"[warn] misaligned pairs for topic={topic}: {len(e_list)} vs {len(c_list)}")
+        else:
+            n = len(e_list)
         for e, c in zip(e_list[:n], c_list[:n]):
             rows.append((topic, e, c))
     return pd.DataFrame(rows, columns=["Topic_Normalized", "Entity", "Class"])
@@ -131,37 +134,6 @@ def build_job_skill_scores(per_rows: pd.DataFrame, job2id: dict, skill2id: dict)
     return {"items": items}
 
 
-# ===== 4) Trending (Trending level per position) =====
-def build_trending_json(df_grouped: pd.DataFrame, job2id: dict):
-    """
-    ใช้สัดส่วน Quantity ต่อผลรวมทั้งหมดเพื่อจัดระดับแนวโน้ม
-    """
-    if "Quantity" not in df_grouped.columns:
-        # fallback: ให้ทุกตัวเท่ากัน
-        df_grouped = df_grouped.copy()
-        df_grouped["Quantity"] = 1
-
-    total_qty = df_grouped["Quantity"].sum()
-    if total_qty <= 0:
-        return {"items": []}
-
-    dfq = df_grouped[["Topic_Normalized", "Quantity"]].copy()
-    dfq["frac"] = dfq["Quantity"] / total_qty
-
-    q1 = dfq["frac"].quantile(1 / 3)
-    q2 = dfq["frac"].quantile(2 / 3)
-
-    items = []
-    for job, frac in dfq[["Topic_Normalized", "frac"]].itertuples(
-        index=False, name=None
-    ):
-        if job not in job2id:
-            continue
-        trending = 1 if frac <= q1 else (2 if frac <= q2 else 3)
-        items.append({"position_id": job2id[job], "trending_level": trending})
-    return {"items": items}
-
-
 # ===== validate =====
 def validate_links(links, jobs, skills):
     job_ids = {j["id"] for j in jobs["items"]}
@@ -213,10 +185,4 @@ if __name__ == "__main__":
     validate_links(links_json, jobs_json, skills_json)
     OUT_LINKS.write_text(
         json.dumps(links_json, ensure_ascii=False, indent=2), encoding="utf-8"
-    )
-
-    # trending จากสัดส่วน Quantity
-    trending_json = build_trending_json(df, job2id)
-    OUT_TRADING.write_text(
-        json.dumps(trending_json, ensure_ascii=False, indent=2), encoding="utf-8"
     )

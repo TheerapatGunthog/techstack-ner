@@ -1,9 +1,9 @@
 # normalize_entity_with_LLM_single.py
-import re as _re
 from pathlib import Path
 import os
 import re
 import time
+import json
 import requests
 import pandas as pd
 from tqdm import tqdm
@@ -22,9 +22,10 @@ MAX_RETRIES = 2
 RETRY_SLEEP = 1.0
 
 # Speed knobs
-BATCH_SIZE = 16            # รวมหลายเอนทิตีต่อคำขอ
-MAX_WORKERS = 3            # ขนานแบบจำกัด
-LLM_OPTIONS = {"temperature": 0, "num_predict": 4}
+BATCH_SIZE = 16  # ลดระหว่างดีบัก JSON-mode ให้แน่ใจว่าพาร์สได้
+MAX_WORKERS = 3  # ขนานแบบจำกัด
+# JSON mode: ลดสุ่มสุดและกันเพ้อ
+LLM_OPTIONS_JSON = {"temperature": 0, "top_p": 0, "num_predict": 64}
 
 # Expanded patterns for current Computer Engineering job postings.
 # Regex are case-insensitive friendly. Aim: maximize root-term normalization coverage.
@@ -61,7 +62,6 @@ TOOLS_PATTERNS = {
     "Sass": [r"\bsass\b", r"\bscss\b"],
     "MATLAB": [r"\bmatlab\b"],
     "Fortran": [r"\bfortran\b"],
-
     # ---------------- Frameworks / Runtimes / Libs ----------------
     "Node.js": [r"\bnode\.?js\b", r"\bnode\s*js\b", r"\bnode\b"],
     "React": [r"\breact(\.js)?\b", r"\breactjs\b"],
@@ -84,7 +84,6 @@ TOOLS_PATTERNS = {
     "ESLint": [r"\beslint\b"],
     "Prettier": [r"\bprettier\b"],
     "Storybook": [r"\bstorybook\b"],
-
     "Django": [r"\bdjango\b"],
     "Flask": [r"\bflask\b"],
     "FastAPI": [r"\bfastapi\b"],
@@ -96,7 +95,6 @@ TOOLS_PATTERNS = {
     "REST": [r"\brestful?\b", r"\brest\s*api\b"],
     "OpenAPI": [r"\bopenapi\b"],
     "Swagger": [r"\bswagger\b"],
-
     "TensorFlow": [r"\btensor\s*flow\b", r"\btensorflow\b", r"\btf\b"],
     "Keras": [r"\bkeras\b"],
     "PyTorch": [r"\bpytorch\b", r"\btorch\b"],
@@ -121,8 +119,10 @@ TOOLS_PATTERNS = {
     "LangChain": [r"\blang\s*chain\b"],
     "LlamaIndex": [r"\bllama\s*index\b"],
     "vLLM": [r"\bvllm\b"],
-    "Triton Inference Server": [r"\btriton\s*inference\s*server\b", r"\bnvidia\s*triton\b"],
-
+    "Triton Inference Server": [
+        r"\btriton\s*inference\s*server\b",
+        r"\bnvidia\s*triton\b",
+    ],
     # ---------------- Data / Streaming / Orchestration ----------------
     "Airflow": [r"\bair\s*flow\b", r"\bairflow\b"],
     "Prefect": [r"\bprefect\b"],
@@ -142,7 +142,6 @@ TOOLS_PATTERNS = {
     "Delta Lake": [r"\bdelta\s*lake\b"],
     "Apache Iceberg": [r"\biceberg\b"],
     "Apache Hudi": [r"\bhudi\b"],
-
     # ---------------- Databases / Storage / Search ----------------
     "PostgreSQL": [r"\bpostgre\s*sql\b", r"\bpostgres\b", r"\bpostgresql\b"],
     "MySQL": [r"\bmysql\b"],
@@ -179,7 +178,6 @@ TOOLS_PATTERNS = {
     "Parquet": [r"\bparquet\b"],
     "Avro": [r"\bavro\b"],
     "ORC": [r"\borc\b"],
-
     # ---------------- DevOps / Infra / SRE ----------------
     "Docker": [r"\bdocker\b"],
     "Kubernetes": [r"\bkubernetes\b", r"\bk8s\b"],
@@ -195,7 +193,6 @@ TOOLS_PATTERNS = {
     "HAProxy": [r"\bhaproxy\b"],
     "Consul": [r"\bconsul\b"],
     "Vault": [r"\bvault\b"],
-
     "Terraform": [r"\bterraform\b"],
     "CloudFormation": [r"\bcloud\s*formation\b", r"\bcloudformation\b"],
     "CDK": [r"\bcdk\b", r"\bcloud\s*development\s*kit\b"],
@@ -204,14 +201,12 @@ TOOLS_PATTERNS = {
     "Puppet": [r"\bpuppet\b"],
     "Chef": [r"\bchef\b"],
     "SaltStack": [r"\bsalt\s*stack\b", r"\bsaltstack\b"],
-
     "Git": [r"\bgit\b"],
     "GitHub": [r"\bgithub\b"],
     "GitLab": [r"\bgitlab\b"],
     "Bitbucket": [r"\bbitbucket\b"],
     "SVN": [r"\bsvn\b", r"\bsubversion\b"],
     "Mercurial": [r"\bmercurial\b", r"\bhg\b"],
-
     "Jenkins": [r"\bjenkins\b"],
     "GitHub Actions": [r"\bgithub\s*actions?\b"],
     "GitLab CI": [r"\bgitlab\s*ci\b"],
@@ -221,7 +216,6 @@ TOOLS_PATTERNS = {
     "Bamboo": [r"\bbamboo\b"],
     "Azure DevOps": [r"\bazure\s*dev\s*ops\b"],
     "Bitrise": [r"\bbitrise\b"],
-
     "Nagios": [r"\bnagios\b"],
     "Zabbix": [r"\bzabbix\b"],
     "Prometheus": [r"\bprometheus\b"],
@@ -232,7 +226,6 @@ TOOLS_PATTERNS = {
     "Splunk": [r"\bsplunk\b"],
     "Sentry": [r"\bsentry\b"],
     "OpenTelemetry": [r"\bopen\s*telemetry\b", r"\botel\b", r"\botel\b"],
-
     "SonarQube": [r"\bsonar\s*qube\b", r"\bsonarqube\b"],
     "Snyk": [r"\bsnyk\b"],
     "Trivy": [r"\btrivy\b"],
@@ -243,7 +236,6 @@ TOOLS_PATTERNS = {
     "Nessus": [r"\bnessus\b"],
     "Keycloak": [r"\bkey\s*cloak\b", r"\bkeycloak\b"],
     "Auth0": [r"\bauth0\b"],
-
     # ---------------- Build / Package / Testing ----------------
     "Maven": [r"\bmaven\b"],
     "Gradle": [r"\bgradle\b"],
@@ -254,7 +246,6 @@ TOOLS_PATTERNS = {
     "CMake": [r"\bcmake\b"],
     "Make": [r"\bmake\b", r"\bmakefile\b"],
     "Ninja": [r"\bninja\b"],
-
     "npm": [r"\bnpm\b"],
     "Yarn": [r"\byarn\b"],
     "pnpm": [r"\bpnpm\b"],
@@ -268,7 +259,6 @@ TOOLS_PATTERNS = {
     "Cargo": [r"\bcargo\b"],
     "NuGet": [r"\bnuget\b"],
     "Go Modules": [r"\bgo\s*mod(ules)?\b"],
-
     "JUnit": [r"\bjunit\b"],
     "TestNG": [r"\btestng\b"],
     "NUnit": [r"\bnunit\b"],
@@ -285,14 +275,12 @@ TOOLS_PATTERNS = {
     "Selenium": [r"\bselenium\b"],
     "Appium": [r"\bappium\b"],
     "Robot Framework": [r"\brobot\s*framework\b"],
-
     "Postman": [r"\bpostman\b"],
     "Newman": [r"\bnewman\b"],
     "JMeter": [r"\bjmeter\b"],
     "Gatling": [r"\bgatling\b"],
     "Locust": [r"\blocust\b"],
     "k6": [r"\bk6\b"],
-
     # ---------------- Mobile / Desktop ----------------
     "Android": [r"\bandroid\b"],
     "iOS": [r"\bios\b"],
@@ -305,7 +293,6 @@ TOOLS_PATTERNS = {
     "Flutter": [r"\bflutter\b"],
     "CocoaPods": [r"\bcocoa\s*pods\b", r"\bcocoapods\b"],
     "Carthage": [r"\bcarthage\b"],
-
     # ---------------- BI / Analytics ----------------
     "Power BI": [r"\bpower\s*bi\b"],
     "Tableau": [r"\btableau\b"],
@@ -314,7 +301,6 @@ TOOLS_PATTERNS = {
     "Metabase": [r"\bmetabase\b"],
     "MicroStrategy": [r"\bmicro\s*strategy\b", r"\bmicrostrategy\b"],
     "Qlik": [r"\bqlik\b", r"\bqlik\s*sense\b", r"\bqlik\s*view\b"],
-
     # ---------------- Productivity / OS ----------------
     "Linux": [r"\blinux\b"],
     "Windows": [r"\bwindows\b"],
@@ -325,12 +311,10 @@ TOOLS_PATTERNS = {
     "Google Sheets": [r"\bgoogle\s*sheets?\b", r"\bg\s*sheets?\b"],
     "Google Docs": [r"\bgoogle\s*docs?\b"],
     "Google Slides": [r"\bgoogle\s*slides?\b"],
-
     # ---------------- Auth / Identity ----------------
     "OAuth2": [r"\boauth\s*2(\.0)?\b", r"\boauth2\b"],
     "OIDC": [r"\boidc\b"],
     "SAML": [r"\bsaml\b"],
-
     # ---------------- Game / Engines ----------------
     "Unity": [r"\bunity\b"],
     "Unreal Engine": [r"\bunreal(\s*engine)?\b"],
@@ -338,16 +322,47 @@ TOOLS_PATTERNS = {
 
 SOFT_PATTERNS = {
     # Core soft skills
-    "Communication": [r"\bcommunication(s)?\b", r"\bcommunicate\b", r"\bpresentation(s)?\b", r"\bwritten\s+and\s+verbal\b"],
-    "Teamwork": [r"\bteam\s*work\b", r"\bteam\s*player\b", r"\bcollaborat(e|ion|ive)\b", r"\bcross[-\s]*functional\b"],
-    "Leadership": [r"\blead(ership)?\b", r"\bmentor(ing|ship)?\b", r"\bpeople\s*management\b", r"\bteam\s*lead\b"],
+    "Communication": [
+        r"\bcommunication(s)?\b",
+        r"\bcommunicate\b",
+        r"\bpresentation(s)?\b",
+        r"\bwritten\s+and\s+verbal\b",
+    ],
+    "Teamwork": [
+        r"\bteam\s*work\b",
+        r"\bteam\s*player\b",
+        r"\bcollaborat(e|ion|ive)\b",
+        r"\bcross[-\s]*functional\b",
+    ],
+    "Leadership": [
+        r"\blead(ership)?\b",
+        r"\bmentor(ing|ship)?\b",
+        r"\bpeople\s*management\b",
+        r"\bteam\s*lead\b",
+    ],
     "Problem Solving": [r"\bproblem[- ]?solv(ing|er)\b", r"\btroubleshoot(ing)?\b"],
     "Critical Thinking": [r"\bcritical\s*thinking\b", r"\banalytical\s*thinking\b"],
-    "Time Management": [r"\btime\s*management\b", r"\bdeadline[-\s]*driven\b", r"\bprioriti[sz]ation\b"],
-    "Adaptability": [r"\badaptabilit(y|ies)\b", r"\badaptable\b", r"\badapt\b", r"\bflexib(le|ility)\b"],
+    "Time Management": [
+        r"\btime\s*management\b",
+        r"\bdeadline[-\s]*driven\b",
+        r"\bprioriti[sz]ation\b",
+    ],
+    "Adaptability": [
+        r"\badaptabilit(y|ies)\b",
+        r"\badaptable\b",
+        r"\badapt\b",
+        r"\bflexib(le|ility)\b",
+    ],
     "Creativity": [r"\bcreativ(e|ity)\b", r"\binnovation\b"],
-    "Attention to Detail": [r"\battention\s*to\s*detail\b", r"\bdetail[- ]?oriented\b", r"\bmeticulous\b"],
-    "Stakeholder Management": [r"\bstakeholder\s*management\b", r"\bstakeholder\s*communication\b"],
+    "Attention to Detail": [
+        r"\battention\s*to\s*detail\b",
+        r"\bdetail[- ]?oriented\b",
+        r"\bmeticulous\b",
+    ],
+    "Stakeholder Management": [
+        r"\bstakeholder\s*management\b",
+        r"\bstakeholder\s*communication\b",
+    ],
     "Project Management": [r"\bproject\s*management\b", r"\bmanage\s*projects?\b"],
     "Decision Making": [r"\bdecision\s*making\b"],
     "Negotiation": [r"\bnegotiation(s)?\b"],
@@ -355,7 +370,11 @@ SOFT_PATTERNS = {
     "Presentation": [r"\bpresentation(s)?\b"],
     "Ownership": [r"\bownership\b", r"\baccountab(le|ility)\b"],
     "Initiative": [r"\binitiative\b", r"\bproactiv(e|ity)\b", r"\bself[-\s]*starter\b"],
-    "Learning Agility": [r"\bfast\s*learner\b", r"\bcontinuous\s*learning\b", r"\bself[-\s]*learning\b"],
+    "Learning Agility": [
+        r"\bfast\s*learner\b",
+        r"\bcontinuous\s*learning\b",
+        r"\bself[-\s]*learning\b",
+    ],
     "Conflict Resolution": [r"\bconflict\s*resolution\b"],
     "Risk Management": [r"\brisk\s*management\b"],
     "Requirements Gathering": [r"\brequirements?\s*gather(ing)?\b"],
@@ -363,7 +382,6 @@ SOFT_PATTERNS = {
     "Customer Focus": [r"\bcustomer\s*(focus|centric)\b"],
     "Strategic Thinking": [r"\bstrategic\s*thinking\b"],
     "Systems Thinking": [r"\bsystems?\s*thinking\b"],
-
     # Methods / practices
     "Agile": [r"\bagile\b"],
     "Scrum": [r"\bscrum\b"],
@@ -428,7 +446,6 @@ EXACT_MAP = {
     "mssql": "SQL Server",
     "dotnet": ".NET",
     "obj-c": "Objective-C",
-
     # New convenient aliases
     "tf": "TensorFlow",
     "pytorch": "PyTorch",
@@ -489,6 +506,7 @@ def base_clean(s: str) -> str:
 
 def compile_dict(patterns: dict):
     import re as _re
+
     return {k: [_re.compile(p, _re.I) for p in v] for k, v in patterns.items()}
 
 
@@ -496,9 +514,11 @@ TOOLS_RX = compile_dict(TOOLS_PATTERNS)
 SOFT_RX = compile_dict(SOFT_PATTERNS)
 
 # ============== Helpers ==============
-_SLASH_EDGE_RX = _re.compile(r"^\s*/\s*$")   # "/" ล้วนๆ
-_SLASH_LEAD_RX = _re.compile(r"^\s*/\s*")    # ขึ้นต้นด้วย "/"
-_SLASH_TAIL_RX = _re.compile(r"\s*/\s*$")    # ลงท้ายด้วย "/"
+import re as _re
+
+_SLASH_EDGE_RX = _re.compile(r"^\s*/\s*$")  # "/" ล้วนๆ
+_SLASH_LEAD_RX = _re.compile(r"^\s*/\s*")  # ขึ้นต้นด้วย "/"
+_SLASH_TAIL_RX = _re.compile(r"\s*/\s*$")  # ลงท้ายด้วย "/"
 
 
 def _pre_normalize_entity(s: str) -> str:
@@ -537,7 +557,7 @@ def canonical_name(s: str) -> str:
 
 
 def _safe_split_csv(x):
-    # อินพุตของคุณคั่นหลักด้วย comma มีบางเคสใช้ ; หรือ | ด้วย
+    # อินพุตจริงใช้คั่นหลักด้วย comma และพบ ; |
     if x is None or (isinstance(x, float) and pd.isna(x)):
         return []
     parts = _re.split(r"\s*[,;|]\s*", str(x))
@@ -552,35 +572,72 @@ def _ekey(s: str) -> str:
     return s.lower().strip()
 
 
-# ตัด noise ออกจากอินพุตก่อนส่ง LLM: ยาวเกินไปหรือเป็นประโยค
+# ตัด noise ออกจากอินพุตก่อนส่ง LLM
 _WORD_RE = _re.compile(r"[A-Za-z][A-Za-z0-9\.\+#\-_/]*")
 
 
 def _is_reasonable_token(s: str) -> bool:
-    # กรองสิ่งที่เป็นประโยคยาวๆ หรือไม่มี token ตัวอักษร
-    if not s or len(s) > 40:
+    # ตัดวลียาว/ประโยค/คำทั่วไปมากเกินไป
+    if not s:
         return False
-    # ตัดเคสที่เป็นวลี 4 คำขึ้นไป เช่น "BTS Asoke" "technical solutions"
+    if len(s) > 40:
+        return False
     if len(s.split()) >= 4:
         return False
-    # ต้องมีอักษรละตินอย่างน้อยหนึ่ง "คำ"
     return bool(_WORD_RE.search(s))
 
 
-# ============== LLM classify ==============
+# ============== LLM classify (JSON mode) ==============
 _ALLOWED = {"PSML", "DB", "CP", "FAL", "TAS", "HW", "NO"}
+
+_JSON_SYSTEM = (
+    "You are a STRICT classifier for tech entities.\n"
+    "Labels: PSML DB CP FAL TAS HW NO.\n"
+    "\n"
+    "DEFINITIONS\n"
+    "PSML = programming / scripting / markup (e.g., Python, Java, C/C++, C#, "
+    "JavaScript, TypeScript, R, Go, Rust, SQL, Bash, PowerShell, MATLAB, "
+    "HTML, CSS, Scala, Kotlin, Swift, PHP, Ruby, Dart).\n"
+    "DB   = database engines, warehouses, key-value, document, graph, search, "
+    "and managed DB services (e.g., PostgreSQL, MySQL, SQLite, SQL Server, "
+    "Oracle, MongoDB, Redis, Cassandra, DynamoDB, Firestore, BigQuery, "
+    "Snowflake, Redshift, ClickHouse, Elasticsearch, OpenSearch, Neo4j, "
+    "CouchDB, TiDB, CockroachDB).\n"
+    "CP   = cloud PLATFORM PROVIDERS only (AWS, Google Cloud/GCP, Microsoft Azure, "
+    "Alibaba Cloud, Firebase platform).\n"
+    "FAL  = frameworks/libraries/tools/runtimes/OS/SDK/CI-CD/VCS/BI/office "
+    "(e.g., React, Vue.js, Angular, Django, Flask, FastAPI, Spring, Node.js, .NET, "
+    "Docker, Kubernetes, Git/GitHub/GitLab, Jenkins, Jira, Confluence, "
+    "Linux, Windows, macOS, Excel, Word, PowerPoint, Power BI, Tableau, Looker, "
+    "OpenCV, Ansible, Terraform, etc.).\n"
+    "HW   = physical hardware/devices/components (Raspberry Pi, Arduino, FPGA, "
+    "microcontroller, NVIDIA GPU, Intel CPU).\n"
+    "TAS  = soft skills and techniques/methodologies/patterns "
+    "(Agile, Scrum, Kanban, TDD, BDD, MVC, MVVM, Clean Architecture, "
+    "Communication, Teamwork, Leadership, Time Management, etc.).\n"
+    "\n"
+    "HARD RULES\n"
+    "- Managed DB services (BigQuery, Redshift, DynamoDB, Firestore) -> DB.\n"
+    "- CP ONLY for provider/platform names; individual cloud services that are not DB -> NO.\n"
+    "- Job titles/roles, degrees/fields (e.g., Computer Science), locations (e.g., MRT, Silom), "
+    "business terms, generic adjectives -> NO.\n"
+    "- If not CLEARLY in the definitions above -> NO.\n"
+    "- If entity could match multiple labels, apply precedence: PSML > DB > CP > FAL > TAS > HW.\n"
+    "- Case-insensitive; treat hyphens/underscores/spacing variants as the same (e.g., NodeJS == Node.js).\n"
+    "- NO explanations. NO preface. NO <think>. Output JSON ONLY.\n"
+    "\n"
+    "OUTPUT FORMAT (strict)\n"
+    '- Either {"labels": ["PSML"|"DB"|"CP"|"FAL"|"TAS"|"HW"|"NO", ...]}\n'
+    "- Or a JSON array of those strings. Length MUST equal number of input lines.\n"
+)
 
 
 def _prompt_batch(entities: list[str]) -> str:
-    # ให้ตอบ 1 บรรทัดเดียว มี N โทเคนคั่นด้วยช่องว่าง
     items = "\n".join(f"{i+1}. {e}" for i, e in enumerate(entities))
     return (
-        "Classify EACH line with EXACTLY ONE of: PSML DB CP FAL TAS HW NO.\n"
-        "Rules: provider-only=CP; managed-DB=DB; tools/libs/OS/CI/VCS/BI/office=FAL; "
-        "soft-skills/methods=TAS; languages=PSML; hardware=HW; else NO.\n"
-        "Return ONE LINE ONLY with N tokens separated by single spaces, in order.\n"
+        "Classify EACH line into EXACTLY ONE label using the rules in system message.\n"
+        "Return JSON ONLY. The number of labels must equal the number of lines.\n"
         f"{items}\n"
-        "Output:\n"
     )
 
 
@@ -588,53 +645,90 @@ def _post_ollama(session: requests.Session, payload: dict) -> str:
     r = session.post(LLM_URL, json=payload, timeout=TIMEOUT)
     if not r.ok:
         raise RuntimeError(f"HTTP {r.status_code}")
-    return r.json().get("response", "").strip()
+    return r.json().get("response", "") or ""
+
+
+def _coerce_json_labels(txt: str, n: int) -> list[str]:
+    # ตัด prefix/suffix noise แล้วพยายามพาร์สสองสchemа
+    txt = txt.strip()
+    # แบบ array ล้วน
+    a0, a1 = txt.find("["), txt.rfind("]")
+    if 0 <= a0 < a1:
+        try:
+            arr = json.loads(txt[a0 : a1 + 1])
+            if isinstance(arr, list) and all(isinstance(x, str) for x in arr):
+                out = [x.upper() for x in arr[:n]]
+                return out
+        except Exception:
+            pass
+    # แบบ {"labels":[...]}
+    o0, o1 = txt.find("{"), txt.rfind("}")
+    if 0 <= o0 < o1:
+        try:
+            obj = json.loads(txt[o0 : o1 + 1])
+            if isinstance(obj, dict) and isinstance(obj.get("labels"), list):
+                arr = obj["labels"]
+                if all(isinstance(x, str) for x in arr):
+                    out = [x.upper() for x in arr[:n]]
+                    return out
+        except Exception:
+            pass
+    return []
 
 
 def _llm_classify_batch(entities: list[str]) -> list[str]:
     sess = requests.Session()
     payload = {
         "model": LLM_MODEL,
+        "system": _JSON_SYSTEM,
         "prompt": _prompt_batch(entities),
-        "stream": False,           # สำคัญ: ต้องเป็น boolean
-        "options": LLM_OPTIONS,    # ไม่ใช้ stop กับ batch
+        "stream": False,
+        "format": "json",
+        "options": LLM_OPTIONS_JSON,
+        # กันคิดออก <think> บางรุ่น (optional)
+        "stop": ["<think>"],
     }
+    n = len(entities)
     for attempt in range(MAX_RETRIES + 1):
         try:
             resp = _post_ollama(sess, payload)
-            resp = resp.strip()
-            if not resp:
-                return ["NO"] * len(entities)
+            if not resp.strip():
+                return ["NO"] * n
 
-            # primary format: single line "FAL PSML DB ..."
-            toks = [t.strip().upper() for t in resp.split() if t.strip()]
-            if len(toks) >= len(entities):
-                out = [t if t in _ALLOWED else "NO" for t in toks[:len(entities)]]
-                return out
+            # 1) พาร์ส JSON
+            labels = _coerce_json_labels(resp, n)
+            if len(labels) >= n:
+                return [lab if lab in _ALLOWED else "NO" for lab in labels[:n]]
 
-            # fallback: บางรุ่นอาจคืนหลายบรรทัด บรรทัดละหนึ่ง token
-            lines = [l.strip().upper() for l in resp.splitlines() if l.strip()]
-            out = []
-            for l in lines[:len(entities)]:
-                m = _re.search(r"\b(PSML|DB|CP|FAL|TAS|HW|NO)\b", l)
-                out.append(m.group(1) if m else "NO")
-            while len(out) < len(entities):
+            # 2) fallback regex ดึงทุก label ตามลำดับ
+            labs = _re.findall(r"\b(PSML|DB|CP|FAL|TAS|HW|NO)\b", resp, flags=_re.I)
+            if len(labs) >= n:
+                return [x.upper() for x in labs[:n]]
+
+            # 3) เติม NO ให้ครบ
+            out = [x.upper() if x.upper() in _ALLOWED else "NO" for x in labs]
+            while len(out) < n:
                 out.append("NO")
+
+            if all(x == "NO" for x in out):
+                print("[DEBUG batch resp cut]", resp[:300].replace("\n", "\\n"))
             return out
 
         except Exception:
             if attempt < MAX_RETRIES:
                 time.sleep(RETRY_SLEEP * (attempt + 1))
                 continue
-            return ["NO"] * len(entities)
+            return ["NO"] * n
 
 
 def _chunk(seq, n):
     for i in range(0, len(seq), n):
-        yield seq[i:i + n]
+        yield seq[i : i + n]
 
 
-def _llm_reclass_entities_parallel_batched(unique_entities: list[str]) -> dict[str, str]:
+def _llm_reclass_entities_parallel_batched(
+    unique_entities: list[str],
+) -> dict[str, str]:
     batches = list(_chunk(unique_entities, BATCH_SIZE))
     entity_to_class: dict[str, str] = {}
 
@@ -644,7 +738,11 @@ def _llm_reclass_entities_parallel_batched(unique_entities: list[str]) -> dict[s
 
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as ex:
         futures = [ex.submit(_work, b) for b in batches]
-        for f in tqdm(as_completed(futures), total=len(futures), desc="LLM reclass (batched+parallel)"):
+        for f in tqdm(
+            as_completed(futures),
+            total=len(futures),
+            desc="LLM reclass (batched+parallel)",
+        ):
             for e, lab in f.result():
                 entity_to_class[_ekey(e)] = lab
 
@@ -653,18 +751,16 @@ def _llm_reclass_entities_parallel_batched(unique_entities: list[str]) -> dict[s
     print(f"[LLM map] entities: {total} | NO: {no_cnt} ({no_cnt/max(1,total):.2%})")
     return entity_to_class
 
+
 # ============== ขั้นตอน LLM + apply ทั้ง dataset ==============
-
-
 def filter_with_llm_reclass_all_entities(df: pd.DataFrame) -> pd.DataFrame:
     """
     - canonicalize entity
     - รวมเอนทิตีไม่ซ้ำ
-    - กรอง noise ให้เข้ากับอินพุตจริง (ยาว/เป็นวลี/ขยะ) ก่อนถาม LLM
-    - เรียก LLM แบบ batch + ขนานจำกัด
+    - กรอง noise ให้เข้ากับอินพุตจริงก่อนถาม LLM
+    - เรียก LLM แบบ batch + ขนานจำกัด (JSON mode)
     - ใช้คลาสจาก LLM แทน; 'NO' → ทิ้ง
     """
-    # 1) unique canonical entities จากคอลัมน์ 'Entity' ที่คั่นด้วย , ; |
     seen = set()
     ents_to_check = []
     for _, row in df.iterrows():
@@ -672,7 +768,6 @@ def filter_with_llm_reclass_all_entities(df: pd.DataFrame) -> pd.DataFrame:
             display = canonical_name(e)
             if not display:
                 continue
-            # กรอง noise เชิงรูปแบบ เพื่อกันคำอย่าง "BTS Asoke", "technical solutions", "Festival" ฯลฯ
             if not _is_reasonable_token(display):
                 continue
             k = _ekey(display)
@@ -681,13 +776,12 @@ def filter_with_llm_reclass_all_entities(df: pd.DataFrame) -> pd.DataFrame:
                 ents_to_check.append(display)
 
     if not ents_to_check:
-        # ไม่มีเอนทิตีที่สมเหตุสมผลหลังกรอง
-        return pd.DataFrame(columns=["Topic_Normalized", "Sentence_Index", "Entity", "Class"])
+        return pd.DataFrame(
+            columns=["Topic_Normalized", "Sentence_Index", "Entity", "Class"]
+        )
 
-    # 2) classify batched + parallel
     entity_to_class = _llm_reclass_entities_parallel_batched(ents_to_check)
 
-    # 3) apply back
     out_rows = []
     for _, row in tqdm(df.iterrows(), total=len(df), desc="Apply LLM class per entity"):
         ents = _safe_split_csv(row.get("Entity", ""))
@@ -710,11 +804,12 @@ def filter_with_llm_reclass_all_entities(df: pd.DataFrame) -> pd.DataFrame:
                     "Class": ", ".join(kept_c),
                 }
             )
-    return pd.DataFrame(out_rows, columns=["Topic_Normalized", "Sentence_Index", "Entity", "Class"])
+    return pd.DataFrame(
+        out_rows, columns=["Topic_Normalized", "Sentence_Index", "Entity", "Class"]
+    )
+
 
 # ============== Final normalize & filter ==============
-
-
 def _concat_nonempty(series: pd.Series) -> str:
     return ", ".join([s for s in series if isinstance(s, str) and s.strip()])
 
