@@ -23,8 +23,8 @@ RETRY_SLEEP = 1.0
 # Speed knobs
 BATCH_SIZE = 16            # รวมหลายเอนทิตีต่อคำขอ
 MAX_WORKERS = 3            # ขนานแบบจำกัด
-LLM_OPTIONS = {"temperature": 0, "num_predict": 3}  # ลดโทเคนที่เดา
-LLM_STOP = ["\n", "\r"]    # หยุดเมื่อจบบรรทัด
+LLM_OPTIONS = {"temperature": 0, "num_predict": 4}
+LLM_STOP = ["\n", "\r"]
 
 # Expanded patterns for current Computer Engineering job postings.
 # Regex are case-insensitive friendly. Aim: maximize root-term normalization coverage.
@@ -581,13 +581,13 @@ Output:
 
 
 def _prompt_batch(entities: list[str]) -> str:
-    lines = "\n".join(f"{i+1}. {e}" for i, e in enumerate(entities))
+    items = "\n".join(f"{i+1}. {e}" for i, e in enumerate(entities))
     return (
-        "Classify EACH line with EXACTLY ONE token from: PSML DB CP FAL TAS HW NO\n"
+        "Classify EACH line with EXACTLY ONE token from: PSML DB CP FAL TAS HW NO.\n"
         "Rules: provider-only=CP; managed-DB=DB; tools/libs/OS/CI/VCS/BI/office=FAL; "
         "soft-skills/methods=TAS; languages=PSML; hardware=HW; else NO.\n"
-        "Output: N lines, one token per line, no extra text.\n"
-        f"{lines}\n"
+        "Return ONE LINE ONLY with N tokens separated by single spaces, in order.\n"
+        f"{items}\n"
         "Output:\n"
     )
 
@@ -603,13 +603,15 @@ def _llm_classify_one(entity: str, session: requests.Session) -> str:
     payload = {
         "model": LLM_MODEL,
         "prompt": _prompt_one(entity),
-        "stream": False,
+        "stream": False,                 # <-- แก้จากเดิมที่ใส่ list ผิด
         "options": LLM_OPTIONS,
-        "stop": LLM_STOP,
+        "stop": LLM_STOP,                # single entity เท่านั้นที่ใช้ stop ขึ้นบรรทัด
     }
     for attempt in range(MAX_RETRIES + 1):
         try:
-            resp = _post_ollama(session, payload)
+            r = session.post(LLM_URL, json=payload, timeout=TIMEOUT)
+            r.raise_for_status()
+            resp = r.json().get("response", "").strip()
             m = re.search(r"\b(PSML|DB|CP|FAL|TAS|HW|NO)\b", resp, flags=re.I)
             lab = m.group(1).upper() if m else "NO"
             return lab if lab in _ALLOWED or lab == "NO" else "NO"
@@ -627,16 +629,18 @@ def _llm_classify_batch(entities: list[str]) -> list[str]:
         "prompt": _prompt_batch(entities),
         "stream": False,
         "options": LLM_OPTIONS,
-        "stop": LLM_STOP,
+        # ไม่มี "stop" ที่เป็น newline ในโหมด batch
     }
     for attempt in range(MAX_RETRIES + 1):
         try:
-            resp = _post_ollama(sess, payload)
-            lines = [l.strip().upper() for l in resp.splitlines() if l.strip()]
+            r = sess.post(LLM_URL, json=payload, timeout=TIMEOUT)
+            r.raise_for_status()
+            resp = r.json().get("response", "").strip()
+            # คาดหวัง "FAL PSML DB ..." 1 บรรทัด
+            toks = [t.strip().upper() for t in resp.split() if t.strip()]
             out = []
-            for l in lines[:len(entities)]:
-                m = re.search(r"\b(PSML|DB|CP|FAL|TAS|HW|NO)\b", l)
-                out.append(m.group(1) if m else "NO")
+            for t in toks[:len(entities)]:
+                out.append(t if t in _ALLOWED or t == "NO" else "NO")
             while len(out) < len(entities):
                 out.append("NO")
             return out
