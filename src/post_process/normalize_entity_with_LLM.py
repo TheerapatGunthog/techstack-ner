@@ -1,4 +1,5 @@
 # normalize_entity_with_LLM_single.py
+import re as _re
 from pathlib import Path
 import os
 import re
@@ -514,7 +515,6 @@ TOOLS_RX = compile_dict(TOOLS_PATTERNS)
 SOFT_RX = compile_dict(SOFT_PATTERNS)
 
 # ============== Helpers ==============
-import re as _re
 
 _SLASH_EDGE_RX = _re.compile(r"^\s*/\s*$")  # "/" ล้วนๆ
 _SLASH_LEAD_RX = _re.compile(r"^\s*/\s*")  # ขึ้นต้นด้วย "/"
@@ -590,46 +590,96 @@ def _is_reasonable_token(s: str) -> bool:
 # ============== LLM classify (JSON mode) ==============
 _ALLOWED = {"PSML", "DB", "CP", "FAL", "TAS", "HW", "NO"}
 
-_JSON_SYSTEM = (
-    "You are a STRICT classifier for tech entities.\n"
-    "Labels: PSML DB CP FAL TAS HW NO.\n"
-    "\n"
-    "DEFINITIONS\n"
-    "PSML = programming / scripting / markup (e.g., Python, Java, C/C++, C#, "
-    "JavaScript, TypeScript, R, Go, Rust, SQL, Bash, PowerShell, MATLAB, "
-    "HTML, CSS, Scala, Kotlin, Swift, PHP, Ruby, Dart).\n"
-    "DB   = database engines, warehouses, key-value, document, graph, search, "
-    "and managed DB services (e.g., PostgreSQL, MySQL, SQLite, SQL Server, "
-    "Oracle, MongoDB, Redis, Cassandra, DynamoDB, Firestore, BigQuery, "
-    "Snowflake, Redshift, ClickHouse, Elasticsearch, OpenSearch, Neo4j, "
-    "CouchDB, TiDB, CockroachDB).\n"
-    "CP   = cloud PLATFORM PROVIDERS only (AWS, Google Cloud/GCP, Microsoft Azure, "
-    "Alibaba Cloud, Firebase platform).\n"
-    "FAL  = frameworks/libraries/tools/runtimes/OS/SDK/CI-CD/VCS/BI/office "
-    "(e.g., React, Vue.js, Angular, Django, Flask, FastAPI, Spring, Node.js, .NET, "
-    "Docker, Kubernetes, Git/GitHub/GitLab, Jenkins, Jira, Confluence, "
-    "Linux, Windows, macOS, Excel, Word, PowerPoint, Power BI, Tableau, Looker, "
-    "OpenCV, Ansible, Terraform, etc.).\n"
-    "HW   = physical hardware/devices/components (Raspberry Pi, Arduino, FPGA, "
-    "microcontroller, NVIDIA GPU, Intel CPU).\n"
-    "TAS  = soft skills and techniques/methodologies/patterns "
-    "(Agile, Scrum, Kanban, TDD, BDD, MVC, MVVM, Clean Architecture, "
-    "Communication, Teamwork, Leadership, Time Management, etc.).\n"
-    "\n"
-    "HARD RULES\n"
-    "- Managed DB services (BigQuery, Redshift, DynamoDB, Firestore) -> DB.\n"
-    "- CP ONLY for provider/platform names; individual cloud services that are not DB -> NO.\n"
-    "- Job titles/roles, degrees/fields (e.g., Computer Science), locations (e.g., MRT, Silom), "
-    "business terms, generic adjectives -> NO.\n"
-    "- If not CLEARLY in the definitions above -> NO.\n"
-    "- If entity could match multiple labels, apply precedence: PSML > DB > CP > FAL > TAS > HW.\n"
-    "- Case-insensitive; treat hyphens/underscores/spacing variants as the same (e.g., NodeJS == Node.js).\n"
-    "- NO explanations. NO preface. NO <think>. Output JSON ONLY.\n"
-    "\n"
-    "OUTPUT FORMAT (strict)\n"
-    '- Either {"labels": ["PSML"|"DB"|"CP"|"FAL"|"TAS"|"HW"|"NO", ...]}\n'
-    "- Or a JSON array of those strings. Length MUST equal number of input lines.\n"
+_JSON_SYSTEM = """
+"You are a HIGH-PRECISION classifier for short entity mentions from job posts.
+Return EXACTLY ONE label token: PSML | DB | CP | FAL | ET | TAS | NO
+No extra words. No punctuation. If unsure after all rules → NO.
+
+GOAL
+Map each entity to ONE of:
+- PSML — programming / scripting / markup languages and language-centric items
+  (e.g., Python, JavaScript, TypeScript, Bash, C/C++, HTML, CSS, MATLAB, SQL, Regex).
+- DB — databases, data stores/engines, warehousing/analytics storage & DB-specific services
+  (e.g., MySQL, PostgreSQL, MongoDB, Redis, Elasticsearch, BigQuery, Delta Lake, Blob Storage, Data Lake).
+- CP — public cloud platforms & named cloud services
+  (e.g., AWS, Azure, Google Cloud/GCP, Alibaba Cloud, Huawei Cloud, OCI, OpenShift,
+   S3/EC2/EKS, IAM, CloudWatch, CloudFormation, AKS, GKE, Azure Sentinel, VPC).
+- FAL — frameworks, libraries, runtimes, tools, dev/ops platforms, OS, app software
+  (e.g., React, Angular, Node.js, Spring, Django, Flask, FastAPI, .NET, Kubernetes, Docker,
+   Terraform, Ansible, Jenkins, Git/GitHub/GitLab, Kafka, Airflow, Grafana, Kibana, Logstash,
+   Nginx, Apache HTTPD, Tomcat, ESXi, Hyper-V, VMware, Linux, Excel, PowerPoint, Tableau, Looker).
+- ET — hardware, electronics, devices, network equipment & embedded/PLC things
+  (e.g., PLC/PLCs, Microcontroller, Arduino, HDL, routers/switches/firewalls (as devices),
+   TCP/IP (as networking), WLAN, Wi-Fi/Wifi, IoT/M2M, sensors, PCB/board/chip).
+- TAS — techniques, methodologies, practices, qualities, architecture/process concepts
+  (e.g., OOP, design patterns, system design, scalability, responsive design, DevOps (as practice),
+   testing types (unit/integration/manual/performance), clean code, problem solving, communication,
+   security best practices/processes/standards, incident response, cost optimization).
+- NO — garbage, brand slogans, mixed/concatenated noise, vague single words that aren’t skills,
+  or items that don’t clearly fit despite rules.
+
+PRE-NORMALIZATION (do this mentally before deciding):
+1) Lowercase. Strip surrounding punctuation.
+2) Split on: / \ | , ; : . + - _ & and CamelCase boundaries.
+3) Remove trailing/leading qualifiers tokens (ignore them for classification):
+   {"experience","experienced","proficient","strong","good","basic","advanced",
+    "knowledge","familiar","understand","understanding","ability","capable",
+    "must","required","prefer","nice","plus","like","such","etc","can","able",
+    "skills","skill","expert","senior","junior","entry","level"}
+   Example: "AngularExperienced" → consider "Angular".
+            "MongoDBUnderstand" → consider "MongoDB".
+            "VueProficient" → consider "Vue".
+            "KubernetesPython" → consider both; choose the more specific tech for the token.
+4) If after cleaning you get multiple clear techs (e.g., "aws/azure/gcp"):
+   choose CP. If it’s a language+framework combo (e.g., "kotlin back"), choose the framework/library (FAL).
+5) Vendor word alone ≠ CP. “microsoft” alone → NO (or FAL if clearly an app like “Excel/PowerPoint/SharePoint”).
+   Needs explicit cloud context to be CP (microsoft azure / azure…).
+
+DISAMBIGUATION RULES (strong):
+A) DO NOT put virtualization/hypervisors into CP.
+   {“vmware”, “vSphere”, “ESXi”, “hyper-v”} → FAL.
+B) GraphQL is NOT DB → FAL. Kibana is NOT DB → FAL. Elasticsearch is DB.
+C) “Security / Monitoring / Operating / Design / Language” alone are NOT CP.
+   - “security” generic → TAS
+   - “monitoring/logging/observability” generic → TAS (unless a specific tool → FAL)
+   - “operating system(s)” → FAL (OS/software), not ET.
+D) Cloud storage naming:
+   - “S3”, “blob storage”, “object storage”, “data lake” → DB (storage/warehouse layer), not CP.
+E) Office/Desktop apps (Excel, Word, PowerPoint), BI tools (Power BI, Looker, Tableau) → FAL.
+F) Libraries/tools/runtimes (Kubernetes, Docker, Terraform, Ansible, Jenkins, Kafka, Airflow, HuggingFace, LangChain) → FAL.
+G) Hardware/electronics/network devices (router/switch/firewall as device, PLC, microcontroller, sensors, PCB, chip) → ET.
+H) Testing “types” (unit/integration/manual/performance, TDD) → TAS.
+   Testing “libraries” (JUnit, pytest, unittest, Selenium, Cypress, Jest) → FAL.
+I) REST (as API style/standard) → FAL. HTTP/HTTPS (protocols) → FAL.
+J) Generic “application development / software delivery / DevOps (as practice)” → TAS.
+K) If token is only a vague adjective/noun (e.g., “design”, “language”, “native”, “digital”) and not a known skill → NO.
+
+FAST EXAMPLES (gold):
+- AngularExperienced → FAL
+- Hibernate → FAL
+- HuggingFace → FAL
+- GraphQL → FAL
+- Kibana → FAL ; Elasticsearch → DB ; Logstash → FAL
+- VMware / VMWare / vSphere / ESXi / Hyper-V → FAL
+- Workday → FAL
+- Azure Sentinel / CloudWatch / CloudFormation / IAM / EKS / AKS / GKE → CP
+- Blob Storage / BigQuery / Delta Lake / Redis / MongoDB / PostgreSQL / MySQL → DB
+- S3 → DB
+- Docker / Kubernetes / Terraform / Ansible / Jenkins / Git / GitHub / GitLab → FAL
+- Linux / Windows / IIS / Nginx / Apache HTTPD / Tomcat → FAL
+- Excel / PowerPoint / Looker / Tableau / Power BI → FAL
+- PLC / PLCs / Microcontroller / Arduino / Router / Switch / Firewall (as device) / WLAN / TCP/IP → ET
+- DevOps (practice) / System Design / Design Patterns / Clean Code / Scalability / Incident Response → TAS
+- Security (generic) / Monitoring (generic) / Operating (generic) → TAS
+- AWS / Azure / Google Cloud / GCP / Alibaba Cloud / Huawei Cloud / OCI / OpenShift → CP
+- “MongoDBUnderstand”, “GitLabExperience”, “UMLGood”, “SQLStrong”, “VueProficient” → classify by the core term: MongoDB→DB; GitLab→FAL; UML→TAS; SQL→PSML; Vue→FAL
+- “KubernetesPython” → prefer the concrete tech/library: Kubernetes→FAL
+- “Microsoft” (alone) → NO ; “Microsoft Azure …” → CP
+
+OUTPUT FORMAT
+Return only the label token: PSML | DB | CP | FAL | ET | TAS | NO
 )
+"""
 
 
 def _prompt_batch(entities: list[str]) -> str:
